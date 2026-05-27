@@ -1,0 +1,119 @@
+{
+  "goodsId": "G000020622",
+  "name": "비데필터",
+  "model": "ETCBID6000MF",
+  "main_images": [
+    "https://static.skmagic.com/image/goods/G000020622/G000020622_4_480x480.png"
+  ],
+  "detail_images": [
+    "https://static.skmagic.com/image/editor/event/202502/1738798944040951.png",
+    "https://static.skmagic.com/image/goods/G000020622/G000020622_4_480x480.png",
+    "https://static.skmagic.com/image/editor/event/202111/1636086365978708.jpg",
+    "https://static.skmagic.com/image/editor/goods_desc/202306/1686099333495135.jpg",
+    "https://static.skmagic.com/image/editor/goods_desc/202302/1677218322318807.jpg",
+    "https://static.skmagic.com/image/editor/goods_desc/202302/1677218333894973.jpg",
+    "https://static.skmagic.com/image/goods/G000069847/G000069847_1_350x350.png",
+    "https://static.skmagic.com/image/goods/G000069844/G000069844_1_350x350.png",
+    "https://static.skmagic.com/image/goods/G000069283/G000069283_1_350x350.png",
+    "https://static.skmagic.com/image/goods/G000069309/G000069309_1_350x350.png",
+    "https://static.skmagic.com/image/goods/G000069527/G000069527_1_350x350.png",
+    "https://static.skmagic.com/image/goods/G000069682/G000069682_1_350x350.png",
+    "https://static.skmagic.com/image/goods/G000020622/G000020622_4.png",
+    "https://web-image.useinsider.com/skmagiccom/defaultImageLibrary/%EB%8B%A4%EC%9D%B4%EB%A0%89%ED%8A%B8%20%EA%B5%AC%EB%8F%85%20%ED%8C%9D%EC%97%85%20PC_1%EA%B0%9C%EC%9B%94-1774948853.png",
+    "https://static.skmagic.com/image/editor/event/202512/1766538140928903.jpg"
+  ],
+  "prices": [
+    {
+      "title": "구독",
+      "del": "월 66,900",
+      "num": "24,950"
+    },
+    {
+      "title": "구독",
+      "del": "월 57,900",
+      "num": "19,450"
+    },
+    {
+      "title": "구독",
+      "del": "월 61,900",
+      "num": "23,450"
+    },
+    {
+      "title": "구독",
+      "del": "월 50,900",
+      "num": "15,700"
+    },
+    {
+      "title": "구독",
+      "del": "월 46,900",
+      "num": "13,200"
+    },
+    {
+      "title": "구독",
+      "del": "월 29,900",
+      "num": "9,950"
+    }
+  ],
+  "specs": [
+    {
+      "label": "상품명",
+      "value": "비데필터"
+    },
+    {
+      "label": "모델명",
+      "value": "ETCBID6000MF"
+    },
+    {
+      "label": "출시년월",
+      "value": "-"
+    },
+    {
+      "label": "색상",
+      "value": "화이트 + 브라운"
+    },
+    {
+      "label": "외관크기(mm)",
+      "value": "137mm, 입수 연결부 15A, 출수 연결부 15A"
+    },
+    {
+      "label": "무게",
+      "value": "-"
+    },
+    {
+      "label": "기본 구성",
+      "value": "필터"
+    },
+    {
+      "label": "설치 / 배송 정보",
+      "value": "기타"
+    },
+    {
+      "label": "적용모델",
+      "value": "-"
+    },
+    {
+      "label": "제조자(수입품의 경우 수입자를 함께 표기)",
+      "value": "에코웨이브"
+    },
+    {
+      "label": "제조국",
+      "value": "대한민국"
+    },
+    {
+      "label": "품질보증기준",
+      "value": "-"
+    },
+    {
+      "label": "A/S 책임자와 전화번호",
+      "value": "SK매직 서비스센터 1600-1661"
+    }
+  ],
+  "pageTitle": "비데필터 | 구매 | 적용가능모델 : 상품설명서 확인 | ETCBID6000MF | SK매직몰",
+  "source_url": "https://www.skmagic.com/goods/indexGoodsDetail?goodsId=G000020622",
+  "fetched_at": "2026-05-23T12:13:23",
+  "downloaded": {
+    "main": 1,
+    "detail": 15
+  },
+  "options": null
+}

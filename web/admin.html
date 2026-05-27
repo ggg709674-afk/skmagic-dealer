@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>관리자 — SK매직 인증파트너점</title>
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="expires" content="0">
+<link rel="preload" href="./assets/fonts/Pretendard-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="./assets/fonts/Pretendard-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="./assets/fonts/Pretendard-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="./assets/style.css">
+<link rel="stylesheet" href="./assets/admin.css" id="adm-css">
+<link rel="icon" type="image/png" sizes="32x32" href="./assets/brand/favicon-32.png">
+</head>
+<body class="admin-body">
+
+<aside class="adm-side">
+  <div class="adm-brand">
+    <img src="./assets/brand/logo.png" alt="SK magic">
+    <div>
+      <div class="adm-brand-title">인증파트너점</div>
+      <div class="adm-brand-sub">관리자</div>
+    </div>
+  </div>
+
+  <nav class="adm-nav">
+    <div class="adm-nav-group">
+      <div class="adm-nav-label">운영</div>
+      <a class="adm-nav-item on" href="#products" data-menu="products">
+        <span class="adm-nav-ic">▦</span> 상품 관리
+      </a>
+      <a class="adm-nav-item is-disabled" href="#consult" data-menu="consult" title="준비 중">
+        <span class="adm-nav-ic">✉</span> 상담 신청 <em class="adm-soon">soon</em>
+      </a>
+    </div>
+    <div class="adm-nav-group">
+      <div class="adm-nav-label">사이트 설정</div>
+      <a class="adm-nav-item is-disabled" href="#banner" data-menu="banner" title="준비 중">
+        <span class="adm-nav-ic">▭</span> 배너/슬라이드 <em class="adm-soon">soon</em>
+      </a>
+      <a class="adm-nav-item is-disabled" href="#store" data-menu="store" title="준비 중">
+        <span class="adm-nav-ic">⌂</span> 매장 정보 <em class="adm-soon">soon</em>
+      </a>
+    </div>
+  </nav>
+
+  <div class="adm-side-foot">
+    <a href="./index.html" class="adm-side-link">← 사이트로 돌아가기</a>
+  </div>
+</aside>
+
+<main class="adm-main">
+
+  <header class="adm-header">
+    <div class="adm-header-title">
+      <h1 id="adm-page-title">상품 관리</h1>
+      <p class="adm-header-sub" id="adm-page-sub">노출 여부 · 추천 배지 · 표시 순서를 관리합니다.</p>
+    </div>
+    <div class="adm-header-actions">
+      <span class="adm-dirty-flag" id="adm-dirty" hidden>● 저장되지 않은 변경</span>
+      <button class="adm-btn adm-btn-ghost" id="btn-reset">초기화</button>
+      <button class="adm-btn adm-btn-ghost" id="btn-export">JSON 내보내기</button>
+      <button class="adm-btn adm-btn-primary" id="btn-save">변경사항 저장</button>
+    </div>
+  </header>
+
+  <!-- ===== 상품 관리 패널 ===== -->
+  <section class="adm-panel" data-panel="products">
+
+    <!-- 필터 바 -->
+    <div class="adm-filter">
+      <div class="adm-filter-row">
+        <div class="adm-chips" id="cat-chips"></div>
+        <div class="adm-search">
+          <input type="text" id="search-input" placeholder="모델명 / 상품명 / 코드 검색…" autocomplete="off">
+        </div>
+      </div>
+      <div class="adm-filter-row adm-filter-toggles">
+        <label class="adm-toggle-pill">
+          <input type="checkbox" id="filter-hidden"> <span>숨김 포함</span>
+        </label>
+        <label class="adm-toggle-pill">
+          <input type="checkbox" id="filter-featured"> <span>추천만</span>
+        </label>
+        <div class="adm-count" id="list-count">—</div>
+      </div>
+    </div>
+
+    <!-- 상품 테이블 -->
+    <div class="adm-table-wrap">
+      <table class="adm-table" id="products-table">
+        <thead>
+          <tr>
+            <th class="col-order">순서</th>
+            <th class="col-cat">카테고리</th>
+            <th class="col-thumb">썸네일</th>
+            <th class="col-model">모델</th>
+            <th class="col-name">상품명</th>
+            <th class="col-price">정상가</th>
+            <th class="col-price">할인가</th>
+            <th class="col-price">타보</th>
+            <th class="col-price">제휴카드</th>
+            <th class="col-toggle">노출</th>
+            <th class="col-toggle">추천</th>
+            <th class="col-actions">정렬</th>
+            <th class="col-edit">수정</th>
+          </tr>
+        </thead>
+        <tbody id="products-tbody">
+          <tr><td colspan="13" class="adm-empty">불러오는 중…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  <!-- ===== 준비 중 패널 ===== -->
+  <section class="adm-panel" data-panel="soon" hidden>
+    <div class="adm-soon-card">
+      <div class="adm-soon-icon">🛠</div>
+      <h2>준비 중인 메뉴예요</h2>
+      <p>이 메뉴는 곧 열려요. 우선 상품 관리부터 사용해주세요.</p>
+      <a class="adm-btn adm-btn-primary" href="#products">상품 관리로 가기</a>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== JSON 내보내기 모달 ===== -->
+<div class="adm-modal" id="export-modal" hidden>
+  <div class="adm-modal-card">
+    <div class="adm-modal-head">
+      <h3>변경사항 JSON</h3>
+      <button class="adm-modal-close" id="export-close">×</button>
+    </div>
+    <p class="adm-modal-sub">아래 JSON을 복사하거나 파일로 저장해 백업하세요. 추후 백엔드 연동 시 이 형식 그대로 사용합니다.</p>
+    <textarea id="export-text" readonly></textarea>
+    <div class="adm-modal-foot">
+      <button class="adm-btn adm-btn-ghost" id="export-copy">클립보드 복사</button>
+      <button class="adm-btn adm-btn-primary" id="export-download">파일로 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 상품 편집 모달 ===== -->
+<div class="adm-modal" id="edit-modal" hidden>
+  <div class="adm-modal-card adm-modal-card-wide">
+    <div class="adm-modal-head">
+      <h3>상품 정보 수정</h3>
+      <button class="adm-modal-close" id="edit-close">×</button>
+    </div>
+
+    <div class="adm-edit-body">
+
+      <!-- 좌측: 썸네일 + 메타 -->
+      <div class="adm-edit-left">
+        <div class="adm-edit-thumb" id="edit-thumb"></div>
+        <dl class="adm-edit-meta">
+          <div><dt>모델코드</dt><dd id="edit-model">—</dd></div>
+          <div><dt>상품ID</dt><dd id="edit-gid">—</dd></div>
+          <div><dt>카테고리</dt><dd id="edit-cat">—</dd></div>
+          <div><dt>색상 변형</dt><dd id="edit-siblings">—</dd></div>
+        </dl>
+        <p class="adm-edit-hint">
+          ※ 같은 모델군의 색상 변형 상품에도 동일하게 적용됩니다.
+          색상별로 다르게 설정하려면 추후 색상별 편집 기능을 추가해야 합니다.
+        </p>
+      </div>
+
+      <!-- 우측: 폼 -->
+      <div class="adm-edit-right">
+        <div class="adm-edit-section">
+          <h4>상품명</h4>
+          <input type="text" id="edit-name" class="adm-input" placeholder="상품명">
+          <small class="adm-edit-orig" id="edit-name-orig"></small>
+        </div>
+
+        <div class="adm-edit-section">
+          <h4>월 구독료 (단위: 원, 숫자/콤마만)</h4>
+          <div class="adm-edit-grid adm-edit-grid-4">
+            <label class="adm-edit-field">
+              <span>정상가</span>
+              <input type="text" id="edit-price-regular" class="adm-input" placeholder="46,900">
+            </label>
+            <label class="adm-edit-field">
+              <span>할인가</span>
+              <input type="text" id="edit-price-sale" class="adm-input" placeholder="13,200">
+            </label>
+            <label class="adm-edit-field">
+              <span>타사보상가</span>
+              <input type="text" id="edit-price-compete" class="adm-input" placeholder="12,900">
+            </label>
+            <label class="adm-edit-field">
+              <span>제휴카드 할인시</span>
+              <input type="text" id="edit-price-card" class="adm-input" placeholder="11,500">
+            </label>
+          </div>
+          <small class="adm-edit-orig" id="edit-price-orig"></small>
+        </div>
+
+        <div class="adm-edit-section">
+          <h4>혜택 태그 (최대 3개, 쉼표로 구분)</h4>
+          <input type="text" id="edit-benefits" class="adm-input" placeholder="냉온정, 셀프관리/방문관리">
+          <small class="adm-edit-orig" id="edit-benefits-orig"></small>
+        </div>
+
+        <div class="adm-edit-section">
+          <h4>상단 배지 / 태그</h4>
+          <input type="text" id="edit-tag" class="adm-input" placeholder="예: 구독 의무5년6개월반값">
+          <small class="adm-edit-orig" id="edit-tag-orig"></small>
+        </div>
+
+        <div class="adm-edit-section">
+          <h4>매장 메모 (내부용)</h4>
+          <textarea id="edit-memo" class="adm-input" rows="2" placeholder="고객에게 어필할 포인트, 재고 메모 등"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="adm-modal-foot adm-edit-foot">
+      <button class="adm-btn adm-btn-danger" id="edit-revert">원본값으로 복원</button>
+      <div class="adm-edit-foot-right">
+        <button class="adm-btn adm-btn-ghost" id="edit-cancel">취소</button>
+        <button class="adm-btn adm-btn-primary" id="edit-save">변경 적용</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Toast ===== -->
+<div class="adm-toast" id="adm-toast" hidden></div>
+
+<script>
+  // 개발 편의: 관리자 페이지는 CSS/JS 캐시를 즉시 무효화.
+  // (정적 서버라 ETag/캐시 헤더가 약해서 변경이 늦게 반영되는 문제 회피)
+  // document.write 로 ?v=... 붙은 script 태그를 인라인 삽입.
+  (function(){
+    var v = '?v=' + Date.now();
+    var css = document.getElementById('adm-css');
+    if (css) css.href = css.getAttribute('href') + v;
+    document.write('<script src="./assets/icons.js' + v + '"><\/script>');
+    document.write('<script src="./assets/db.js' + v + '"><\/script>');
+    document.write('<script src="./assets/app.js' + v + '"><\/script>');
+    document.write('<script src="./assets/admin.js' + v + '"><\/script>');
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,2283 @@
+{
+  "fetched_at": "2026-05-26T10:31:04",
+  "categories": [
+    {
+      "name": "정수기",
+      "dispClsfNo": "100000005",
+      "menuNo": "1001",
+      "goodsFilterList": null,
+      "url": "https://www.skmagic.com/goods/indexGoodsList?dispClsfNo=100000005&mstDispClsfNo=100000003&dispLvl=2&menuNo=1001",
+      "count": 26
+    },
+    {
+      "name": "필터정기배송 정수기",
+      "dispClsfNo": "1000000227",
+      "menuNo": "100103",
+      "goodsFilterList": null,
+      "url": "https://www.skmagic.com/goods/indexGoodsList?dispClsfNo=1000000227&mstDispClsfNo=1000000219&dispLvl=2&menuNo=100103",
+      "count": 1
+    },
+    {
+      "name": "공기청정기",
+      "dispClsfNo": "100000010",
+      "menuNo": "1010",
+      "goodsFilterList": null,
+      "url": "https://www.skmagic.com/goods/indexGoodsList?dispClsfNo=100000010&mstDispClsfNo=100000004&dispLvl=2&menuNo=1010",
+      "count": 10
+    },
+    {
+      "name": "비데",
+      "dispClsfNo": "100000024",
+      "menuNo": "1011",
+      "goodsFilterList": null,
+      "url": "https://www.skmagic.com/goods/indexGoodsList?dispClsfNo=100000024&mstDispClsfNo=100000004&dispLvl=2&menuNo=1011",
+      "count": 5
+    },
+    {
+      "name": "일시불 구매",
+      "dispClsfNo": "1000000212",
+      "menuNo": "1013",
+      "goodsFilterList": null,
+      "url": "https://www.skmagic.com/goods/indexGoodsList?dispClsfNo=1000000212&mstDispClsfNo=1000000182&dispLvl=2&menuNo=1013",
+      "count": 11
+    },
+    {
+      "name": "매트리스",
+      "dispClsfNo": "1000000245",
+      "menuNo": "100501",
+      "goodsFilterList": null,
+      "url": "https://www.skmagic.com/goods/indexGoodsList?dispClsfNo=1000000245&mstDispClsfNo=1000000182&dispLvl=2&menuNo=100501",
+      "count": 5
+    },
+    {
+      "name": "프레임",
+      "dispClsfNo": "1000000246",
+      "menuNo": "100502",
+      "goodsFilterList": null,
+      "url": "https://www.skmagic.com/goods/indexGoodsList?dispClsfNo=1000000246&mstDispClsfNo=1000000182&dispLvl=2&menuNo=100502",
+      "count": 5
+    },
+    {
+      "name": "정수기 필터",
+      "dispClsfNo": "1000000241",
+      "menuNo": "100807",
+      "goodsFilterList": null,
+      "url": "https://www.skmagic.com/goods/indexGoodsList?dispClsfNo=1000000241&mstDispClsfNo=100000002&dispLvl=2&menuNo=100807",
+      "count": 2
+    },
+    {
+      "name": "공기청정기 필터",
+      "dispClsfNo": "1000000108",
+      "menuNo": "100808",
+      "goodsFilterList": null,
+      "url": "https://www.skmagic.com/goods/indexGoodsList?dispClsfNo=1000000108&mstDispClsfNo=100000002&dispLvl=2&menuNo=100808",
+      "count": 12
+    },
+    {
+      "name": "비데 필터",
+      "dispClsfNo": "1000000112",
+      "menuNo": "100809",
+      "goodsFilterList": null,
+      "url": "https://www.skmagic.com/goods/indexGoodsList?dispClsfNo=1000000112&mstDispClsfNo=100000002&dispLvl=2&menuNo=100809",
+      "count": 2
+    },
+    {
+      "name": "정수기 미네랄 카트리지",
+      "dispClsfNo": "1000000332",
+      "menuNo": "100801",
+      "goodsFilterList": null,
+      "url": "https://www.skmagic.com/goods/indexGoodsList?dispClsfNo=1000000332&mstDispClsfNo=100000002&dispLvl=2&menuNo=100801",
+      "count": 1
+    }
+  ],
+  "products": [
+    {
+      "goodsId": "G000069846",
+      "name": "MEGA ICE 얼음정수기",
+      "model": "WPUIAC506SNW",
+      "alt": "MEGA ICE 얼음정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069846/G000069846_1_350x350.png",
+      "benefits": [
+        "냉온정얼음",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년18개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 70,900",
+          "num": "25,950"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        },
+        {
+          "color": "color12",
+          "style": "background: #8A8A8A;"
+        }
+      ],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0001",
+      "_colorStyle": "rgb(251,251,251)",
+      "_colorName": "내추럴 화이트"
+    },
+    {
+      "goodsId": "G000069844",
+      "name": "투워터 정수기",
+      "model": "WPUMAC306SWH",
+      "alt": "투워터 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069844/G000069844_1_350x350.png",
+      "benefits": [
+        "미네랄",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년12개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 57,900",
+          "num": "19,450"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        }
+      ],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorName": "화이트"
+    },
+    {
+      "goodsId": "G000069527",
+      "name": "초소형 라이트 직수 정수기",
+      "model": "WPUJAC125SNW",
+      "alt": "초소형 라이트 직수 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069527/G000069527_1_350x350.png",
+      "benefits": [
+        "냉온정",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년12개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 46,900",
+          "num": "13,200"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        },
+        {
+          "color": "color07",
+          "style": "background: #CCB89E;"
+        },
+        {
+          "color": "color02",
+          "style": "background: #FFD4D4;"
+        }
+      ],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0002",
+      "_colorStyle": "rgb(251,251,251)",
+      "_colorName": "화이트"
+    },
+    {
+      "goodsId": "G000069529",
+      "name": "초소형 라이트 직수 정수기",
+      "model": "WPUJAC125SVB",
+      "alt": "초소형 라이트 직수 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069529/G000069529_1_350x350.png",
+      "benefits": [
+        "냉온정",
+        "셀프관리/방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 46,900",
+          "num": "13,200"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0002",
+      "_colorStyle": "#CCB89E",
+      "_colorName": "베이지"
+    },
+    {
+      "goodsId": "G000069526",
+      "name": "초소형 라이트 직수 정수기",
+      "model": "WPUJAC125SNW",
+      "alt": "초소형 라이트 직수 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069526/G000069526_1_350x350.png",
+      "benefits": [
+        "냉온정",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년12개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 50,900",
+          "num": "14,700"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0002",
+      "_colorName": "화이트"
+    },
+    {
+      "goodsId": "G000069311",
+      "name": "초소형 플러스 직수 정수기",
+      "model": "WPUJAC115SNS",
+      "alt": "초소형 플러스 직수 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069311/G000069311_1_350x350.png",
+      "benefits": [
+        "냉온정",
+        "셀프관리/방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 50,900",
+          "num": "15,700"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0003",
+      "_colorStyle": "#8A8A8A",
+      "_colorName": "뉴트럴 실버"
+    },
+    {
+      "goodsId": "G000069310",
+      "name": "초소형 플러스 직수 정수기",
+      "model": "WPUJAC115SNS",
+      "alt": "초소형 플러스 직수 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069310/G000069310_1_350x350.png",
+      "benefits": [
+        "냉온정",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 최대 12개월 반값할인",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 54,900",
+          "num": "17,200"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0003",
+      "_colorName": "뉴트럴 실버"
+    },
+    {
+      "goodsId": "G000069309",
+      "name": "초소형 플러스 직수 정수기",
+      "model": "WPUJAC115SNW",
+      "alt": "초소형 플러스 직수 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069309/G000069309_1_350x350.png",
+      "benefits": [
+        "냉온정",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년12개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 50,900",
+          "num": "15,700"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        },
+        {
+          "color": "color12",
+          "style": "background: #8A8A8A;"
+        },
+        {
+          "color": "color14",
+          "style": "background: url('https://web-image.useinsider.com/skmagiccom/defaultImageLibrary/PSG%E1%84%8E%E1%85%A9%E1%84%89%E1%85%A9%E1%84%92%E1%85%A7%E1%86%BC%E1%84%91%E1%85%B3%E1%86%AF%E1%84%85%E1%85%A5%E1%84%89%E1%85%B3_%E1%84%82%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%87%E1%85%B5_PC-1750985772.png');"
+        }
+      ],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0003",
+      "_colorStyle": "rgb(251,251,251)",
+      "_colorName": "내추럴 화이트"
+    },
+    {
+      "goodsId": "G000069308",
+      "name": "초소형 플러스 직수 정수기",
+      "model": "WPUJAC115SNW",
+      "alt": "초소형 플러스 직수 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069308/G000069308_1_350x350.png",
+      "benefits": [
+        "냉온정",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년12개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 54,900",
+          "num": "17,200"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0003",
+      "_colorName": "내추럴 화이트"
+    },
+    {
+      "goodsId": "G000069285",
+      "name": "원코크 플러스 얼음물 정수기",
+      "model": "WPUIAC425SNS",
+      "alt": "원코크 플러스 얼음물 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069285/G000069285_1_350x350.png",
+      "benefits": [
+        "냉온정얼음",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년12개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 61,900",
+          "num": "23,450"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0004",
+      "_colorStyle": "#8A8A8A",
+      "_colorName": "뉴트럴 실버"
+    },
+    {
+      "goodsId": "G000069284",
+      "name": "원코크 플러스 얼음물 정수기",
+      "model": "WPUIAC425SNS",
+      "alt": "원코크 플러스 얼음물 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069284/G000069284_1_350x350.png",
+      "benefits": [
+        "냉온정얼음",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년12개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 65,900",
+          "num": "24,450"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0004",
+      "_colorName": "뉴트럴 실버",
+      "_colorStyle": "#8A8A8A"
+    },
+    {
+      "goodsId": "G000069283",
+      "name": "원코크 플러스 얼음물 정수기",
+      "model": "WPUIAC425SNW",
+      "alt": "원코크 플러스 얼음물 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069283/G000069283_1_350x350.png",
+      "benefits": [
+        "냉온정얼음",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년15개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 61,900",
+          "num": "23,450"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0004",
+      "_colorStyle": "rgb(251,251,251)",
+      "_colorName": "내추럴 화이트"
+    },
+    {
+      "goodsId": "G000069282",
+      "name": "원코크 플러스 얼음물 정수기",
+      "model": "WPUIAC425SNW",
+      "alt": "원코크 플러스 얼음물 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069282/G000069282_1_350x350.png",
+      "benefits": [
+        "냉온정얼음",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년18개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 65,900",
+          "num": "24,450"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        },
+        {
+          "color": "color12",
+          "style": "background: #8A8A8A;"
+        }
+      ],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0004",
+      "_colorName": "내추럴 화이트",
+      "_colorStyle": "rgb(251,251,251)"
+    },
+    {
+      "goodsId": "G000068402",
+      "name": "원코크 얼음물 정수기",
+      "model": "WPUIAC414SOW",
+      "alt": "원코크 얼음물 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000068402/G000068402_1_350x350.png",
+      "benefits": [
+        "냉온정얼음",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년15개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 59,900",
+          "num": "21,950"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0005",
+      "_colorStyle": "rgb(251,251,251)",
+      "_colorName": "옵틱 화이트"
+    },
+    {
+      "goodsId": "G000068401",
+      "name": "원코크 얼음물 정수기",
+      "model": "WPUIAC414SOW",
+      "alt": "원코크 얼음물 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000068401/G000068401_1_350x350.png",
+      "benefits": [
+        "냉온정얼음",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년18개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 63,900",
+          "num": "22,950"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        },
+        {
+          "color": "color02",
+          "style": "background: #FFD4D4;"
+        },
+        {
+          "color": "color03",
+          "style": "background: #DDE5DB;"
+        },
+        {
+          "color": "color04",
+          "style": "background: #DCE9F9;"
+        }
+      ],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0005",
+      "_colorName": "옵틱 화이트"
+    },
+    {
+      "goodsId": "G000063338",
+      "name": "에코미니 정수기 그린41",
+      "model": "WPUGBC112SCE",
+      "alt": "에코미니 정수기 그린41",
+      "thumb": "https://static.skmagic.com/image/goods/G000063338/G000063338_1.jpg",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "199,000 원",
+          "num": "159,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000227"
+      ],
+      "thumb_ext": ".jpg"
+    },
+    {
+      "goodsId": "G000069682",
+      "name": "20평 올클린 공기청정기",
+      "model": "ACL20C1ASKWH",
+      "alt": "20평 올클린 공기청정기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069682/G000069682_1_350x350.png",
+      "benefits": [
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년,6년 6개월 반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 29,900",
+          "num": "9,950"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        }
+      ],
+      "categories": [
+        "100000010"
+      ],
+      "thumb_ext": ".png",
+      "_colorName": "화이트"
+    },
+    {
+      "goodsId": "G000069681",
+      "name": "15평 올클린 공기청정기",
+      "model": "ACL15C1ASKWH",
+      "alt": "15평 올클린 공기청정기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069681/G000069681_1_350x350.png",
+      "benefits": [
+        "셀프관리/방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 27,900",
+          "num": "8,950"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        }
+      ],
+      "categories": [
+        "100000010"
+      ],
+      "thumb_ext": ".png",
+      "_colorName": "화이트"
+    },
+    {
+      "goodsId": "G000069683",
+      "name": "25평 올클린 공기청정기",
+      "model": "ACL25C1ASKCE",
+      "alt": "25평 올클린 공기청정기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069683/G000069683_1_350x350.png",
+      "benefits": [
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년,6년 6개월 반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 33,900",
+          "num": "11,950"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        }
+      ],
+      "categories": [
+        "100000010"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000069142",
+      "name": "22평 올클린 디아트 공기청정기",
+      "model": "ACL22C1ASKOB",
+      "alt": "22평 올클린 디아트 공기청정기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069142/G000069142_1_350x350.png",
+      "benefits": [
+        "알러지필터 or 펫필터",
+        "방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 41,900",
+          "num": "28,900"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color07",
+          "style": "background: #CCB89E;"
+        }
+      ],
+      "categories": [
+        "100000010"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000067185",
+      "name": "22평 올클린 디아트 공기청정기",
+      "model": "ACL22C1ASKOB",
+      "alt": "22평 올클린 디아트 공기청정기",
+      "thumb": "https://static.skmagic.com/image/goods/G000067185/G000067185_1_350x350.png",
+      "benefits": [
+        "셀프관리/방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 37,900",
+          "num": "24,900"
+        },
+        {
+          "title": "구매",
+          "del": "",
+          "num": "719,000"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color07",
+          "style": "background: #CCB89E;"
+        },
+        {
+          "color": "color08",
+          "style": "background: #173C25;"
+        }
+      ],
+      "categories": [
+        "100000010"
+      ],
+      "thumb_ext": ".png",
+      "_colorName": "오트밀 베이지"
+    },
+    {
+      "goodsId": "G000067181",
+      "name": "22평 올클린 디아트 펫 공기청정기",
+      "model": "ACL22P1CSKSL",
+      "alt": "22평 올클린 디아트 펫 공기청정기",
+      "thumb": "https://static.skmagic.com/image/goods/G000067181/G000067181_1_350x350.png",
+      "benefits": [
+        "셀프관리/방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 40,900",
+          "num": "27,900"
+        },
+        {
+          "title": "구매",
+          "del": "",
+          "num": "799,000"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color09",
+          "style": "background: #ADAEA9;"
+        }
+      ],
+      "categories": [
+        "100000010"
+      ],
+      "thumb_ext": ".png",
+      "_colorName": "실버"
+    },
+    {
+      "goodsId": "G000067189",
+      "name": "16평 올클린 디아트 공기청정기",
+      "model": "ACL16C1ASKOB",
+      "alt": "16평 올클린 디아트 공기청정기",
+      "thumb": "https://static.skmagic.com/image/goods/G000067189/G000067189_1_350x350.png",
+      "benefits": [
+        "셀프관리/방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 35,900",
+          "num": "22,900"
+        },
+        {
+          "title": "구매",
+          "del": "",
+          "num": "619,000"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color07",
+          "style": "background: #CCB89E;"
+        },
+        {
+          "color": "color08",
+          "style": "background: #173C25;"
+        }
+      ],
+      "categories": [
+        "100000010"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0006",
+      "_colorStyle": "#CCB89E",
+      "_colorName": "오트밀 베이지"
+    },
+    {
+      "goodsId": "G000061081",
+      "name": "30평 슈퍼 공기청정기",
+      "model": "ACL300VASKWH",
+      "alt": "30평 슈퍼 공기청정기",
+      "thumb": "https://static.skmagic.com/image/goods/G000061081/G000061081_1_350x350.png",
+      "benefits": [
+        "방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "",
+          "num": "49,900"
+        },
+        {
+          "title": "구매",
+          "del": "1,090,000 원",
+          "num": "969,000"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        }
+      ],
+      "categories": [
+        "100000010"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000068762",
+      "name": "13평 코어 360˚ 공기청정기",
+      "model": "ACL131T0CJDG",
+      "alt": "13평 코어 360˚ 공기청정기 ",
+      "thumb": "https://static.skmagic.com/image/goods/G000068762/G000068762_1_350x350.png",
+      "benefits": [
+        "방문관리(12개월)"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 22,900",
+          "num": "12,900"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        }
+      ],
+      "categories": [
+        "100000010"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000069281",
+      "name": "PSG 코어 공기청정기",
+      "model": "ACL130Z0SKPN",
+      "alt": "PSG 코어 공기청정기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069281/G000069281_1_350x350.png",
+      "benefits": [
+        "방문관리(4개월 | 12개월)"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 26,900",
+          "num": "22,900"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color10",
+          "style": "background: url('https://web-image.useinsider.com/skmagiccom/defaultImageLibrary/psg_Navy_PC_size-1741227254.png');"
+        }
+      ],
+      "categories": [
+        "100000010"
+      ],
+      "thumb_ext": ".png",
+      "_colorName": "PSG 네이비"
+    },
+    {
+      "goodsId": "G000069623",
+      "name": "올클린 케어 비데",
+      "model": "BIDS51DR15WH",
+      "alt": "올클린 케어 비데",
+      "thumb": "https://static.skmagic.com/image/goods/G000069623/G000069623_1_350x350.png",
+      "benefits": [
+        "방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 26,900",
+          "num": "11,950"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        }
+      ],
+      "categories": [
+        "100000024"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000066592",
+      "name": "풀스텐 스파 비데",
+      "model": "BIDF17DR43WH",
+      "alt": "풀스텐 스파 비데",
+      "thumb": "https://static.skmagic.com/image/goods/G000066592/G000066592_1_350x350.png",
+      "benefits": [
+        "방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 21,900",
+          "num": "14,900"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        }
+      ],
+      "categories": [
+        "100000024"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000068961",
+      "name": "풀스텐 케어 비데",
+      "model": "BIDS17DR64WH",
+      "alt": "풀스텐 케어 비데",
+      "thumb": "https://static.skmagic.com/image/goods/G000068961/G000068961_1_350x350.png",
+      "benefits": [
+        "방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 22,900",
+          "num": "15,900"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        }
+      ],
+      "categories": [
+        "100000024"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000068781",
+      "name": "위글위글 풀스텐 스파 비데",
+      "model": "BIDF17DR54WW",
+      "alt": "위글위글 풀스텐 스파 비데",
+      "thumb": "https://static.skmagic.com/image/goods/G000068781/G000068781_1_350x350.png",
+      "benefits": [
+        "방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 24,900",
+          "num": "15,900"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        }
+      ],
+      "categories": [
+        "100000024"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000020604",
+      "name": "파워업 에코 비데",
+      "model": "BID096PR46WH",
+      "alt": "파워업 에코 비데",
+      "thumb": "https://static.skmagic.com/image/goods/G000020604/G000020604_1_350x350.png",
+      "benefits": [
+        "방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "",
+          "num": "23,900"
+        },
+        {
+          "title": "구매",
+          "del": "",
+          "num": "497,000"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        }
+      ],
+      "categories": [
+        "100000024"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000068487",
+      "name": "원코크 얼음물 정수기",
+      "model": "WPUIAC414SOW",
+      "alt": "원코크 얼음물 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000068487/G000068487_1.png",
+      "benefits": [
+        "케어 1년포함"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "1,890,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000212"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0007",
+      "_colorName": "옵틱 화이트"
+    },
+    {
+      "goodsId": "G000068488",
+      "name": "원코크 얼음물 정수기",
+      "model": "WPUIAC414SPB",
+      "alt": "원코크 얼음물 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000068488/G000068488_1.png",
+      "benefits": [
+        "케어 1년포함"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "1,890,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000212"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0007",
+      "_colorName": "파스텔 블루"
+    },
+    {
+      "goodsId": "G000068490",
+      "name": "원코크 얼음물 정수기",
+      "model": "WPUIAC414SPS",
+      "alt": "원코크 얼음물 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000068490/G000068490_1.png",
+      "benefits": [
+        "케어 1년포함"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "1,890,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000212"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0007",
+      "_colorName": "파스텔 세이지 그린"
+    },
+    {
+      "goodsId": "G000068665",
+      "name": "초소형 직수 정수기",
+      "model": "WPUJAC104SWH",
+      "alt": "초소형 직수 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000068665/G000068665_1.png",
+      "benefits": [
+        "케어 1년포함",
+        "냉온정",
+        "냉정"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "1,620,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000212"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0008",
+      "_colorName": "화이트"
+    },
+    {
+      "goodsId": "G000068663",
+      "name": "초소형 직수 정수기",
+      "model": "WPUJAC104SPB",
+      "alt": "초소형 직수 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000068663/G000068663_1.png",
+      "benefits": [
+        "케어 1년포함",
+        "냉온정",
+        "냉정"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "1,620,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000212"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0008",
+      "_colorName": "파스텔 블루"
+    },
+    {
+      "goodsId": "G000068662",
+      "name": "초소형 직수 정수기",
+      "model": "WPUJAC104SDG",
+      "alt": "초소형 직수 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000068662/G000068662_1.png",
+      "benefits": [
+        "케어 1년포함",
+        "냉온정",
+        "냉정"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "1,740,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000212"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0008",
+      "_colorName": "다크 그레이"
+    },
+    {
+      "goodsId": "G000068491",
+      "name": "위글위글 초소형 직수 정수기",
+      "model": "WPUJAC104SWW",
+      "alt": "위글위글 초소형 직수 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000068491/G000068491_1.png",
+      "benefits": [
+        "케어 1년포함"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "1,740,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000212"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000068162",
+      "name": "초소형 직수 정수기",
+      "model": "WPUJCC104SWH",
+      "alt": "초소형 직수 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000068162/G000068162_1.png",
+      "benefits": [
+        "케어 1년포함",
+        "냉정"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "1,618,800"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000212"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0008",
+      "_colorName": "화이트"
+    },
+    {
+      "goodsId": "G000063911",
+      "name": "에코미니 정수기 그린41",
+      "model": "WPUGBC102SCE",
+      "alt": "에코미니 정수기 그린41",
+      "thumb": "https://static.skmagic.com/image/goods/G000063911/G000063911_1.jpg",
+      "benefits": [
+        "케어 1년포함",
+        "정수",
+        "무전원"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "329,800"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000212"
+      ],
+      "thumb_ext": ".jpg"
+    },
+    {
+      "goodsId": "G000062138",
+      "name": "그랜드 정수기 프리스탠딩(지하수)",
+      "model": "WPUB610FREWH",
+      "alt": "그랜드 정수기 프리스탠딩(지하수)",
+      "thumb": "https://static.skmagic.com/image/goods/G000062138/G000062138_1.jpg",
+      "benefits": [
+        "케어 1년포함",
+        "냉온",
+        "스테인리스탱크"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "1,223,100"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000212"
+      ],
+      "thumb_ext": ".jpg"
+    },
+    {
+      "goodsId": "G000061931",
+      "name": "언더싱크 정수기",
+      "model": "WPU9100CREWH",
+      "alt": "언더싱크 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000061931/G000061931_1.jpg",
+      "benefits": [
+        "케어 1년포함",
+        "정수",
+        "나노필터시스템"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "434,200"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000212"
+      ],
+      "thumb_ext": ".jpg"
+    },
+    {
+      "goodsId": "G000069431",
+      "name": "수납형 프레임",
+      "model": "MATSH510RKWH",
+      "alt": "수납형 프레임",
+      "thumb": "https://static.skmagic.com/image/goods/G000069431/G000069431_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 22,900",
+          "num": "17,900"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000246"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000069433",
+      "name": "패브릭 헤드보드",
+      "model": "MATSH520RKIV",
+      "alt": "패브릭 헤드보드",
+      "thumb": "https://static.skmagic.com/image/goods/G000069433/G000069433_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 22,900",
+          "num": "17,900"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000246"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000069442",
+      "name": "PVC 레더 파운데이션",
+      "model": "MATSF530RKBE",
+      "alt": "PVC 레더 파운데이션",
+      "thumb": "https://static.skmagic.com/image/goods/G000069442/G000069442_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 15,900",
+          "num": "10,900"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000246"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000069439",
+      "name": "PVC 레더 헤드보드",
+      "model": "MATSH530RKBE",
+      "alt": "PVC 레더 헤드보드",
+      "thumb": "https://static.skmagic.com/image/goods/G000069439/G000069439_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 21,900",
+          "num": "16,900"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000246"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000069436",
+      "name": "패브릭 파운데이션",
+      "model": "MATSF520RKIV",
+      "alt": "패브릭 파운데이션",
+      "thumb": "https://static.skmagic.com/image/goods/G000069436/G000069436_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 15,900",
+          "num": "10,900"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000246"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000063360",
+      "name": "프리블록카본 정수기필터",
+      "model": "FLTW0610P0P1",
+      "alt": "프리블록카본 정수기필터",
+      "thumb": "https://static.skmagic.com/image/goods/G000063360/G000063360_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "40,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000241"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000063363",
+      "name": "복합나노 정수기필터",
+      "model": "FLTW0610N0P2",
+      "alt": "복합나노 정수기필터",
+      "thumb": "https://static.skmagic.com/image/goods/G000063363/G000063363_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "70,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000241"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000066252",
+      "name": "20평형 올클린공기청정기 올인원플러스 필터 1개입",
+      "model": "FLTA20C2ARWH",
+      "alt": "20평형 올클린공기청정기 올인원플러스 필터 1개입",
+      "thumb": "https://static.skmagic.com/image/goods/G000066252/G000066252_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "56,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000108"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000068711",
+      "name": "[22평] 디아트 공기청정기 프리필터 (1매입)",
+      "model": "FLTA22C1A1BL",
+      "alt": "[22평] 디아트 공기청정기 프리필터 (1매입)",
+      "thumb": "https://static.skmagic.com/image/goods/G000068711/G000068711_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "15,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000108"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000068710",
+      "name": "[16평] 디아트 공기청정기 프리필터 (1매입)",
+      "model": "FLTA16C1A1BL",
+      "alt": "[16평] 디아트 공기청정기 프리필터 (1매입)",
+      "thumb": "https://static.skmagic.com/image/goods/G000068710/G000068710_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "13,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000108"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000068709",
+      "name": "[22평] 디아트 공기청정기 펫 일체형 (프레임+팩)",
+      "model": "FLTA22P1CTBU",
+      "alt": "[22평] 디아트 공기청정기 펫 일체형 (프레임+팩)",
+      "thumb": "https://static.skmagic.com/image/goods/G000068709/G000068709_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "70,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000108"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000068708",
+      "name": "[22평] 디아트 공기청정기 일체형 (프레임+팩)",
+      "model": "FLTA22C1ATZG",
+      "alt": "[22평] 디아트 공기청정기 일체형 (프레임+팩)",
+      "thumb": "https://static.skmagic.com/image/goods/G000068708/G000068708_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "65,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000108"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000068707",
+      "name": "[16평] 디아트 공기청정기 일체형 (프레임+팩)",
+      "model": "FLTA16C1ATZG",
+      "alt": "[16평] 디아트 공기청정기 일체형 (프레임+팩)",
+      "thumb": "https://static.skmagic.com/image/goods/G000068707/G000068707_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "60,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000108"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000068706",
+      "name": "[22평] 디아트 공기청정기 펫 교체형(콤비필터팩)",
+      "model": "FLTA22P1CRBU",
+      "alt": "[22평] 디아트 공기청정기 펫 교체형(콤비필터팩)",
+      "thumb": "https://static.skmagic.com/image/goods/G000068706/G000068706_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "60,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000108"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000068705",
+      "name": "[22평] 디아트 공기청정기 교체형(콤비필터팩)",
+      "model": "FLTA22C1ARZG",
+      "alt": "[22평] 디아트 공기청정기 교체형(콤비필터팩)",
+      "thumb": "https://static.skmagic.com/image/goods/G000068705/G000068705_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "55,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000108"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000068704",
+      "name": "[22평] 디아트 공기청정기 프리필터 (3매입)",
+      "model": "FLTA22C1A3BL",
+      "alt": "[22평] 디아트 공기청정기 프리필터 (3매입)",
+      "thumb": "https://static.skmagic.com/image/goods/G000068704/G000068704_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "25,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000108"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000068703",
+      "name": "[16평] 디아트 공기청정기 교체형(콤비필터팩)",
+      "model": "FLTA16C1ARZG",
+      "alt": "[16평] 디아트 공기청정기 교체형(콤비필터팩)",
+      "thumb": "https://static.skmagic.com/image/goods/G000068703/G000068703_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "50,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000108"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000068502",
+      "name": "[20평형]올클린 공기청정기 프리필터",
+      "model": "FLTA20C1A1WH",
+      "alt": "[20평형]올클린 공기청정기 프리필터",
+      "thumb": "https://static.skmagic.com/image/goods/G000068502/G000068502_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "13,500"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000108"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000066250",
+      "name": "15평형 올클린공기청정기 올인원플러스 필터 1개입",
+      "model": "FLTA15C2ARWH",
+      "alt": "15평형 올클린공기청정기 올인원플러스 필터 1개입",
+      "thumb": "https://static.skmagic.com/image/goods/G000066250/G000066250_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "45,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000108"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000057638",
+      "name": "원터치 비데필터",
+      "model": "ETCBID3000MF",
+      "alt": "원터치 비데필터 ",
+      "thumb": "https://static.skmagic.com/image/goods/G000057638/G000057638_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "13,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000112"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000020622",
+      "name": "비데필터",
+      "model": "ETCBID6000MF",
+      "alt": "비데필터",
+      "thumb": "https://static.skmagic.com/image/goods/G000020622/G000020622_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "12,000"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000112"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000069905",
+      "name": "미네랄 워터 카트리지",
+      "model": "HWCM1402K0WH",
+      "alt": "미네랄 워터 카트리지",
+      "thumb": "https://static.skmagic.com/image/goods/G000069905/G000069905_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구매",
+          "del": "",
+          "num": "33,800"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000332"
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000069641",
+      "name": "원코크 얼음물 정수기",
+      "model": "WPUIAC414SSP",
+      "alt": "원코크 얼음물 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069641/G000069641_17_480x480.png",
+      "benefits": [
+        "냉온정얼음",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년18개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 63,900",
+          "num": "22,950"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        },
+        {
+          "color": "color02",
+          "style": "background: #FFD4D4;"
+        },
+        {
+          "color": "color03",
+          "style": "background: #DDE5DB;"
+        },
+        {
+          "color": "color04",
+          "style": "background: #DCE9F9;"
+        }
+      ],
+      "categories": [
+        "100000005"
+      ],
+      "_colorGroup": "cg_0005",
+      "_colorName": "소프트 핑크"
+    },
+    {
+      "goodsId": "G000068407",
+      "name": "원코크 얼음물 정수기",
+      "model": "WPUIAC414SPS",
+      "alt": "원코크 얼음물 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000068407/G000068407_24_480x480.png",
+      "benefits": [
+        "냉온정얼음",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년18개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 63,900",
+          "num": "22,950"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        },
+        {
+          "color": "color02",
+          "style": "background: #FFD4D4;"
+        },
+        {
+          "color": "color03",
+          "style": "background: #DDE5DB;"
+        },
+        {
+          "color": "color04",
+          "style": "background: #DCE9F9;"
+        }
+      ],
+      "categories": [
+        "100000005"
+      ],
+      "_colorGroup": "cg_0005",
+      "_colorName": "파스텔 세이지 그린"
+    },
+    {
+      "goodsId": "G000068403",
+      "name": "원코크 얼음물 정수기",
+      "model": "WPUIAC414SPB",
+      "alt": "원코크 얼음물 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000068403/G000068403_24_480x480.png",
+      "benefits": [
+        "냉온정얼음",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년18개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 63,900",
+          "num": "22,950"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        },
+        {
+          "color": "color02",
+          "style": "background: #FFD4D4;"
+        },
+        {
+          "color": "color03",
+          "style": "background: #DDE5DB;"
+        },
+        {
+          "color": "color04",
+          "style": "background: #DCE9F9;"
+        }
+      ],
+      "categories": [
+        "100000005"
+      ],
+      "_colorGroup": "cg_0005",
+      "_colorName": "파스텔 블루"
+    },
+    {
+      "goodsId": "G000069531",
+      "name": "초소형 라이트 직수 정수기",
+      "model": "WPUJAC125SSP",
+      "alt": "초소형 라이트 직수 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069531/G000069531_9_480x480.png",
+      "benefits": [
+        "냉온정",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년15개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 66,900",
+          "num": "24,950"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        },
+        {
+          "color": "color07",
+          "style": "background: #CCB89E;"
+        },
+        {
+          "color": "color02",
+          "style": "background: #FFD4D4;"
+        }
+      ],
+      "categories": [
+        "100000005"
+      ],
+      "_colorGroup": "cg_0002",
+      "_colorStyle": "#EEDAD1",
+      "_colorName": "핑크"
+    },
+    {
+      "goodsId": "G000069848",
+      "name": "MEGA ICE 얼음정수기",
+      "model": "WPUIAC506SNS",
+      "alt": "MEGA ICE 얼음정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069848/G000069848_9_480x480.png",
+      "benefits": [
+        "냉온정얼음",
+        "셀프관리/방문관리"
+      ],
+      "tag": "구독 의무5년6개월반값 , 의무6년18개월반값",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 70,900",
+          "num": "25,950"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        },
+        {
+          "color": "color12",
+          "style": "background: #8A8A8A;"
+        }
+      ],
+      "categories": [
+        "100000005"
+      ],
+      "_colorGroup": "cg_0001",
+      "_colorStyle": "#8A8A8A",
+      "_colorName": "뉴트럴 실버"
+    },
+    {
+      "goodsId": "G000069382",
+      "name": "PSG 초소형 플러스 직수 정수기",
+      "model": "WPUJAC115PPN",
+      "alt": "PSG 초소형 플러스 직수 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069382/G000069382_19_480x480.png",
+      "benefits": [
+        "냉온정",
+        "셀프관리/방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 50,900",
+          "num": "15,700"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "100000005"
+      ],
+      "_colorGroup": "cg_0003",
+      "_colorStyle": "url('https://web-image.useinsider.com/skmagiccom/defaultImageLibrary/PSG%E1%84%8E%E1%85%A9%E1%84%89%E1%85%A9%E1%84%92%E1%85%A7%E1%86%BC%E1%84%91%E1%85%B3%E1%86%AF%E1%84%85%E1%85%A5%E1%84%89%E1%85%B3_%E1%84%82%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%87%E1%85%B5_PC-1750985772.png')",
+      "_colorName": "다크 네이비"
+    },
+    {
+      "goodsId": "G000067187",
+      "name": "16평 올클린 디아트 공기청정기",
+      "model": "ACL16C2ASKZG",
+      "alt": "16평 올클린 디아트 공기청정기",
+      "thumb": "https://static.skmagic.com/image/goods/G000067187/G000067187_18_480x480.png",
+      "benefits": [
+        "셀프관리/방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 35,900",
+          "num": "22,900"
+        },
+        {
+          "title": "구매",
+          "del": "",
+          "num": "619,000"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color07",
+          "style": "background: #CCB89E;"
+        },
+        {
+          "color": "color08",
+          "style": "background: #173C25;"
+        }
+      ],
+      "categories": [
+        "100000010"
+      ],
+      "_colorGroup": "cg_0006",
+      "_colorStyle": "#173C25",
+      "_colorName": "다크 그린"
+    },
+    {
+      "goodsId": "G000062320",
+      "name": "FS직수 얼음 정수기 프리스탠딩",
+      "model": "WPUIC110FRSL",
+      "alt": "FS직수 얼음 정수기 프리스탠딩",
+      "thumb": "https://static.skmagic.com/image/goods/G000062320/G000062320_12_480x480.png",
+      "benefits": [
+        "방문관리",
+        "냉온정얼음",
+        "UV안심케어"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 66,900",
+          "num": "24,950"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_manuallyAdded": true
+    },
+    {
+      "goodsId": "G000069345",
+      "name": "PSG 원코크 플러스 얼음물 정수기",
+      "model": "WPUIAC425PPW",
+      "alt": "PSG 원코크 플러스 얼음물 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069345/G000069345_18_480x480.png",
+      "benefits": [
+        "냉온정얼음",
+        "셀프관리/방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 66,900",
+          "num": "24,950"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0004",
+      "_colorStyle": "url('https://web-image.useinsider.com/skmagiccom/defaultImageLibrary/psg_White_PC_size-1741227254.png')",
+      "_colorName": "내추럴 화이트",
+      "_addedByColorExpand": true
+    },
+    {
+      "goodsId": "G000069348",
+      "name": "PSG 원코크 플러스 얼음물 정수기",
+      "model": "WPUIAC425PNS",
+      "alt": "PSG 원코크 플러스 얼음물 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069348/G000069348_18_480x480.png",
+      "benefits": [
+        "냉온정얼음",
+        "셀프관리/방문관리"
+      ],
+      "tag": "",
+      "prices": [],
+      "colors": [],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0004",
+      "_colorStyle": "url('https://web-image.useinsider.com/skmagiccom/defaultImageLibrary/PSG%E1%84%91%E1%85%B3%E1%86%AF%E1%84%85%E1%85%A5%E1%84%89%E1%85%B3_%E1%84%89%E1%85%B5%E1%86%AF%E1%84%87%E1%85%A5_PC-1749602708.png')",
+      "_colorName": "뉴트럴 실버",
+      "_addedByColorExpand": true
+    },
+    {
+      "goodsId": "G000069303",
+      "name": "뉴슬림 플러스 정수기",
+      "model": "WPUTDC104RNW",
+      "alt": "뉴슬림 플러스 정수기",
+      "thumb": "https://static.skmagic.com/image/goods/G000069303/G000069303_10_480x480.png",
+      "benefits": [
+        "방문관리",
+        "냉온",
+        "UF필터"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 66,900",
+          "num": "24,950"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorStyle": "rgb(251,251,251)",
+      "_colorName": "화이트",
+      "_addedByColorExpand": true
+    },
+    {
+      "goodsId": "G000069304",
+      "name": "뉴슬림 플러스 정수기 프리스탠딩",
+      "model": "WPUTDF104RNW",
+      "alt": "뉴슬림 플러스 정수기 프리스탠딩",
+      "thumb": "https://static.skmagic.com/image/goods/G000069304/G000069304_10_480x480.png",
+      "benefits": [
+        "방문관리",
+        "냉온",
+        "UF필터"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 66,900",
+          "num": "24,950"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorStyle": "rgb(251,251,251)",
+      "_colorName": "화이트",
+      "_addedByColorExpand": true
+    },
+    {
+      "goodsId": "G000069405",
+      "name": "워커힐 클라우드 매트리스",
+      "model": "MATSM430RLWH",
+      "alt": "워커힐 클라우드 매트리스",
+      "thumb": "https://static.skmagic.com/image/goods/G000069405/G000069405_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 35,900",
+          "num": "30,900"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000245"
+      ]
+    },
+    {
+      "goodsId": "G000069406",
+      "name": "워커힐 클라우드 매트리스",
+      "model": "MATSM430RLWH",
+      "alt": "워커힐 클라우드 매트리스",
+      "thumb": "https://static.skmagic.com/image/goods/G000069406/G000069406_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 25,900",
+          "num": "20,900"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000245"
+      ]
+    },
+    {
+      "goodsId": "G000069429",
+      "name": "워커힐 스탠다드 매트리스",
+      "model": "MATSM730RZOM",
+      "alt": "워커힐 스탠다드 매트리스",
+      "thumb": "https://static.skmagic.com/image/goods/G000069429/G000069429_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 19,900",
+          "num": "14,900"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000245"
+      ]
+    },
+    {
+      "goodsId": "G000069422",
+      "name": "워커힐 스위트 매트리스",
+      "model": "MATSM230RSBR",
+      "alt": "워커힐 스위트 매트리스",
+      "thumb": "https://static.skmagic.com/image/goods/G000069422/G000069422_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 21,900",
+          "num": "16,900"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000245"
+      ]
+    },
+    {
+      "goodsId": "G000069421",
+      "name": "워커힐 스위트 매트리스",
+      "model": "MATSM230RSBR",
+      "alt": "워커힐 스위트 매트리스",
+      "thumb": "https://static.skmagic.com/image/goods/G000069421/G000069421_1_350x350.png",
+      "benefits": [],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 31,900",
+          "num": "26,900"
+        }
+      ],
+      "colors": [],
+      "categories": [
+        "1000000245"
+      ]
+    }
+  ],
+  "total": 81
+}

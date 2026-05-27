@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SK매직 인증파트너점 | 정수기·공기청정기·비데·매트리스</title>
+<meta name="description" content="검증된 SK매직 정품 렌탈 라인업을 한 화면에. 안심·편한 셀프 또는 방문 관리, 빠른 설치까지.">
+<link rel="preload" href="./assets/fonts/Pretendard-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="./assets/fonts/Pretendard-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="./assets/fonts/Pretendard-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="./assets/fonts/Pretendard-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="./assets/style.css">
+<link rel="icon" type="image/png" sizes="32x32" href="./assets/brand/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./assets/brand/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./assets/brand/apple-touch-icon.png">
+<link rel="shortcut icon" href="./assets/brand/favicon.ico">
+<meta name="theme-color" content="#DE4F41">
+</head>
+<body>
+
+<!-- ===== Utility bar ===== -->
+<div class="util-bar">
+  <div class="container">
+    <a href="#">고객센터</a>
+    <a href="#">렌탈안내</a>
+    <a href="#">제휴문의</a>
+    <a href="#">대리점 안내</a>
+    <a href="./admin.html" class="util-admin">관리자</a>
+  </div>
+</div>
+
+<!-- ===== Header ===== -->
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="./index.html">
+      <img class="brand-logo" src="./assets/brand/logo.png" alt="SK magic">
+      <span class="partner-label">인증파트너점</span>
+    </a>
+    <nav class="gnb">
+      <a href="./index.html?cls=100000005">정수기</a>
+      <a href="./index.html?cls=100000010">공기청정기</a>
+      <a href="./index.html?cls=100000024">비데</a>
+      <a href="./index.html?cls=1000000245">매트리스</a>
+    </nav>
+    <!-- 헤더 우측 액션 영역 제거됨 (검색·장바구니·계정·상담신청) — 상담은 우하단 FAB로 대체 -->
+    <div class="header-actions"></div>
+  </div>
+</header>
+
+<!-- ============================================================
+     VIEW: HOME
+============================================================ -->
+<main data-view="home" hidden>
+  <!-- ===== NEW HERO: 3-슬라이드 캐러셀 (3초 자동전환 + 좌우 버튼) ===== -->
+  <section class="hero-slider" id="hero-slider">
+    <div class="hs-track">
+      <div class="hs-slide on"><img src="./assets/hero/11.jpg" alt="" loading="eager"></div>
+      <div class="hs-slide"><img src="./assets/hero/22.jpg" alt="" loading="lazy"></div>
+      <div class="hs-slide"><img src="./assets/hero/33.jpg" alt="" loading="lazy"></div>
+    </div>
+    <button class="hs-nav hs-prev" type="button" aria-label="이전 슬라이드">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 6 9 12 15 18"/></svg>
+    </button>
+    <button class="hs-nav hs-next" type="button" aria-label="다음 슬라이드">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg>
+    </button>
+    <div class="hs-dots">
+      <button class="hs-dot on" type="button" data-i="0" aria-label="1번"></button>
+      <button class="hs-dot" type="button" data-i="1" aria-label="2번"></button>
+      <button class="hs-dot" type="button" data-i="2" aria-label="3번"></button>
+    </div>
+  </section>
+
+  <!-- ===== LEGACY HERO (구버전 — 숨김 보존 / 다시 켜려면 hidden 제거) ===== -->
+  <section class="hero" hidden>
+    <div class="container">
+      <div>
+        <span class="hero-eyebrow"><span class="dot"></span> 2026 SUMMER FRESH</span>
+        <h1>매일 마시는 물부터<br>다시 정성껏 <em>고르세요</em>.</h1>
+        <p class="lead">정수기·공기청정기·비데·매트리스까지. <br>
+          검증된 정품 라인업과 셀프·방문 관리 선택권, <br>
+          빠른 설치를 한 곳에서.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="./index.html?cls=100000005">
+            정수기 둘러보기 <span id="ic-arr1"></span>
+          </a>
+          <a class="btn btn-ghost" href="#consult">
+            무료 상담 신청
+          </a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hv-title">이번 달 <em>베스트</em> 정수기</div>
+        <div class="hv-img" id="hero-visual-img"></div>
+
+        <!-- 좌상단 — 베스트 상품 + 가격 카드 -->
+        <div class="hv-card hv-card-tl" aria-hidden="true">
+          <div class="hvc-tag">★ 베스트 No.1</div>
+          <div class="hvc-name">초소형 라이트 직수</div>
+          <div class="hvc-price">월 <strong>13,200</strong><span>원~</span></div>
+          <div class="hvc-sub">셀프관리 · 3년 약정</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="section home-cat">
+    <div class="container">
+      <div class="cat-grid" id="cat-grid"></div>
+    </div>
+  </section>
+
+  <section class="section best-section" style="background:var(--surface)">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 id="best-title"><span id="best-month">5</span>월 인기 상품</h2>
+          <p class="sub">실시간 조회수 + 구독 신청 데이터를 합쳐 골랐어요.</p>
+        </div>
+        <a class="more" href="./index.html?view=category">전체보기 <span id="ic-arr2"></span></a>
+      </div>
+      <div class="product-grid" id="best-grid"></div>
+    </div>
+  </section>
+
+  <div class="container" id="cat-sections" style="padding-top:60px;padding-bottom:60px"></div>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>우리는 이렇게 다릅니다</h2>
+          <p class="sub">불편한 약정·복잡한 가격은 그만. 핵심만 챙겼어요.</p>
+        </div>
+      </div>
+      <div class="why-grid">
+        <div class="cat-card why-card">
+          <div class="ic" id="wh-1"></div>
+          <div class="why-text">
+            <div class="why-title">정품 직배송 보증</div>
+            <div class="why-desc">제조사 정품만 취급. 본사 직배송으로 신선한 박스 그대로 받아보세요.</div>
+          </div>
+        </div>
+        <div class="cat-card why-card">
+          <div class="ic" id="wh-2"></div>
+          <div class="why-text">
+            <div class="why-title">셀프·방문 자유 선택</div>
+            <div class="why-desc">관리 방식과 약정 기간을 입맛대로 골라 월 부담을 가볍게.</div>
+          </div>
+        </div>
+        <div class="cat-card why-card">
+          <div class="ic" id="wh-3"></div>
+          <div class="why-text">
+            <div class="why-title">빠른 설치 일정</div>
+            <div class="why-desc">상담 후 평균 2일 이내 설치. 지역별 전문 기사가 직접 시공합니다.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============================================================
+     VIEW: CATEGORY
+============================================================ -->
+<main data-view="category" hidden>
+  <section class="container" style="padding-top:36px">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px">
+      <div id="cat-icon" class="cat-page-icon" style="width:44px;height:44px;border-radius:12px;display:grid;place-items:center"></div>
+      <h1 id="cat-title" style="font-size:32px;letter-spacing:-0.5px;margin:0;font-weight:800">전체 상품</h1>
+    </div>
+    <div style="color:var(--ink-4);font-size:13px;margin-bottom:18px"><span id="cat-count">—</span> · 가격은 월 구독료 기준입니다.</div>
+
+    <div class="filter-bar" id="filter-bar"></div>
+
+    <div class="product-grid" id="cat-products"></div>
+  </section>
+</main>
+
+<!-- ============================================================
+     VIEW: DETAIL
+============================================================ -->
+<main data-view="detail" hidden>
+  <section class="container detail-wrap">
+    <div class="breadcrumb" id="crumb"><span class="loader"></span></div>
+
+    <div class="detail-top">
+      <div class="gallery">
+        <div class="main" id="gallery-main"></div>
+        <div class="thumbs" id="gallery-thumbs"></div>
+      </div>
+
+      <div class="detail-info">
+        <div class="model" id="p-model"></div>
+        <div class="name-row">
+          <h1 id="p-name">불러오는 중...</h1>
+          <span class="color-name" id="p-color-name" hidden></span>
+        </div>
+        <div class="tags" id="p-tags"></div>
+
+        <!-- 색상 선택 (같은 모델군에 다른 색상 변형이 있을 때만 노출) -->
+        <div class="color-picker" id="p-color-picker" hidden></div>
+
+        <!-- 약정/관리유형 옵션 (본사 데이터 — 가격 제외 메타만) -->
+        <div class="option-block" id="p-options" hidden>
+          <div class="option-row" id="p-size-row" hidden>
+            <span class="op-label">사이즈</span>
+            <div class="op-tabs" id="p-size-tabs"></div>
+          </div>
+          <div class="option-row" id="p-care-row" hidden>
+            <span class="op-label">관리 유형</span>
+            <div class="op-tabs" id="p-care-tabs"></div>
+          </div>
+          <div class="option-row" id="p-contract-row" hidden>
+            <span class="op-label">약정 기간</span>
+            <div class="op-tabs" id="p-contract-tabs"></div>
+          </div>
+          <div class="option-info" id="p-option-info"></div>
+        </div>
+
+        <div class="price-card" id="p-price"></div>
+
+        <div class="detail-cta">
+          <a class="btn btn-primary" href="#"><span id="ic-arr"></span>상담 신청</a>
+          <a class="btn btn-ghost" href="#"><span id="ic-check"></span>장바구니</a>
+        </div>
+
+        <div style="margin-top:24px;padding:18px;background:var(--primary-soft);border-radius:14px;font-size:13px;color:var(--ink-2);line-height:1.6">
+          <strong>혜택 안내</strong><br>
+          상담 신청 시 약정 기간·관리 방식에 따라 추가 할인 적용. 전국 빠른 설치 가능.
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-tabs">
+      <div class="tabbar">
+        <button class="on" data-pane="info">상품 상세</button>
+        <button data-pane="spec">제품 사양</button>
+        <button data-pane="ship">배송/설치</button>
+      </div>
+      <div class="tabpane" id="pane-info">
+        <div class="infoimgs" id="p-info-imgs"><div class="empty"><span class="loader"></span></div></div>
+      </div>
+      <div class="tabpane" id="pane-spec" style="display:none">
+        <div class="spec-wrap" id="p-spec-wrap">
+          <div class="empty" style="padding:40px 0">제품 사양 정보가 준비되면 표시됩니다.</div>
+        </div>
+      </div>
+      <div class="tabpane" id="pane-ship" style="display:none">
+        <div style="max-width:760px;margin:0 auto;line-height:1.8;color:var(--ink-2)">
+          <h3 style="font-size:18px;margin-bottom:12px">배송·설치 안내</h3>
+          <ul style="padding-left:20px;list-style:disc">
+            <li>상담 완료 후 평균 2영업일 내 전문 기사가 방문 설치합니다.</li>
+            <li>설치비는 무료이며, 일부 도서·산간 지역은 추가 비용이 발생할 수 있습니다.</li>
+            <li>설치 가능 시간: 평일/토 09:00–18:00 (휴일 일정 협의 가능).</li>
+          </ul>
+          <h3 style="font-size:18px;margin:24px 0 12px">관리 안내</h3>
+          <ul style="padding-left:20px;list-style:disc">
+            <li>방문 관리: 전담 매니저가 정기 방문하여 필터 교체·외관 위생을 점검합니다.</li>
+            <li>셀프 관리: 정기 배송되는 필터를 형이 직접 교체. 월 부담이 더 가벼움.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ===== Footer (공통) ===== -->
+<footer class="site-footer" id="consult">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="brand" style="color:#fff">
+          <img class="brand-logo" src="./assets/brand/logo_white.png" alt="SK magic">
+          <span class="partner-label">인증파트너점</span>
+        </div>
+        <p style="font-size:13px;line-height:1.7;margin-top:12px;color:#A0A0A0">
+          정수기·공기청정기·비데·매트리스 렌탈 전문.<br>
+          궁금한 점은 언제든 편하게 문의주세요.
+        </p>
+      </div>
+      <div>
+        <h4>쇼핑</h4>
+        <ul>
+          <li><a href="./index.html?cls=100000005">정수기</a></li>
+          <li><a href="./index.html?cls=100000010">공기청정기</a></li>
+          <li><a href="./index.html?cls=100000024">비데</a></li>
+          <li><a href="./index.html?cls=1000000245">매트리스</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>고객지원</h4>
+        <ul>
+          <li><a href="#">상담 신청</a></li>
+          <li><a href="#">설치 문의</a></li>
+          <li><a href="#">A/S</a></li>
+          <li><a href="#">자주 묻는 질문</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>고객센터</h4>
+        <ul class="ft-info">
+          <li style="font-size:22px;color:#fff;font-weight:800;letter-spacing:-0.5px">1588 - 0000</li>
+          <li>평일 09:00 - 18:00</li>
+          <li>주말·공휴일 휴무</li>
+        </ul>
+      </div>
+    </div>
+    <!-- ===== 사업자정보 — 더미값. 실제 정보로 교체 필수. ===== -->
+    <div class="biz-info">
+      <dl class="biz-grid">
+        <div class="biz-row"><dt>상호</dt><dd>우주가전 (SK매직 인증파트너점)</dd></div>
+        <div class="biz-row"><dt>대표자</dt><dd>OOO</dd></div>
+        <div class="biz-row"><dt>사업자등록번호</dt><dd>000-00-00000</dd></div>
+        <div class="biz-row"><dt>통신판매업</dt><dd>제0000-서울OO-0000호</dd></div>
+        <div class="biz-row full"><dt>주소</dt><dd>서울특별시 OO구 OO로 00, 0층 (00동)</dd></div>
+        <div class="biz-row"><dt>대표전화</dt><dd>1588-0000</dd></div>
+        <div class="biz-row"><dt>이메일</dt><dd>contact@example.com</dd></div>
+      </dl>
+      <p class="biz-note">
+        본 페이지는 SK매직 정식 대리점의 영업 상담 보조용 카탈로그입니다.
+        모든 상품·가격 정보의 최종 확인은 본사 공식 홈페이지(skmagic.com) 또는 매장 상담으로 진행해주세요.
+      </p>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 SK매직 인증파트너점. 본 페이지는 영업 카탈로그입니다.</span>
+      <span>이용약관 · 개인정보처리방침</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ===== Floating 상담 버튼 + Popup ===== -->
+<a class="fab-consult" href="#" id="fab-consult" aria-label="상담 신청 열기">
+  <span id="fab-phone"></span>
+  <span class="fab-label">상담 신청</span>
+</a>
+<div class="fab-popup" id="fab-popup" hidden>
+  <p class="pop-label">지금 바로 상담 가능</p>
+  <a class="pop-tel" href="tel:1588-0000">1588-0000</a>
+  <div class="pop-hours">평일 09:00 - 18:00 · 주말·공휴일 휴무</div>
+  <a class="pop-kakao" href="#" target="_blank" rel="noopener" id="pop-kakao">
+    카카오톡 상담
+  </a>
+</div>
+
+<script src="./assets/icons.js"></script>
+<script src="./assets/db.js"></script>
+<script src="./assets/app.js"></script>
+<script>
+  // ===== 정적 아이콘 주입 (헤더 액션 제거됨 — FAB만 남음) =====
+  document.getElementById('fab-phone').innerHTML = ICONS.phone();
+
+  /* ===== FAB popup 토글 — PC/모바일 공통 ===== */
+  (function(){
+    const fab = document.getElementById('fab-consult');
+    const popup = document.getElementById('fab-popup');
+    if (!fab || !popup) return;
+    fab.addEventListener('click', (e) => {
+      e.preventDefault();
+      popup.hidden = !popup.hidden;
+    });
+    // popup 바깥 클릭 시 닫기 (popup 안 링크 클릭은 정상 동작)
+    document.addEventListener('click', (e) => {
+      if (popup.hidden) return;
+      if (e.target.closest('.fab-consult')) return;
+      if (e.target.closest('.fab-popup')) return;
+      popup.hidden = true;
+    });
+    // ESC 키로 닫기
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !popup.hidden) popup.hidden = true;
+    });
+  })();
+  document.getElementById('ic-arr1').innerHTML = ICONS.arrow();
+  document.getElementById('ic-arr2').innerHTML = ICONS.arrow();
+  document.getElementById('ic-arr').innerHTML = ICONS.arrow();
+  document.getElementById('ic-check').innerHTML = ICONS.cart();
+  document.getElementById('wh-1').innerHTML = ICONS.shield();
+  document.getElementById('wh-2').innerHTML = ICONS.spark();
+  document.getElementById('wh-3').innerHTML = ICONS.truck();
+
+  /* ===== Hero Slider — 3초 자동전환 + 좌우 버튼 + 점 인디케이터 ===== */
+  (function(){
+    const root = document.getElementById('hero-slider');
+    if (!root) return;
+    const slides = root.querySelectorAll('.hs-slide');
+    const dots = root.querySelectorAll('.hs-dot');
+    if (!slides.length) return;
+    let cur = 0;
+    let timer = null;
+    const AUTO_MS = 3000;
+
+    function go(idx){
+      idx = (idx + slides.length) % slides.length;
+      slides[cur].classList.remove('on');
+      dots[cur] && dots[cur].classList.remove('on');
+      cur = idx;
+      slides[cur].classList.add('on');
+      dots[cur] && dots[cur].classList.add('on');
+    }
+    function next(){ go(cur + 1); }
+    function prev(){ go(cur - 1); }
+    function start(){ stop(); timer = setInterval(next, AUTO_MS); }
+    function stop(){ if (timer) { clearInterval(timer); timer = null; } }
+
+    root.querySelector('.hs-next').addEventListener('click', () => { next(); start(); });
+    root.querySelector('.hs-prev').addEventListener('click', () => { prev(); start(); });
+    dots.forEach(d => d.addEventListener('click', () => {
+      go(parseInt(d.dataset.i, 10) || 0); start();
+    }));
+    // 탭이 백그라운드일 때만 멈춤 (배터리·성능). hover로는 안 멈춤.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop(); else start();
+    });
+    start();
+  })();
+
+  // ===== detail 탭 전환 — location.hash 기반 (#info/#spec/#ship) =====
+  // 새로고침/뒤로가기 시 현재 탭 유지.
+  (function(){
+    const PANES = ['info', 'spec', 'ship'];
+    function currentPane(){
+      const h = (location.hash || '').replace(/^#/, '');
+      return PANES.includes(h) ? h : 'info';
+    }
+    function applyPane(){
+      const detailMain = document.querySelector('[data-view="detail"]');
+      if (!detailMain || detailMain.hidden) return;
+      const pane = currentPane();
+      detailMain.querySelectorAll('.tabbar button').forEach(b => {
+        b.classList.toggle('on', b.dataset.pane === pane);
+      });
+      PANES.forEach(p => {
+        const el = document.getElementById('pane-' + p);
+        if (el) el.style.display = (p === pane) ? '' : 'none';
+      });
+    }
+    // 클릭 시 hash 갱신만 — hashchange 가 applyPane 처리
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-view="detail"] .tabbar button');
+      if (!btn) return;
+      e.preventDefault();
+      const target = '#' + btn.dataset.pane;
+      if (location.hash === target) applyPane();
+      else location.hash = target;
+    });
+    window.addEventListener('hashchange', applyPane);
+    // detail view 가 활성화될 때마다(라우터 진입) 동기화 필요 → MutationObserver
+    const mainsObs = new MutationObserver(applyPane);
+    document.querySelectorAll('main[data-view]').forEach(m => {
+      mainsObs.observe(m, { attributes:true, attributeFilter:['hidden'] });
+    });
+    // 첫 로드 적용
+    applyPane();
+  })();
+
+  // ===== 라우터 시작 =====
+  App.startRouter();
+</script>
+</body>
+</html>

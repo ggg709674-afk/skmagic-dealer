@@ -1,0 +1,598 @@
+/* =========================================================
+   admin.css — 관리자 페이지 전용 스타일
+   사이트(style.css)의 컬러 토큰을 그대로 상속해서 톤 통일.
+   ========================================================= */
+
+:root{
+  --adm-side-w: 240px;
+  --adm-side-bg: #1f2024;
+  --adm-side-bg-2: #16171a;
+  --adm-side-ink: #e6e6e8;
+  --adm-side-ink-dim: #8a8c92;
+  --adm-side-line: #2c2e34;
+  --adm-side-on: var(--primary);
+  --adm-row-h: 64px;
+}
+
+html, body.admin-body{
+  background:#f6f7f9;
+  font-family:'Pretendard', system-ui, -apple-system, sans-serif;
+  color:var(--ink-1);
+  min-height:100vh;
+}
+body.admin-body{
+  display:grid;
+  grid-template-columns: var(--adm-side-w) 1fr;
+  grid-template-rows: 100vh;
+  overflow:hidden;
+}
+
+/* ===== Sidebar ===== */
+.adm-side{
+  background:linear-gradient(180deg, var(--adm-side-bg) 0%, var(--adm-side-bg-2) 100%);
+  color:var(--adm-side-ink);
+  display:flex; flex-direction:column;
+  border-right:1px solid #0c0c0e;
+  overflow-y:auto;
+}
+.adm-brand{
+  display:flex; align-items:center; gap:12px;
+  padding:20px 20px 18px;
+  border-bottom:1px solid var(--adm-side-line);
+}
+.adm-brand img{height:24px; width:auto; filter:brightness(0) invert(1) opacity(.95)}
+.adm-brand-title{font-size:13px; font-weight:700; letter-spacing:-0.2px; line-height:1.2}
+.adm-brand-sub{font-size:11px; color:var(--adm-side-ink-dim); margin-top:2px}
+
+.adm-nav{flex:1; padding:14px 10px}
+.adm-nav-group{margin-bottom:18px}
+.adm-nav-label{
+  font-size:11px; font-weight:600; color:var(--adm-side-ink-dim);
+  letter-spacing:0.6px; text-transform:uppercase;
+  padding:6px 12px 8px;
+}
+.adm-nav-item{
+  display:flex; align-items:center; gap:10px;
+  padding:9px 12px; margin:1px 0;
+  border-radius:8px;
+  color:var(--adm-side-ink);
+  text-decoration:none;
+  font-size:13.5px; font-weight:500;
+  transition:background .12s, color .12s;
+}
+.adm-nav-item:hover{background:rgba(255,255,255,.05)}
+.adm-nav-item.on{
+  background:var(--adm-side-on);
+  color:#fff;
+  font-weight:600;
+}
+.adm-nav-item.on .adm-nav-ic{opacity:1}
+.adm-nav-ic{
+  display:inline-block; width:18px; text-align:center;
+  font-size:13px; opacity:.7;
+}
+.adm-nav-item.is-disabled{
+  color:var(--adm-side-ink-dim);
+  cursor:not-allowed;
+}
+.adm-nav-item.is-disabled:hover{background:transparent}
+.adm-soon{
+  margin-left:auto;
+  font-size:10px; font-style:normal; font-weight:600;
+  padding:2px 6px; border-radius:4px;
+  background:rgba(255,255,255,.08); color:#aaa;
+}
+
+.adm-side-foot{
+  padding:14px 18px;
+  border-top:1px solid var(--adm-side-line);
+}
+.adm-side-link{
+  font-size:12.5px;
+  color:var(--adm-side-ink-dim);
+  text-decoration:none;
+}
+.adm-side-link:hover{color:#fff}
+
+/* ===== Main area ===== */
+.adm-main{
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+
+.adm-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:22px 32px 18px;
+  background:#fff;
+  border-bottom:1px solid var(--line);
+  flex-shrink:0;
+}
+.adm-header h1{
+  font-size:22px; font-weight:800; letter-spacing:-0.4px;
+  margin:0;
+}
+.adm-header-sub{
+  font-size:13px; color:var(--ink-3);
+  margin:4px 0 0;
+}
+.adm-header-actions{display:flex; align-items:center; gap:8px}
+
+.adm-dirty-flag{
+  font-size:12.5px; color:var(--primary); font-weight:600;
+  padding:6px 10px; background:var(--primary-soft);
+  border-radius:6px; margin-right:6px;
+}
+
+.adm-btn{
+  height:38px; padding:0 16px;
+  border-radius:8px;
+  font-size:13px; font-weight:600;
+  border:1px solid transparent;
+  cursor:pointer;
+  transition:background .12s, border-color .12s, color .12s;
+}
+.adm-btn-primary{
+  background:var(--primary); color:#fff;
+  border-color:var(--primary);
+}
+.adm-btn-primary:hover{background:var(--primary-dark); border-color:var(--primary-dark)}
+.adm-btn-ghost{
+  background:#fff; color:var(--ink-2);
+  border-color:var(--line-strong);
+}
+.adm-btn-ghost:hover{background:var(--surface); border-color:#bbb}
+.adm-btn-danger{
+  background:#fff; color:var(--danger);
+  border-color:#f3c2bd;
+}
+.adm-btn-danger:hover{background:var(--primary-soft)}
+
+/* ===== Panel ===== */
+.adm-panel{
+  flex:1;
+  padding:24px 32px 32px;
+  overflow-y:auto;
+}
+
+/* ===== Filter bar ===== */
+.adm-filter{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:16px 18px;
+  margin-bottom:16px;
+}
+.adm-filter-row{
+  display:flex; align-items:center; gap:14px;
+  flex-wrap:wrap;
+}
+.adm-filter-row + .adm-filter-row{margin-top:12px}
+.adm-chips{display:flex; gap:6px; flex-wrap:wrap}
+.adm-chip{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 14px;
+  border-radius:999px;
+  font-size:13px; font-weight:500;
+  background:var(--surface); color:var(--ink-2);
+  border:1px solid transparent;
+  cursor:pointer;
+}
+.adm-chip:hover{background:#ebebee}
+.adm-chip.on{
+  background:var(--ink-1); color:#fff;
+  border-color:var(--ink-1);
+}
+.adm-chip .chip-cnt{
+  font-size:11px; opacity:.7;
+  padding:1px 5px; background:rgba(0,0,0,.1); border-radius:4px;
+}
+.adm-chip.on .chip-cnt{background:rgba(255,255,255,.2)}
+
+.adm-search{
+  margin-left:auto;
+  position:relative;
+}
+.adm-search input{
+  width:280px;
+  height:36px;
+  padding:0 14px;
+  border:1px solid var(--line-strong);
+  border-radius:8px;
+  font-size:13px;
+  background:#fff;
+  outline:none;
+  font-family:inherit;
+}
+.adm-search input:focus{border-color:var(--primary)}
+
+.adm-filter-toggles{justify-content:flex-start}
+.adm-toggle-pill{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:12.5px; color:var(--ink-2);
+  cursor:pointer; user-select:none;
+}
+.adm-toggle-pill input{margin:0}
+.adm-count{
+  margin-left:auto;
+  font-size:12.5px; color:var(--ink-3);
+}
+.adm-count strong{color:var(--ink-1); font-weight:700}
+
+/* ===== Table ===== */
+.adm-table-wrap{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  overflow-x:auto;       /* 좁은 폭에서 가로 스크롤 허용 */
+  overflow-y:hidden;
+}
+.adm-table{
+  width:100%;
+  min-width:1280px;     /* 가격 4컬럼 추가에 따라 확장 */
+  border-collapse:collapse;
+  font-size:13px;
+}
+.adm-table td, .adm-table th{
+  word-break:keep-all;
+  overflow-wrap:anywhere;
+}
+.adm-table thead th{
+  background:var(--surface);
+  font-weight:600;
+  font-size:12px;
+  color:var(--ink-3);
+  text-align:center;
+  padding:12px 10px;
+  border-bottom:1px solid var(--line);
+  white-space:nowrap;
+}
+/* 텍스트 컨텐츠가 들어가는 셀(모델/상품명)은 본문은 왼쪽, 헤더는 가운데 — 헤더만 center 유지 */
+.adm-table thead th.col-model,
+.adm-table thead th.col-name{text-align:center}
+.adm-table tbody td{
+  padding:10px 10px;
+  border-bottom:1px solid var(--line);
+  vertical-align:middle;
+}
+.adm-table tbody td{text-align:center}
+/* 모델·상품명도 가운데 정렬 (헤더와 통일) */
+.col-name .nm-sub{justify-content:center}
+.adm-table tbody tr:last-child td{border-bottom:0}
+.adm-table tbody tr:hover{background:#fafbfc}
+.adm-table tbody tr.is-hidden{opacity:.45}
+.adm-table tbody tr.is-featured td.col-name::before{
+  content:'★';
+  color:var(--gold);
+  margin-right:6px;
+}
+
+.col-order{width:46px; color:var(--ink-4); font-size:12px}
+.col-thumb{width:62px}
+.col-thumb img{
+  width:48px; height:48px;
+  object-fit:contain;
+  background:var(--surface);
+  border-radius:8px;
+  display:block;
+  margin:0 auto;
+}
+.col-model{width:140px; font-family:'SF Mono', Menlo, Consolas, monospace; font-size:12px; color:var(--ink-2)}
+.col-model .model-code{font-weight:600; color:var(--ink-1)}
+.col-model .color-label{
+  font-style:normal; font-weight:500;
+  color:var(--ink-3); font-size:11.5px;
+}
+.col-model .gid{display:block; color:var(--ink-4); font-size:11px; margin-top:2px}
+.col-name{width:280px}
+.col-name .nm{font-weight:600; color:var(--ink-1)}
+.col-name .nm-sub{
+  display:flex; align-items:center; gap:5px;
+  font-size:11.5px; color:var(--ink-4); margin-top:4px;
+  flex-wrap:wrap;
+}
+.col-name .col-dot{
+  display:inline-block; width:12px; height:12px;
+  border-radius:50%;
+  border:1px solid rgba(0,0,0,.08);
+}
+.col-name .col-count{
+  display:inline-block;
+  padding:1px 6px;
+  background:var(--surface); color:var(--ink-3);
+  border-radius:4px; font-size:11px; font-weight:600;
+}
+.col-name .col-name-label{
+  font-size:11px; color:var(--ink-4);
+}
+.col-cat{width:84px}
+.col-cat .cat-tag{
+  display:inline-block;
+  padding:3px 8px;
+  background:var(--surface); color:var(--ink-2);
+  border-radius:4px; font-size:11.5px; font-weight:500;
+}
+.col-price{width:84px; font-weight:600; color:var(--ink-1); font-size:12.5px}
+.col-price strong{font-weight:700}
+.col-price s{color:var(--ink-4); font-weight:500}
+.col-price .price-empty{color:var(--ink-4); font-weight:400}
+/* 할인가는 강조 */
+.col-price-sale strong{color:var(--primary)}
+/* 카드/타보는 보조색 */
+.col-price-compete strong, .col-price-card strong{color:var(--ink-2); font-weight:600}
+.col-toggle{width:56px}
+.col-actions{width:80px; white-space:nowrap}
+.col-edit{width:80px; white-space:nowrap}
+
+/* ===== Switch toggle ===== */
+.adm-switch{
+  position:relative;
+  display:inline-block;
+  width:38px; height:22px;
+  cursor:pointer;
+}
+.adm-switch input{
+  position:absolute; opacity:0; pointer-events:none;
+}
+.adm-switch-slider{
+  position:absolute; inset:0;
+  background:#d0d2d6;
+  border-radius:999px;
+  transition:background .15s;
+}
+.adm-switch-slider::after{
+  content:'';
+  position:absolute;
+  top:2px; left:2px;
+  width:18px; height:18px;
+  background:#fff;
+  border-radius:50%;
+  transition:transform .15s;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.adm-switch input:checked + .adm-switch-slider{background:var(--primary)}
+.adm-switch input:checked + .adm-switch-slider::after{transform:translateX(16px)}
+.adm-switch.feat input:checked + .adm-switch-slider{background:var(--gold)}
+
+/* ===== Order arrows ===== */
+.adm-arrow{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:28px; height:28px;
+  background:#fff;
+  border:1px solid var(--line-strong);
+  border-radius:6px;
+  cursor:pointer;
+  margin:0 1px;
+  font-size:11px; color:var(--ink-2);
+  transition:background .1s, border-color .1s;
+}
+.adm-arrow:hover{background:var(--surface); border-color:#bbb}
+.adm-arrow:disabled{opacity:.3; cursor:not-allowed}
+
+/* 행 편집 버튼 */
+.adm-row-edit{
+  display:inline-flex; align-items:center; gap:4px;
+  height:28px; padding:0 10px;
+  background:#fff;
+  border:1px solid var(--line-strong);
+  border-radius:6px;
+  cursor:pointer;
+  font-size:12px; font-weight:500; color:var(--ink-2);
+}
+.adm-row-edit:hover{background:var(--primary-soft); border-color:var(--primary); color:var(--primary)}
+
+/* 수정된 행 강조 */
+.adm-table tbody tr.is-edited td.col-price::after{
+  content:'·수정됨';
+  display:block;
+  font-size:10px; color:var(--primary); font-weight:600;
+  margin-top:2px;
+}
+
+/* ===== Empty / loading ===== */
+.adm-empty{
+  text-align:center;
+  padding:60px 20px;
+  color:var(--ink-4);
+  font-size:14px;
+}
+
+/* ===== Soon panel ===== */
+.adm-soon-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:64px 32px;
+  text-align:center;
+  max-width:520px;
+  margin:80px auto;
+}
+.adm-soon-icon{font-size:42px; margin-bottom:14px}
+.adm-soon-card h2{font-size:20px; font-weight:800; margin:0 0 8px}
+.adm-soon-card p{font-size:13.5px; color:var(--ink-3); margin:0 0 24px}
+
+/* ===== Modal ===== */
+.adm-modal{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.5);
+  display:flex; align-items:center; justify-content:center;
+  z-index:100;
+  padding:20px;
+}
+.adm-modal[hidden]{display:none}
+.adm-toast[hidden]{display:none}
+.adm-dirty-flag[hidden]{display:none}
+.adm-panel[hidden]{display:none}
+
+.adm-modal-card-wide{max-width:880px}
+
+/* 편집 모달 ─ 좌측 메타 + 우측 폼 */
+.adm-edit-body{
+  display:grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap:0;
+  flex:1;
+  overflow:hidden;
+}
+.adm-edit-left{
+  padding:20px 22px;
+  background:var(--surface);
+  border-right:1px solid var(--line);
+  overflow-y:auto;
+}
+.adm-edit-right{
+  padding:18px 24px;
+  overflow-y:auto;
+}
+.adm-edit-thumb{
+  width:100%; aspect-ratio:1; max-width:240px;
+  margin:0 auto 16px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:10px;
+  display:grid; place-items:center;
+  overflow:hidden;
+}
+.adm-edit-thumb img{
+  max-width:90%; max-height:90%;
+  object-fit:contain;
+}
+
+.adm-edit-meta{margin:0; font-size:12.5px}
+.adm-edit-meta > div{
+  display:flex; justify-content:space-between;
+  padding:6px 0;
+  border-bottom:1px solid var(--line);
+}
+.adm-edit-meta > div:last-child{border-bottom:0}
+.adm-edit-meta dt{color:var(--ink-4); font-weight:500}
+.adm-edit-meta dd{margin:0; color:var(--ink-1); font-weight:600; text-align:right}
+
+.adm-edit-hint{
+  margin-top:14px;
+  padding:10px 12px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:8px;
+  font-size:11.5px;
+  color:var(--ink-3);
+  line-height:1.55;
+}
+
+.adm-edit-section{margin-bottom:18px}
+.adm-edit-section:last-child{margin-bottom:0}
+.adm-edit-section h4{
+  font-size:12.5px; font-weight:600;
+  color:var(--ink-1);
+  margin:0 0 6px;
+}
+.adm-edit-grid{
+  display:grid;
+  grid-template-columns: 80px 1fr 1fr;
+  gap:10px;
+  min-width:0;
+}
+.adm-edit-grid-4{grid-template-columns: repeat(4, minmax(0, 1fr))}
+.adm-edit-grid .adm-input{min-width:0}
+.adm-edit-field{display:flex; flex-direction:column; gap:4px}
+.adm-edit-field span{font-size:11px; color:var(--ink-4); font-weight:500}
+
+.adm-input{
+  width:100%;
+  padding:8px 12px;
+  border:1px solid var(--line-strong);
+  border-radius:6px;
+  font-size:13px;
+  font-family:inherit;
+  background:#fff;
+  outline:none;
+  transition:border-color .12s;
+}
+.adm-input:focus{border-color:var(--primary)}
+textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
+
+.adm-edit-orig{
+  display:block;
+  margin-top:5px;
+  font-size:11px;
+  color:var(--ink-4);
+}
+.adm-edit-orig code{
+  background:var(--surface);
+  padding:1px 5px; border-radius:3px;
+  color:var(--ink-3);
+}
+
+.adm-edit-foot{justify-content:space-between !important}
+.adm-edit-foot-right{display:flex; gap:8px}
+.adm-modal-card{
+  background:#fff;
+  border-radius:14px;
+  max-width:680px; width:100%;
+  max-height:80vh;
+  display:flex; flex-direction:column;
+  box-shadow:0 24px 60px rgba(0,0,0,.25);
+}
+.adm-modal-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 22px;
+  border-bottom:1px solid var(--line);
+}
+.adm-modal-head h3{font-size:16px; font-weight:700; margin:0}
+.adm-modal-close{
+  background:none; border:0; cursor:pointer;
+  font-size:22px; color:var(--ink-3);
+  width:32px; height:32px;
+  border-radius:6px;
+}
+.adm-modal-close:hover{background:var(--surface)}
+.adm-modal-sub{
+  padding:14px 22px 0;
+  font-size:12.5px; color:var(--ink-3);
+  margin:0;
+}
+.adm-modal textarea{
+  flex:1; min-height:280px;
+  margin:14px 22px;
+  padding:14px;
+  border:1px solid var(--line-strong);
+  border-radius:8px;
+  background:var(--surface);
+  font-family:'SF Mono', Menlo, Consolas, monospace;
+  font-size:12px; line-height:1.5;
+  resize:vertical;
+  outline:none;
+}
+.adm-modal-foot{
+  padding:14px 22px;
+  border-top:1px solid var(--line);
+  display:flex; justify-content:flex-end; gap:8px;
+}
+
+/* ===== Toast ===== */
+.adm-toast{
+  position:fixed;
+  bottom:32px; left:50%;
+  transform:translateX(-50%);
+  background:var(--ink-1); color:#fff;
+  padding:12px 22px;
+  border-radius:999px;
+  font-size:13px; font-weight:500;
+  z-index:200;
+  box-shadow:0 8px 24px rgba(0,0,0,.2);
+  animation: toast-in .2s ease-out;
+}
+@keyframes toast-in{
+  from{opacity:0; transform:translate(-50%, 10px)}
+  to  {opacity:1; transform:translate(-50%, 0)}
+}
+
+/* ===== 좁은 화면 대응 (관리자는 PC 우선 — 1024 이하에서는 사이드바 축소) ===== */
+@media (max-width: 1024px){
+  body.admin-body{grid-template-columns: 64px 1fr}
+  .adm-brand-title, .adm-brand-sub, .adm-nav-label, .adm-nav-item span:not(.adm-nav-ic), .adm-soon, .adm-side-link{display:none}
+  .adm-brand{padding:18px 0; justify-content:center}
+  .adm-brand img{height:22px}
+  .adm-nav-item{justify-content:center; padding:10px}
+  .adm-nav-ic{font-size:16px}
+  .adm-header, .adm-panel{padding-left:20px; padding-right:20px}
+}
