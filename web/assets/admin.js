@@ -723,41 +723,6 @@
     renderTable();
     toast('초기화 완료');
   }
-  function onExport(){
-    const text = JSON.stringify({
-      ...state.overrides,
-      _meta: {
-        exported_at: new Date().toISOString(),
-        product_count: state.products.length,
-        version: 1,
-      }
-    }, null, 2);
-    document.getElementById('export-text').value = text;
-    document.getElementById('export-modal').hidden = false;
-  }
-  function onExportClose(){
-    document.getElementById('export-modal').hidden = true;
-  }
-  function onExportCopy(){
-    const ta = document.getElementById('export-text');
-    ta.select();
-    document.execCommand('copy');
-    toast('클립보드에 복사됨');
-  }
-  function onExportDownload(){
-    const text = document.getElementById('export-text').value;
-    const blob = new Blob([text], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `skm-admin-overrides-${new Date().toISOString().slice(0,10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast('파일로 저장됨');
-  }
-
   /* ─── 사이드바 메뉴 (hash 기반 라우팅) ───────────────
      URL: ./admin.html#<menu>
        products | consult | banner | store
@@ -871,10 +836,6 @@
   function bindHeader(){
     document.getElementById('btn-save')?.addEventListener('click', onSave);
     document.getElementById('btn-reset')?.addEventListener('click', onReset);
-    document.getElementById('btn-export').addEventListener('click', onExport);
-    document.getElementById('export-close').addEventListener('click', onExportClose);
-    document.getElementById('export-copy').addEventListener('click', onExportCopy);
-    document.getElementById('export-download').addEventListener('click', onExportDownload);
     const btnOut = document.getElementById('btn-signout');
     if (btnOut) btnOut.addEventListener('click', () => {
       if (confirm('로그아웃하시겠어요?')) signOut();
@@ -889,7 +850,6 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape'){
         if (!document.getElementById('edit-modal').hidden) closeEditModal();
-        else if (!document.getElementById('export-modal').hidden) onExportClose();
       }
     });
 

@@ -90,7 +90,6 @@
     <div class="adm-header-actions">
       <span class="adm-user-chip" id="adm-user-chip" hidden></span>
       <span class="adm-dirty-flag" id="adm-dirty" hidden></span>
-      <button class="adm-btn adm-btn-ghost" id="btn-export">JSON 내보내기</button>
       <button class="adm-btn adm-btn-ghost" id="btn-signout" hidden>로그아웃</button>
     </div>
   </header>
@@ -156,22 +155,6 @@
   </section>
 
 </main>
-
-<!-- ===== JSON 내보내기 모달 ===== -->
-<div class="adm-modal" id="export-modal" hidden>
-  <div class="adm-modal-card">
-    <div class="adm-modal-head">
-      <h3>변경사항 JSON</h3>
-      <button class="adm-modal-close" id="export-close">×</button>
-    </div>
-    <p class="adm-modal-sub">아래 JSON을 복사하거나 파일로 저장해 백업하세요. 추후 백엔드 연동 시 이 형식 그대로 사용합니다.</p>
-    <textarea id="export-text" readonly></textarea>
-    <div class="adm-modal-foot">
-      <button class="adm-btn adm-btn-ghost" id="export-copy">클립보드 복사</button>
-      <button class="adm-btn adm-btn-primary" id="export-download">파일로 저장</button>
-    </div>
-  </div>
-</div>
 
 <!-- ===== 상품 편집 모달 ===== -->
 <div class="adm-modal" id="edit-modal" hidden>
