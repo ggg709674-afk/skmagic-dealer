@@ -247,6 +247,73 @@ const App = (() => {
     return rawData;
   }
 
+  /* ===== 멀티테넌트 매장별 admin_overrides 로드 =====
+     슬러그 → store → admin_overrides 행들을 goodsId 맵으로 캐시.
+     슬러그/Supabase 없으면 빈 맵 (= 본사 원본 그대로 노출). */
+  let _overrides = null;
+  async function loadOverrides() {
+    if (_overrides) return _overrides;
+    _overrides = new Map();
+    try {
+      if (!window.sb || typeof window.skmGetSlug !== 'function') return _overrides;
+      const slug = window.skmGetSlug();
+      if (!slug) return _overrides;
+      const store = await window.skmFetchStore(slug);
+      if (!store) return _overrides;
+      const rows = await window.skmFetchOverrides(store.id);
+      for (const r of rows) _overrides.set(r.goods_id, r);
+    } catch (e) {
+      console.warn('[loadOverrides]', e);
+    }
+    return _overrides;
+  }
+
+  /* admin_overrides 를 deduped 상품 목록에 반영 (mutate).
+     - hidden:   목록에서 제거
+     - featured: p._featured = true (이달의 추천 섹션 우선)
+     - order_index: p._order 로 보관 후 카테고리별 정렬에 사용
+     - name/benefits/tag: 본사 원본 위에 덮어쓰기
+     - prices: 정상가(del)·할인가(num) 재구성 + 타사보상가/제휴카드는 p._priceExtra */
+  function applyOverrides(dbObj, ovs) {
+    const stripUnit = (s) => String(s || '').replace(/^[^\d]*월?\s*/, '').replace(/\s*원\s*$/, '').trim();
+    const kept = [];
+    for (const p of dbObj.products) {
+      const r = ovs.get(p.goodsId);
+      if (r) {
+        if (r.hidden) continue;
+        if (r.name_override) p.name = r.name_override;
+        if (Array.isArray(r.benefits_override) && r.benefits_override.length) p.benefits = r.benefits_override;
+        if (r.tag_override != null && r.tag_override !== '') p.tag = r.tag_override;
+        p._featured = !!r.featured;
+        p._order = (r.order_index != null) ? r.order_index : null;
+        if (r.price_regular || r.price_sale || r.price_compete || r.price_card) {
+          const orig = (p.prices && p.prices[0]) || {};
+          const regular = r.price_regular || stripUnit(orig.del);
+          const sale = r.price_sale || stripUnit(orig.num);
+          p.prices = [{
+            title: orig.title || '구독',
+            del: regular ? `월 ${regular}` : '',
+            num: sale,
+          }];
+          const extra = {};
+          if (r.price_compete) extra.compete = r.price_compete;
+          if (r.price_card) extra.card = r.price_card;
+          if (Object.keys(extra).length) p._priceExtra = extra;
+        }
+      }
+      kept.push(p);
+    }
+    // order_index 우선 정렬 (지정 안 된 건 원래 순서 유지 — stable sort).
+    // 카테고리별로 분배된 인덱스지만, 표시 시 항상 카테고리로 먼저 필터링되므로
+    // 전역 stable sort 로도 각 카테고리 내 순서가 올바르게 유지됨.
+    kept.sort((a, b) => {
+      const ao = a._order == null ? Infinity : a._order;
+      const bo = b._order == null ? Infinity : b._order;
+      return ao - bo;
+    });
+    dbObj.products = kept;
+  }
+
   async function db() {
     if (_db) return _db;
     let raw = null;
@@ -297,6 +364,9 @@ const App = (() => {
       _colorGroups: colorGroups,
       _raw_products: raw.products,  // 상세 페이지가 dedup으로 사라진 goodsId 직접 진입할 때 fallback
     };
+    // 매장별 admin_overrides 반영 (노출/추천/순서/이름/가격 등)
+    const ovs = await loadOverrides();
+    if (ovs && ovs.size) applyOverrides(cleaned, ovs);
     _db = recomputeCategoryCounts(cleaned);
     return _db;
   }
@@ -320,7 +390,7 @@ const App = (() => {
     const pr = pricesOf(p);
     const benefits = (p.benefits || []).slice(0, 3).map(b => `<span class="bft">${escape(b)}</span>`).join('');
     const colorsHTML = (p.colors || []).slice(0, 5).map(c => `<span class="dot" style="${escape(c.style || '')}"></span>`).join('');
-    const tag = '';
+    const tag = p._featured ? '<span class="badge b-best">추천</span>' : '';
     // 본사 model 필드는 "코드\n별점N (수)" 형식 — 모델코드만 추출
     const modelCode = (p.model || '').split('\n')[0].trim();
     // 매트리스(1000000245) 카테고리면 워커힐 브랜드 배지 표시
@@ -402,14 +472,19 @@ const App = (() => {
     const monthEl = document.getElementById('best-month');
     if (monthEl) monthEl.textContent = new Date().getMonth() + 1;
 
-    // best products — 카테고리별 1개씩 모아 4개(다양성)
+    // best products — 매장이 '추천' 지정한 상품 우선, 없으면 카테고리별 1개씩(다양성)
     const best = document.getElementById('best-grid');
     if (best) {
-      const picks = visibleCats
-        .map(c => data.products.find(p => (p.categories || []).includes(c.dispClsfNo)))
-        .filter(Boolean)
-        .slice(0, HOME_PREVIEW_LIMIT);
-      best.innerHTML = picks.map(productCard).join('');
+      // 매장이 '추천' 지정한 상품을 앞세우고, 모자라면 카테고리별 1개씩으로 줄을 채움
+      const featured = data.products.filter(p => p._featured && (p.categories || []).some(isVisibleCat));
+      const picks = [...featured];
+      const seen = new Set(picks.map(p => p.goodsId));
+      for (const c of visibleCats) {
+        if (picks.length >= HOME_PREVIEW_LIMIT) break;
+        const pick = data.products.find(p => (p.categories || []).includes(c.dispClsfNo) && !seen.has(p.goodsId));
+        if (pick) { picks.push(pick); seen.add(pick.goodsId); }
+      }
+      best.innerHTML = picks.slice(0, HOME_PREVIEW_LIMIT).map(productCard).join('');
     }
 
     // 카테고리별 섹션 — VISIBLE만, 각 4개씩 미리보기 + 전체보기 링크
@@ -867,10 +942,21 @@ const App = (() => {
           </span>
         </div>
       `).join('');
+      // 매장 지정 추가 가격 — 타사 보상가 / 제휴카드 할인 시
+      const ex = p._priceExtra || {};
+      const extraRows = [
+        ex.compete ? ['타사 보상가', ex.compete] : null,
+        ex.card ? ['제휴카드 할인 시', ex.card] : null,
+      ].filter(Boolean).map(([k, v]) => `
+        <div class="row">
+          <span class="label">${escape(k)}</span>
+          <span class="val"><small>월</small>${escape(v)}<small>원</small></span>
+        </div>
+      `).join('');
       // 약정 옵션 행 — 색상 변형 간 카드 사이즈 통일을 위해 tag 비어있어도 기본 문구 표시
       const tagText = p.tag || '상담 시 약정 옵션·할인 안내';
       const tag = `<div class="row" style="border-top:1px solid var(--line);padding-top:14px"><span class="label" style="font-weight:600">약정 옵션</span><span style="font-size:13px;color:var(--ink-3);text-align:right;max-width:240px">${escape(tagText)}</span></div>`;
-      priceEl.innerHTML = rows + tag;
+      priceEl.innerHTML = rows + extraRows + tag;
     }
 
     // 제품 사양 — specs_by_size(매트리스 사이즈별) 우선, 없으면 specs

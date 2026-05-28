@@ -408,5 +408,40 @@ document.addEventListener('visibilitychange', () => {
 
 ---
 
-*최종 업데이트: 2026-05-28*
+---
+
+## 📅 2026-05-29 — 관리자 수정사항을 프론트 카탈로그에 실제 반영
+
+### 한 일: admin_overrides → 카탈로그 연결
+지금까지 관리자(/admin)에서 노출/추천/순서/이름/가격을 고쳐도 **프론트 홈에는 전혀 반영 안 됨** (app.js가 db.js만 읽고 Supabase overrides는 무시). 이걸 연결함.
+
+- `web/index.html`: supabase-js CDN + `./assets/supabase.js` 를 app.js **앞에** 로드 추가
+- `web/assets/app.js`:
+  - `loadOverrides()` 추가 — `skmGetSlug()` → `skmFetchStore()` → `skmFetchOverrides()` 로 매장별 override 행을 goodsId 맵으로 1회 캐시. 슬러그/Supabase 없으면 빈 맵(=본사 원본 그대로).
+  - `applyOverrides()` 추가 — `db()` 안에서 deduped 상품 목록에 반영:
+    - `hidden` → 목록에서 제거 (홈/카테고리/상세 전부 안 보임)
+    - `featured` → `p._featured=true`, 카드에 골드 "추천" 배지 + 홈 "이달의 추천" 우선
+    - `order_index` → `p._order` 보관 후 stable sort (카테고리로 먼저 필터되므로 전역 정렬로도 카테고리 내 순서 정확)
+    - `name_override`/`benefits_override`/`tag_override` → 본사 원본 위에 덮어쓰기
+    - 가격 → `price_regular`→del("월 X"), `price_sale`→num. `price_compete`/`price_card`는 `p._priceExtra`
+  - `renderHome` best-grid: 추천 상품 앞세우고 모자라면 카테고리별 1개씩으로 4칸 채움
+  - `renderDetail` 가격 박스: 타사 보상가 / 제휴카드 할인 시 행 추가 (`_priceExtra` 있을 때만)
+
+### 가격 4종 의미 (admin과 동일하게 맞춤)
+- regular=정상가(취소선 del), sale=할인가(헤드라인 num), compete=타사보상가, card=제휴카드 할인시
+- admin은 본사 원본과 다를 때만 override에 저장 → 프론트도 없으면 원본 fallback
+
+### 검증 (node 정적 서버 + preview)
+- 이 PC는 `python` 이 Windows Store stub라 실행 불가 → `.claude/launch.json` 에 **node 정적 서버 config(`skmagic-node`)** 추가해서 미리보기. (python config도 그대로 둠)
+- `?store=skmagic` 로 접속 → 실제 Supabase 연결 OK. 기존 override 1건(MEGA ICE 얼음정수기 G000069846 = featured) 확인.
+- 홈 "5월 인기 상품" + 정수기 섹션에서 MEGA ICE가 골드 "추천" 배지 달고 맨 앞 정렬됨. 콘솔 에러 0. 상세 페이지도 정상.
+
+### 알아둘 점 / 미진한 부분
+- 프론트는 **로그인 안 함** — 슬러그(`?store=` 또는 path)로 매장 식별. 프로덕션은 `/{slug}` → `index.html?store={slug}` rewrite라 OK. 로컬 검증은 `?store=skmagic` 붙여야 override 보임.
+- 색상 dedup 대표 G코드 기준으로만 override 적용 (admin도 동일). dedup된 sibling에 직접 진입하면 `_raw_products` fallback이라 override 미적용 — 엣지케이스.
+- anon 클라이언트는 RLS상 override write 불가 → name/가격/hidden/order는 코드 검증만 (featured는 실데이터로 끝까지 확인). 실제 수정 테스트는 형이 admin 로그인해서 해보면 됨.
+
+---
+
+*최종 업데이트: 2026-05-29*
 *다음 세션에서 컨텍스트 빠르게 잡고 싶으면 이 파일부터 읽으면 됨.*
