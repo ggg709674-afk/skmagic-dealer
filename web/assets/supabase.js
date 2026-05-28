@@ -1,0 +1,124 @@
+/* ============================================================
+   supabase.js — Supabase 클라이언트 초기화 + 공통 헬퍼
+   - CDN의 supabase-js v2 글로벌 사용 (window.supabase)
+   - 슬러그 파싱: URL ?store= 우선, 없으면 path /{slug}/...
+   ============================================================ */
+
+(function(){
+  const SUPABASE_URL  = 'https://qpexfvwrlwkpjyihlnwz.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwZXhmdndybHdrcGp5aWhsbnd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4OTAwMTIsImV4cCI6MjA5MzQ2NjAxMn0.Aq1b2i5UpQ2Y48nWlnygkkxrw-h8GufAkl8L8K8e0kY';
+
+  if (typeof window.supabase === 'undefined' || !window.supabase.createClient){
+    console.error('[supabase] supabase-js CDN 이 로드되지 않았습니다. <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> 가 먼저 와야 합니다.');
+    return;
+  }
+
+  // 글로벌 클라이언트 — 모든 페이지에서 공용
+  window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      storageKey: 'skm-auth',
+    },
+  });
+
+  /* ─── 슬러그 파싱 ─────────────────────────────────
+     우선순위:
+       1) ?store=xxx  (query string — 개발/테스트 편의)
+       2) /xxx/...    (pathname 첫 segment)
+       3) null        (루트 또는 매장 슬러그 없음)
+     예약 슬러그: _super (본부), admin (단일 매장 admin 직진입)
+  ─────────────────────────────────────────────────── */
+  const RESERVED = new Set(['admin', '_super', 'assets', 'products', 'data', 'web']);
+
+  window.skmGetSlug = function(){
+    try {
+      const params = new URLSearchParams(location.search);
+      const fromQuery = params.get('store');
+      if (fromQuery) return fromQuery.trim();
+    } catch(_){}
+    // dev 환경: /web/admin.html → 'web' segment 건너뛰기
+    const segs = (location.pathname || '/').split('/').filter(Boolean);
+    let seg = segs[0];
+    if (seg === 'web') seg = segs[1];
+    if (!seg) return null;
+    if (RESERVED.has(seg)) return null;
+    if (/\.html?$/i.test(seg)) return null;
+    return seg;
+  };
+
+  /* ─── 매장 정보 조회 ───────────────────────────── */
+  window.skmFetchStore = async function(slug){
+    if (!slug) return null;
+    const { data, error } = await window.sb
+      .from('stores')
+      .select('id, slug, name, type, parent_store_id, biz_no, biz_owner, address, phone, email, kakao_url, theme_color, logo_url')
+      .eq('slug', slug)
+      .maybeSingle();
+    if (error){
+      console.warn('[skmFetchStore]', error);
+      return null;
+    }
+    return data;
+  };
+
+  /* ─── 매장의 admin_overrides 일괄 조회 ───────── */
+  window.skmFetchOverrides = async function(storeId){
+    if (!storeId) return [];
+    const { data, error } = await window.sb
+      .from('admin_overrides')
+      .select('*')
+      .eq('store_id', storeId);
+    if (error){
+      console.warn('[skmFetchOverrides]', error);
+      return [];
+    }
+    return data || [];
+  };
+
+  /* ─── overrides 한 행 upsert ─────────────────── */
+  window.skmUpsertOverride = async function(storeId, goodsId, patch){
+    if (!storeId || !goodsId) return { error: new Error('storeId/goodsId 필요') };
+    const row = {
+      store_id: storeId,
+      goods_id: goodsId,
+      ...patch,
+      updated_at: new Date().toISOString(),
+    };
+    const { data, error } = await window.sb
+      .from('admin_overrides')
+      .upsert(row, { onConflict: 'store_id,goods_id' })
+      .select()
+      .maybeSingle();
+    if (error) console.warn('[skmUpsertOverride]', error);
+    return { data, error };
+  };
+
+  /* ─── overrides 행 삭제 (해당 상품 수정 전체 해제) ─ */
+  window.skmDeleteOverride = async function(storeId, goodsId){
+    const { error } = await window.sb
+      .from('admin_overrides')
+      .delete()
+      .eq('store_id', storeId)
+      .eq('goods_id', goodsId);
+    if (error) console.warn('[skmDeleteOverride]', error);
+    return { error };
+  };
+
+  /* ─── 현재 로그인된 사용자 + 매장 컨텍스트 ─────── */
+  window.skmAuthContext = async function(){
+    const { data: { user } } = await window.sb.auth.getUser();
+    if (!user) return { user: null, store: null, isSuperAdmin: false };
+    const { data: store } = await window.sb
+      .from('stores')
+      .select('id, slug, name, type, parent_store_id')
+      .eq('owner_user_id', user.id)
+      .maybeSingle();
+    return {
+      user,
+      store: store || null,
+      isSuperAdmin: store?.type === 'super_admin',
+    };
+  };
+
+})();

@@ -17,6 +17,34 @@
 </head>
 <body class="admin-body">
 
+<!-- ===== 로그인 게이트 (auth 안 끝나면 가림) ===== -->
+<div class="adm-auth-gate" id="adm-auth-gate" hidden>
+  <div class="adm-auth-card">
+    <div class="adm-auth-brand">
+      <img src="./assets/brand/logo.png" alt="SK magic">
+      <div>
+        <div class="adm-auth-title">인증파트너점 관리자</div>
+        <div class="adm-auth-sub">로그인이 필요합니다</div>
+      </div>
+    </div>
+    <form id="adm-auth-form" class="adm-auth-form" autocomplete="on">
+      <label>
+        <span>이메일</span>
+        <input type="email" id="auth-email" required placeholder="you@example.com" autocomplete="username">
+      </label>
+      <label>
+        <span>비밀번호</span>
+        <input type="password" id="auth-password" required placeholder="••••••" autocomplete="current-password">
+      </label>
+      <div class="adm-auth-msg" id="auth-msg" hidden></div>
+      <button class="adm-btn adm-btn-primary" type="submit" id="auth-submit">로그인</button>
+    </form>
+    <div class="adm-auth-foot">
+      <a href="./index.html">← 사이트로 돌아가기</a>
+    </div>
+  </div>
+</div>
+
 <aside class="adm-side">
   <div class="adm-brand">
     <img src="./assets/brand/logo.png" alt="SK magic">
@@ -60,10 +88,10 @@
       <p class="adm-header-sub" id="adm-page-sub">노출 여부 · 추천 배지 · 표시 순서를 관리합니다.</p>
     </div>
     <div class="adm-header-actions">
-      <span class="adm-dirty-flag" id="adm-dirty" hidden>● 저장되지 않은 변경</span>
-      <button class="adm-btn adm-btn-ghost" id="btn-reset">초기화</button>
+      <span class="adm-user-chip" id="adm-user-chip" hidden></span>
+      <span class="adm-dirty-flag" id="adm-dirty" hidden></span>
       <button class="adm-btn adm-btn-ghost" id="btn-export">JSON 내보내기</button>
-      <button class="adm-btn adm-btn-primary" id="btn-save">변경사항 저장</button>
+      <button class="adm-btn adm-btn-ghost" id="btn-signout" hidden>로그아웃</button>
     </div>
   </header>
 
@@ -233,10 +261,10 @@
 <!-- ===== Toast ===== -->
 <div class="adm-toast" id="adm-toast" hidden></div>
 
+<!-- Supabase JS v2 (Auth + Realtime + Storage 등 통합) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // 개발 편의: 관리자 페이지는 CSS/JS 캐시를 즉시 무효화.
-  // (정적 서버라 ETag/캐시 헤더가 약해서 변경이 늦게 반영되는 문제 회피)
-  // document.write 로 ?v=... 붙은 script 태그를 인라인 삽입.
+  // 개발 편의: 관리자 페이지는 로컬 CSS/JS 캐시를 즉시 무효화.
   (function(){
     var v = '?v=' + Date.now();
     var css = document.getElementById('adm-css');
@@ -244,6 +272,7 @@
     document.write('<script src="./assets/icons.js' + v + '"><\/script>');
     document.write('<script src="./assets/db.js' + v + '"><\/script>');
     document.write('<script src="./assets/app.js' + v + '"><\/script>');
+    document.write('<script src="./assets/supabase.js' + v + '"><\/script>');
     document.write('<script src="./assets/admin.js' + v + '"><\/script>');
   })();
 </script>

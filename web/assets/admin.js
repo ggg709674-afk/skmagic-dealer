@@ -20,12 +20,13 @@
   const STORAGE_KEY = 'skm_admin_overrides_v1';
   const state = {
     products: [],             // App.db()의 dedup된 products 중 VISIBLE_CATS 소속만
-    filterCat: '',            // '' = 전체, 또는 dispClsfNo
+    filterCat: '',
     filterSearch: '',
     filterShowHidden: false,
     filterFeaturedOnly: false,
-    overrides: loadOverrides(),
+    overrides: emptyOverrides(),
     dirty: false,
+    store: null,              // 현재 매장 (Supabase stores 행)
   };
 
   /* ─── overrides 스키마 ───────────────────────────
@@ -37,7 +38,12 @@
        updated_at: ISO 문자열
      }
   ─────────────────────────────────────────────────── */
-  function loadOverrides(){
+  function emptyOverrides(){
+    return { hidden:{}, featured:{}, order:{}, edits:{}, updated_at:null };
+  }
+
+  /* localStorage 폴백(오프라인/매장 미지정 모드) */
+  function loadOverridesLocal(){
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return emptyOverrides();
@@ -49,20 +55,192 @@
         edits:    o.edits    || {},
         updated_at: o.updated_at || null,
       };
-    } catch(e){
-      console.warn('[admin] overrides 로드 실패', e);
-      return emptyOverrides();
+    } catch(e){ return emptyOverrides(); }
+  }
+
+  /* Supabase rows → state.overrides 변환 */
+  function rowsToOverrides(rows, products){
+    const ov = emptyOverrides();
+    const orderByCat = {};  // dispClsfNo → [{gid, order_index}]
+    rows.forEach(r => {
+      const gid = r.goods_id;
+      if (r.hidden)   ov.hidden[gid]   = true;
+      if (r.featured) ov.featured[gid] = true;
+      // edits
+      const ed = {};
+      if (r.name_override)               ed.name = r.name_override;
+      if (r.benefits_override?.length)   ed.benefits = r.benefits_override;
+      if (r.tag_override != null)        ed.tag = r.tag_override;
+      if (r.memo)                        ed.memo = r.memo;
+      const hasPrice = r.price_regular || r.price_sale || r.price_compete || r.price_card;
+      if (hasPrice){
+        ed.price = {
+          regular: r.price_regular || '',
+          sale:    r.price_sale    || '',
+          compete: r.price_compete || '',
+          card:    r.price_card    || '',
+        };
+      }
+      if (Object.keys(ed).length) ov.edits[gid] = ed;
+      // order_index → 카테고리별 분배 (product에서 primary cat 알아내야 함)
+      if (r.order_index != null){
+        const p = products.find(x => x.goodsId === gid);
+        if (p){
+          const cat = (p.categories || []).find(c => VISIBLE_CATS.includes(c)) || (p.categories || [])[0];
+          if (cat){
+            (orderByCat[cat] = orderByCat[cat] || []).push({ gid, idx: r.order_index });
+          }
+        }
+      }
+    });
+    Object.entries(orderByCat).forEach(([cat, list]) => {
+      list.sort((a, b) => a.idx - b.idx);
+      ov.order[cat] = list.map(x => x.gid);
+    });
+    return ov;
+  }
+
+  /* ─── 단일 gid 의 row 빌드 / 비어있는지 판별 ─────── */
+  function buildRowForGid(storeId, products, ov, gid){
+    const p = products.find(x => x.goodsId === gid);
+    let order_index = null;
+    if (p){
+      const cat = (p.categories || []).find(c => VISIBLE_CATS.includes(c)) || (p.categories || [])[0];
+      const arr = (cat && ov.order[cat]) || [];
+      const idx = arr.indexOf(gid);
+      if (idx >= 0) order_index = idx;
     }
+    const ed = ov.edits[gid] || {};
+    return {
+      store_id: storeId,
+      goods_id: gid,
+      hidden:   !!ov.hidden[gid],
+      featured: !!ov.featured[gid],
+      order_index,
+      name_override:     ed.name || null,
+      benefits_override: ed.benefits || null,
+      tag_override:      ed.tag != null ? ed.tag : null,
+      price_regular: ed.price?.regular || null,
+      price_sale:    ed.price?.sale    || null,
+      price_compete: ed.price?.compete || null,
+      price_card:    ed.price?.card    || null,
+      memo: ed.memo || null,
+    };
   }
-  function emptyOverrides(){
-    return { hidden:{}, featured:{}, order:{}, edits:{}, updated_at:null };
+  function rowIsEmpty(r){
+    return !r.hidden && !r.featured && r.order_index == null
+      && !r.name_override && (!r.benefits_override || r.benefits_override.length === 0) && !r.tag_override
+      && !r.price_regular && !r.price_sale && !r.price_compete && !r.price_card
+      && !r.memo;
   }
-  function saveOverrides(){
+
+  /* ─── 즉시 클라우드 동기화 (auto-save) ──────────── */
+  let _syncPending = 0;
+  function setSyncStatus(text, kind){
+    const el = document.getElementById('adm-dirty');
+    if (!el) return;
+    if (!text){ el.hidden = true; return; }
+    el.hidden = false;
+    el.textContent = text;
+    el.style.color = kind === 'error' ? '#fff' : 'var(--primary)';
+    el.style.background = kind === 'error' ? 'var(--primary)' : 'var(--primary-soft)';
+  }
+
+  async function persistOne(gid){
+    if (!state.store?.id || !window.sb || !gid) return;
+    const row = buildRowForGid(state.store.id, state.products, state.overrides, gid);
+    _syncPending++;
+    setSyncStatus('● 동기화 중…');
+    try {
+      if (rowIsEmpty(row)){
+        await window.sb.from('admin_overrides').delete()
+          .eq('store_id', row.store_id)
+          .eq('goods_id', gid);
+      } else {
+        const { error } = await window.sb.from('admin_overrides')
+          .upsert(row, { onConflict: 'store_id,goods_id' });
+        if (error) throw error;
+      }
+      // localStorage 백업
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.overrides));
+    } catch(e){
+      console.error('[admin] persistOne 실패', e);
+      setSyncStatus('⚠ 동기화 실패', 'error');
+      _syncPending = 0;
+      return;
+    }
+    _syncPending--;
+    if (_syncPending === 0) setSyncStatus('✓ 저장됨');
+    setTimeout(() => { if (_syncPending === 0) setSyncStatus(''); }, 1200);
+  }
+
+  /* state.overrides → Supabase upsert rows (변경된 gid 들의 행) */
+  function overridesToRows(storeId, products, ov){
+    // hidden/featured/edits 에 한 번이라도 등장한 gid + order 에 들어간 gid
+    const gids = new Set();
+    Object.keys(ov.hidden).forEach(g => gids.add(g));
+    Object.keys(ov.featured).forEach(g => gids.add(g));
+    Object.keys(ov.edits).forEach(g => gids.add(g));
+    Object.values(ov.order).forEach(arr => (arr || []).forEach(g => gids.add(g)));
+
+    const rows = [];
+    for (const gid of gids){
+      const p = products.find(x => x.goodsId === gid);
+      let order_index = null;
+      if (p){
+        const cat = (p.categories || []).find(c => VISIBLE_CATS.includes(c)) || (p.categories || [])[0];
+        const arr = (cat && ov.order[cat]) || [];
+        const idx = arr.indexOf(gid);
+        if (idx >= 0) order_index = idx;
+      }
+      const ed = ov.edits[gid] || {};
+      rows.push({
+        store_id: storeId,
+        goods_id: gid,
+        hidden:   !!ov.hidden[gid],
+        featured: !!ov.featured[gid],
+        order_index,
+        name_override:     ed.name || null,
+        benefits_override: ed.benefits || null,
+        tag_override:      ed.tag != null ? ed.tag : null,
+        price_regular: ed.price?.regular || null,
+        price_sale:    ed.price?.sale    || null,
+        price_compete: ed.price?.compete || null,
+        price_card:    ed.price?.card    || null,
+        memo: ed.memo || null,
+      });
+    }
+    return rows;
+  }
+
+  /* 저장: Supabase upsert + localStorage 백업 */
+  async function saveOverrides(){
     state.overrides.updated_at = new Date().toISOString();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state.overrides));
-    state.dirty = false;
-    updateDirtyFlag();
-    toast('저장되었어요');
+
+    if (!state.store?.id){
+      // 매장 미지정 모드 — 로컬만
+      state.dirty = false;
+      updateDirtyFlag();
+      toast('로컬에 저장되었어요 (매장 미지정 모드)');
+      return;
+    }
+
+    try {
+      const rows = overridesToRows(state.store.id, state.products, state.overrides);
+      if (rows.length){
+        const { error } = await window.sb
+          .from('admin_overrides')
+          .upsert(rows, { onConflict: 'store_id,goods_id' });
+        if (error) throw error;
+      }
+      state.dirty = false;
+      updateDirtyFlag();
+      toast(`클라우드에 저장됨 (${rows.length}건)`);
+    } catch(e){
+      console.error('[admin] cloud save 실패', e);
+      toast('⚠️ 클라우드 저장 실패 — 로컬엔 백업됨');
+    }
   }
   function markDirty(){
     state.dirty = true;
@@ -381,7 +559,6 @@
     if (!gid) return;
     const act = e.target.dataset.act;
     if (act === 'visible'){
-      // 체크됨 = 노출, 체크 해제 = 숨김
       if (e.target.checked) delete state.overrides.hidden[gid];
       else state.overrides.hidden[gid] = true;
       tr.classList.toggle('is-hidden', !e.target.checked);
@@ -390,7 +567,7 @@
       else delete state.overrides.featured[gid];
       tr.classList.toggle('is-featured', e.target.checked);
     }
-    markDirty();
+    persistOne(gid);
   }
 
   function onArrow(e){
@@ -414,10 +591,13 @@
     const cur = arr.indexOf(gid);
     const next = cur + dir;
     if (next < 0 || next >= arr.length) return;
+    const otherGid = arr[next];
     [arr[cur], arr[next]] = [arr[next], arr[cur]];
     state.overrides.order[cat] = arr;
-    markDirty();
     renderTable();
+    // swap된 두 gid 모두 동기화
+    persistOne(gid);
+    persistOne(otherGid);
   }
 
   /* ─── 편집 모달 ─────────────────────────────────── */
@@ -516,19 +696,19 @@
     } else {
       state.overrides.edits[_editingGid] = ed;
     }
-    markDirty();
+    const gid = _editingGid;
     closeEditModal();
     renderTable();
-    toast('수정 적용됨 (저장 버튼으로 확정)');
+    persistOne(gid);
   }
   function revertEditModal(){
     if (!_editingGid) return;
     if (!confirm('이 상품의 수정 내용을 모두 삭제하고 원본값으로 되돌립니다.')) return;
     delete state.overrides.edits[_editingGid];
-    markDirty();
+    const gid = _editingGid;
     closeEditModal();
     renderTable();
-    toast('원본값으로 복원됨');
+    persistOne(gid);
   }
 
   /* ─── 헤더 액션 ─────────────────────────────────── */
@@ -689,12 +869,16 @@
   }
 
   function bindHeader(){
-    document.getElementById('btn-save').addEventListener('click', onSave);
-    document.getElementById('btn-reset').addEventListener('click', onReset);
+    document.getElementById('btn-save')?.addEventListener('click', onSave);
+    document.getElementById('btn-reset')?.addEventListener('click', onReset);
     document.getElementById('btn-export').addEventListener('click', onExport);
     document.getElementById('export-close').addEventListener('click', onExportClose);
     document.getElementById('export-copy').addEventListener('click', onExportCopy);
     document.getElementById('export-download').addEventListener('click', onExportDownload);
+    const btnOut = document.getElementById('btn-signout');
+    if (btnOut) btnOut.addEventListener('click', () => {
+      if (confirm('로그아웃하시겠어요?')) signOut();
+    });
 
     // 편집 모달
     document.getElementById('edit-close').addEventListener('click', closeEditModal);
@@ -718,19 +902,120 @@
     });
   }
 
+  /* ─── 로그인 게이트 ────────────────────────────── */
+  async function ensureAuth(){
+    if (!window.sb) return false;
+    const gate = document.getElementById('adm-auth-gate');
+    // 이미 로그인됐는지 확인
+    const { data: { user } } = await window.sb.auth.getUser();
+    if (user){
+      if (gate) gate.hidden = true;
+      return true;
+    }
+
+    // 로그인 폼 표시 + Promise 로 결과 대기
+    return new Promise((resolve) => {
+      const form = document.getElementById('adm-auth-form');
+      const msg  = document.getElementById('auth-msg');
+      const submitBtn = document.getElementById('auth-submit');
+      gate.hidden = false;
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        msg.hidden = true;
+        submitBtn.disabled = true;
+        submitBtn.textContent = '로그인 중…';
+        const email = document.getElementById('auth-email').value.trim();
+        const password = document.getElementById('auth-password').value;
+        try {
+          const { data, error } = await window.sb.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          gate.hidden = true;
+          resolve(true);
+        } catch(err){
+          msg.textContent = '로그인 실패: ' + (err.message || '알 수 없는 오류');
+          msg.hidden = false;
+          submitBtn.disabled = false;
+          submitBtn.textContent = '로그인';
+        }
+      });
+    });
+  }
+
+  async function signOut(){
+    if (!window.sb) return;
+    await window.sb.auth.signOut();
+    location.reload();
+  }
+
+  function renderAuthChip(authCtx){
+    const chip = document.getElementById('adm-user-chip');
+    const btnOut = document.getElementById('btn-signout');
+    if (!chip) return;
+    if (authCtx?.user){
+      const roleLbl = authCtx.isSuperAdmin ? '본부' : (authCtx.store?.type === 'dealer' ? '딜러' : authCtx.store?.type === 'shop' ? '판매점' : '게스트');
+      chip.innerHTML = `<strong>${escape(roleLbl)}</strong> · ${escape(authCtx.user.email)}`;
+      chip.hidden = false;
+      btnOut.hidden = false;
+    }
+  }
+
   /* ─── Init ──────────────────────────────────────── */
   async function init(){
     bindMenu();
     bindHeader();
     bindSearch();
     bindFilterToggles();
-    // 초기 hash 읽기 — state.filterCat 만 먼저 세팅하고, 패널/렌더는 데이터 로드 후
     state.filterCat = parseHash().cat;
     applyMenuFromHash();
     await loadProducts();
+
+    // ── 로그인 게이트 (auth 통과해야 다음 진행) ──
+    if (window.sb){
+      const ok = await ensureAuth();
+      if (!ok) return;
+    }
+    const authCtx = (typeof window.skmAuthContext === 'function') ? await window.skmAuthContext() : null;
+    renderAuthChip(authCtx);
+
+    // 매장 컨텍스트 로드 (URL 슬러그 우선, 없으면 로그인 user 의 매장)
+    const slug = (typeof window.skmGetSlug === 'function') ? window.skmGetSlug() : null;
+    if (slug && window.skmFetchStore){
+      try {
+        state.store = await window.skmFetchStore(slug);
+      } catch(e){ console.warn('[admin] store fetch 실패', e); }
+    }
+    if (!state.store && authCtx?.store) state.store = authCtx.store;
+
+    if (state.store?.id && window.skmFetchOverrides){
+      try {
+        const rows = await window.skmFetchOverrides(state.store.id);
+        state.overrides = rowsToOverrides(rows, state.products);
+        toast(`${state.store.name} 데이터 로드`);
+      } catch(e){
+        console.warn('[admin] cloud overrides fetch 실패 → 로컬 폴백', e);
+        state.overrides = loadOverridesLocal();
+      }
+    } else {
+      // 슬러그 없거나 매장 못 찾음 → localStorage 사용
+      state.overrides = loadOverridesLocal();
+    }
+    renderStoreLabel();
     renderChips();
     renderTable();
     updateDirtyFlag();
+  }
+
+  /* 헤더에 현재 매장 표시 */
+  function renderStoreLabel(){
+    const subEl = document.getElementById('adm-page-sub');
+    if (!subEl) return;
+    const base = '노출 여부 · 추천 배지 · 표시 순서 · 매장 자체 가격/이름 수정.';
+    if (state.store){
+      subEl.innerHTML = `<strong style="color:var(--primary)">${escape(state.store.name)}</strong> · ${base}`;
+    } else {
+      subEl.innerHTML = `<span style="color:var(--ink-4)">⚠ 매장 미지정 (로컬 모드)</span> · ${base}`;
+    }
   }
 
   if (document.readyState === 'loading'){

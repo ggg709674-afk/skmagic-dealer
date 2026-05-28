@@ -118,9 +118,12 @@ body.admin-body{
 .adm-header-actions{display:flex; align-items:center; gap:8px}
 
 .adm-dirty-flag{
+  display:inline-flex; align-items:center;
+  height:38px;
+  padding:0 12px;
   font-size:12.5px; color:var(--primary); font-weight:600;
-  padding:6px 10px; background:var(--primary-soft);
-  border-radius:6px; margin-right:6px;
+  background:var(--primary-soft);
+  border-radius:6px;
 }
 
 .adm-btn{
@@ -567,6 +570,77 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
   border-top:1px solid var(--line);
   display:flex; justify-content:flex-end; gap:8px;
 }
+
+/* ===== 로그인 게이트 ===== */
+.adm-auth-gate{
+  position:fixed; inset:0;
+  background:linear-gradient(135deg, #f7f7f9 0%, #eef0f5 100%);
+  display:flex; align-items:center; justify-content:center;
+  z-index:300;
+  padding:20px;
+}
+.adm-auth-gate[hidden]{display:none}
+.adm-auth-card{
+  background:#fff;
+  border-radius:14px;
+  padding:32px 36px;
+  width:100%; max-width:380px;
+  box-shadow:0 16px 48px rgba(0,0,0,.08);
+}
+.adm-auth-brand{
+  display:flex; align-items:center; gap:14px;
+  padding-bottom:20px; margin-bottom:22px;
+  border-bottom:1px solid var(--line);
+}
+.adm-auth-brand img{height:28px; width:auto}
+.adm-auth-title{font-size:15px; font-weight:700; color:var(--ink-1); letter-spacing:-0.3px}
+.adm-auth-sub{font-size:12px; color:var(--ink-4); margin-top:2px}
+
+.adm-auth-form{display:flex; flex-direction:column; gap:14px}
+.adm-auth-form label{display:flex; flex-direction:column; gap:6px}
+.adm-auth-form label span{font-size:12.5px; color:var(--ink-2); font-weight:600}
+.adm-auth-form input{
+  height:40px; padding:0 14px;
+  border:1px solid var(--line-strong);
+  border-radius:8px;
+  font-size:14px;
+  font-family:inherit;
+  outline:none;
+}
+.adm-auth-form input:focus{border-color:var(--primary)}
+.adm-auth-form button{margin-top:6px; height:42px; font-size:14px}
+.adm-auth-msg{
+  font-size:12.5px;
+  padding:10px 12px;
+  border-radius:6px;
+  background:var(--primary-soft);
+  color:var(--primary);
+  line-height:1.5;
+}
+.adm-auth-foot{
+  margin-top:22px; padding-top:18px;
+  border-top:1px solid var(--line);
+  text-align:center;
+}
+.adm-auth-foot a{
+  font-size:12.5px; color:var(--ink-3);
+  text-decoration:none;
+}
+.adm-auth-foot a:hover{color:var(--ink-1)}
+
+/* 헤더 사용자 칩 */
+.adm-user-chip{
+  display:inline-flex; align-items:center;
+  height:38px;
+  padding:0 14px;
+  font-size:12.5px;
+  background:var(--surface);
+  border-radius:999px;
+  color:var(--ink-2);
+  margin-right:4px;
+}
+.adm-user-chip[hidden]{display:none}
+.adm-user-chip strong{color:var(--primary); font-weight:700}
 
 /* ===== Toast ===== */
 .adm-toast{
