@@ -25,6 +25,7 @@ body.admin-body{
   grid-template-columns: var(--adm-side-w) 1fr;
   grid-template-rows: 100vh;
   overflow:hidden;
+  min-width: 1024px;   /* PC 전용 — 더 좁아지면 축소(찌그러짐) 대신 가로 스크롤 */
 }
 
 /* ===== Sidebar ===== */
@@ -115,7 +116,7 @@ body.admin-body{
   font-size:13px; color:var(--ink-3);
   margin:4px 0 0;
 }
-.adm-header-actions{display:flex; align-items:center; gap:8px}
+.adm-header-actions{display:flex; align-items:center; gap:8px; flex-shrink:0}
 
 .adm-dirty-flag{
   display:inline-flex; align-items:center;
@@ -130,6 +131,7 @@ body.admin-body{
   height:38px; padding:0 16px;
   border-radius:8px;
   font-size:13px; font-weight:600;
+  white-space:nowrap;
   border:1px solid transparent;
   cursor:pointer;
   transition:background .12s, border-color .12s, color .12s;
@@ -634,6 +636,7 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
   height:38px;
   padding:0 14px;
   font-size:12.5px;
+  white-space:nowrap;
   background:var(--surface);
   border-radius:999px;
   color:var(--ink-2);
@@ -660,13 +663,5 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
   to  {opacity:1; transform:translate(-50%, 0)}
 }
 
-/* ===== 좁은 화면 대응 (관리자는 PC 우선 — 1024 이하에서는 사이드바 축소) ===== */
-@media (max-width: 1024px){
-  body.admin-body{grid-template-columns: 64px 1fr}
-  .adm-brand-title, .adm-brand-sub, .adm-nav-label, .adm-nav-item span:not(.adm-nav-ic), .adm-soon, .adm-side-link{display:none}
-  .adm-brand{padding:18px 0; justify-content:center}
-  .adm-brand img{height:22px}
-  .adm-nav-item{justify-content:center; padding:10px}
-  .adm-nav-ic{font-size:16px}
-  .adm-header, .adm-panel{padding-left:20px; padding-right:20px}
-}
+/* 관리자는 PC 전용. 창이 min-width(1024px)보다 좁아지면 레이아웃을 줄이지 않고
+   가로 스크롤로 처리해 사이드바/메뉴가 세로로 찌그러지는 문제를 막는다. */
