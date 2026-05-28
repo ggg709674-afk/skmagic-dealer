@@ -968,6 +968,7 @@
     bindFilterToggles();
     state.filterCat = parseHash().cat;
     applyMenuFromHash();
+    renderBackToSite();
     await loadProducts();
 
     // ── 로그인 게이트 (auth 통과해야 다음 진행) ──
@@ -1001,9 +1002,20 @@
       state.overrides = loadOverridesLocal();
     }
     renderStoreLabel();
+    renderBackToSite();
     renderChips();
     renderTable();
     updateDirtyFlag();
+  }
+
+  /* "사이트로 돌아가기" 링크를 매장 슬러그 기준 clean URL 로.
+     URL 슬러그 우선(로그인 전에도 동작), 없으면 로드된 매장,
+     본부(_super)·미지정이면 메인 카탈로그 /skmagic 로. */
+  function renderBackToSite(){
+    const urlSlug = (typeof window.skmGetSlug === 'function') ? window.skmGetSlug() : null;
+    const slug = urlSlug || state.store?.slug;
+    const target = (slug && slug !== '_super') ? '/' + slug : '/skmagic';
+    document.querySelectorAll('a[data-back-site]').forEach(a => { a.href = target; });
   }
 
   /* 헤더에 현재 매장 표시 */
