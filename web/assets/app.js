@@ -247,11 +247,12 @@ const App = (() => {
     return rawData;
   }
 
-  /* ===== 멀티테넌트 매장별 admin_overrides 로드 (본부 상속) =====
+  /* ===== 멀티테넌트 매장별 admin_overrides 로드 (필드 단위 병합) =====
      슬러그 → store → admin_overrides 행들을 goodsId 맵으로 캐시.
-     상속: 본부(_super) 값을 base 로 깔고, 매장 자체 행이 있으면 그 상품만 덮어씀.
-       - 매장이 안 건드린 상품 → 본부값 그대로 노출 (자동 상속)
-       - 매장이 건드린 상품(행 존재) → 매장값 우선 (이후엔 매장이 알아서)
+     상속 규칙:
+       - 내용(가격·상품명·혜택·태그·메모) → 본부(_super) 값을 base 로 상속,
+         매장이 값을 넣었으면 매장값 우선.
+       - 추천·노출·정렬 → 상속하지 않음. 매장 개별 관리(매장 자체 행 값만 적용).
      슬러그/Supabase 없으면 빈 맵 (= 본사 원본 그대로 노출). */
   const SUPER_SLUG = '_super';
   let _overrides = null;
@@ -265,20 +266,53 @@ const App = (() => {
       const store = await window.skmFetchStore(slug);
       if (!store) return _overrides;
 
-      // 1) 본부(_super) 값을 base 레이어로 (매장 자신이 본부가 아니면)
+      // 1) 본부(_super) base: 내용(가격·상품명·혜택·태그·메모)만 상속.
+      //    추천·노출·정렬은 매장 개별 관리이므로 base 에서는 항상 꺼둔다.
       if (slug !== SUPER_SLUG) {
         try {
           const superStore = await window.skmFetchStore(SUPER_SLUG);
           if (superStore && superStore.id !== store.id) {
             const baseRows = await window.skmFetchOverrides(superStore.id);
-            for (const r of baseRows) _overrides.set(r.goods_id, r);
+            for (const r of baseRows) {
+              _overrides.set(r.goods_id, {
+                goods_id: r.goods_id,
+                name_override: r.name_override,
+                benefits_override: r.benefits_override,
+                tag_override: r.tag_override,
+                price_regular: r.price_regular,
+                price_sale: r.price_sale,
+                price_compete: r.price_compete,
+                price_card: r.price_card,
+                memo: r.memo,
+                hidden: false, featured: false, order_index: null,
+              });
+            }
           }
         } catch (e) { console.warn('[loadOverrides] 본부 base 로드 실패', e); }
       }
 
-      // 2) 매장 자체 행으로 덮어쓰기 (행 단위)
+      // 2) 매장 자체 행: 추천·노출·정렬은 항상 매장값,
+      //    내용은 매장값이 있으면 우선, 없으면 본부 base 유지.
       const rows = await window.skmFetchOverrides(store.id);
-      for (const r of rows) _overrides.set(r.goods_id, r);
+      for (const r of rows) {
+        const base = _overrides.get(r.goods_id) || {};
+        const benefits = (Array.isArray(r.benefits_override) && r.benefits_override.length)
+          ? r.benefits_override : (base.benefits_override || null);
+        _overrides.set(r.goods_id, {
+          goods_id: r.goods_id,
+          hidden: r.hidden,
+          featured: r.featured,
+          order_index: r.order_index,
+          name_override: r.name_override || base.name_override || null,
+          benefits_override: benefits,
+          tag_override: (r.tag_override != null && r.tag_override !== '') ? r.tag_override : (base.tag_override ?? null),
+          price_regular: r.price_regular || base.price_regular || null,
+          price_sale:    r.price_sale    || base.price_sale    || null,
+          price_compete: r.price_compete || base.price_compete || null,
+          price_card:    r.price_card    || base.price_card    || null,
+          memo: r.memo || base.memo || null,
+        });
+      }
     } catch (e) {
       console.warn('[loadOverrides]', e);
     }
