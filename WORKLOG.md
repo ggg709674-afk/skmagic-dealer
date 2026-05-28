@@ -305,5 +305,108 @@ document.addEventListener('visibilitychange', () => {
 
 ---
 
-*최종 업데이트: 2026-05-24*
+## 📅 2026-05-28 — 멀티테넌트 SaaS 전환 + 온라인 배포
+
+### 사업 방향 전환
+- **단일 매장 카탈로그 → 멀티테넌트 분양 플랫폼**으로 변경
+- 본부(우리) → 딜러 → 판매점 3계층 구조
+- 매장 수백 개 분양 예정
+- 본부가 모든 데이터 조회, 딜러는 산하 판매점 합산 실적, 판매점은 자기 실적만
+
+### 새로 추가된 것
+
+#### 1. 관리자 페이지 (`/admin`)
+- `web/admin.html` + `web/assets/admin.{js,css}` + `web/assets/supabase.js` 신규
+- 상품 관리 메뉴 (사이드바: 상품관리 / 상담신청·배너·매장정보 = soon)
+- 카테고리 필터 (정수기 9 / 공기청정기 9 / 비데 5 / 매트리스 3 — 색상 dedup 적용)
+- **노출/추천 토글 + ▲▼ 순서 이동 + 검색**
+- **상품 수정 모달**: 상품명·가격(4종)·혜택 태그·상단 배지·매장 메모
+- **가격 4컬럼**: 정상가(취소선) / 할인가(빨강) / 타사보상가 / 제휴카드 할인시
+- 모델 컬럼: 모델코드만, 색상 dot+N색 배지는 상품명 셀
+- 헤더에 본부 칩 + JSON 내보내기 + 로그아웃 (변경사항 저장 버튼은 자동저장으로 인해 제거)
+- **hash 라우팅** `#products/cat-100000005` 등 — 새로고침/뒤로가기 시 그 자리에 머무름
+- detail 페이지 탭(`#info` / `#spec` / `#ship`) 도 hash 라우팅
+
+#### 2. Supabase 멀티테넌트 백엔드
+- 프로젝트 URL: `https://qpexfvwrlwkpjyihlnwz.supabase.co` (기존 프로젝트에 테이블만 추가)
+- 마이그레이션 SQL: `supabase/migrations/`
+  - `001_initial_schema.sql` — 테이블 + 인덱스 + 트리거 + RLS + 시드
+  - `002_link_super_admin.sql` — 본부 계정 연결
+  - `003_fix_rls_recursion.sql` — RLS 무한재귀 수정
+  - `004_grants.sql` — anon/authenticated GRANT
+- **테이블**:
+  - `stores` (id, slug, name, type=super_admin/dealer/shop, parent_store_id, biz_no, phone, owner_user_id…)
+  - `admin_overrides` (store_id, goods_id, hidden, featured, order_index, name_override, benefits_override, tag_override, price_regular/sale/compete/card, memo)
+  - `consultations` (store_id, customer_name/phone, products jsonb, status, created_at)
+- **RLS 정책 핵심**:
+  - 모두 SELECT stores/admin_overrides 가능 (방문자가 카탈로그 봐야 함)
+  - 누구나 consultations INSERT 가능 (상담 신청)
+  - super_admin은 모든 write, store owner는 자기 매장만 write
+  - 헬퍼 함수 `is_super_admin()`, `is_my_store()`, `my_visible_stores()` (SECURITY DEFINER + row_security=off)
+- **시드된 매장**:
+  - slug=`_super` (본부, super_admin) → 계정 `ggg709674@gmail.com` 연결됨
+  - slug=`skmagic` (SK매직 인증파트너점, dealer) → 본부가 관리
+
+#### 3. 로그인 게이트 + 자동저장
+- admin 페이지 진입 시 Supabase Auth 로그인 폼 (이메일/비번)
+- 본부 칩 `본부 · ggg709674@gmail.com` 헤더 우측 표시
+- 모든 변경(토글/순서/수정)이 **즉시 클라우드 upsert** — 저장 버튼 없음
+- "● 동기화 중…" → "✓ 저장됨" 인디케이터
+- localStorage 백업도 병행
+
+#### 4. URL 슬러그 라우팅
+- `web/assets/supabase.js` — `window.skmGetSlug()` + `skmFetchStore/Overrides` 헬퍼
+- query string `?store=skmagic` 우선, 없으면 path 첫 segment
+- 예약어: admin, _super, assets, products, data, web (dev 환경 호환)
+
+#### 5. Git + GitHub + Vercel 배포
+- Git init + `.gitignore` (Python 캐시·.env·IDE 등 제외, products/ 800MB 포함)
+- GitHub repo: **`ggg709674-afk/skmagic-dealer`** (Public)
+- Vercel 프로젝트: **`sk-magic`** (Hobby plan)
+- Production 도메인: **https://sk-magic.vercel.app/** (+ skmagic-dealer.vercel.app 백업)
+- `vercel.json` rewrite:
+  - `/` → `/web/landing.html` (안내 페이지)
+  - `/admin` → `/web/admin.html` (본부 진입)
+  - `/{slug}` → `/web/index.html?store={slug}` (매장 카탈로그)
+  - `/{slug}/admin` → `/web/admin.html?store={slug}` (매장 관리자)
+  - `/assets/:path*` → `/web/assets/:path*`
+- ※ `cleanUrls: true` 는 rewrite와 충돌해서 제거함
+- Push만 하면 Vercel 자동 재배포 (GitHub 연동)
+
+#### 6. 안내 페이지 (`web/landing.html`)
+- 거래처 고객이 루트(/)로 들어오면 "매장 직접 주소로 접속하라" 안내
+- "관리자 로그인" 버튼만 본부/매장 운영자용
+- 본사 사이트 링크는 제거 (요청에 따라)
+
+### 도메인 검토
+- `sk-magic.kr` — 본사 관계자한테 도메인 사용 OK 받았다고 함. 진행 시 **서면 확인 필수** + 백업 도메인 동시 등록 권장
+- `woozoo.kr / .com / .net / .io / .app` — 다 등록 불가 (선점됨)
+- `woozoo.ai` — 등록 가능 (연 9~12만원). 사용자가 마음에 들어함
+- 도메인 연결은 다음 세션으로 미룸
+
+### 캐시 디버깅 노하우
+- 정적 서버(python http.server)는 캐시 헤더 약함 → 브라우저가 admin.html / admin.js 옛 버전 계속 들고 있음
+- 해결: admin.html 안에 `<meta http-equiv="cache-control" content="no-cache">` + inline script가 admin.{css,js}에 `?v=Date.now()` 자동 부여
+- 그래도 안 되면 콘솔에서 `(async()=>{const r=await fetch('./admin.html?force='+Date.now(),{cache:'no-store'});const t=await r.text();document.open();document.write(t);document.close()})()` 로 강제 fetch
+
+### 안 한 것 / 다음 세션 작업 후보
+- [ ] **본부 백오피스** (`/_super`): 딜러 추가/삭제/슬러그 변경 UI, 모든 매장 실적 조회
+- [ ] **딜러 백오피스**: 산하 판매점 추가/관리, 산하 실적 조회
+- [ ] **상담신청 폼**: 카탈로그 페이지에서 모달로 받아서 consultations 테이블에 INSERT
+- [ ] **실적 조회 페이지**: 매장별/딜러별/본부별 dashboard
+- [ ] **본부가 슬러그 없이 admin 진입 시 매장 선택기**: 현재는 `?store=skmagic` 명시해야 매장 잡힘
+- [ ] **색상 변형 개별 가격**: 현재는 모델군 1개 카드로 묶여서 색상별 다른 가격 불가
+- [ ] **엑셀 업로드**: 가격 4종을 .xlsx 파일로 일괄 갱신
+- [ ] **도메인 연결**: `woozoo.ai` 또는 `sk-magic.kr` Vercel 등록 + DNS 설정
+- [ ] **매장별 사업자정보 분리**: footer의 사업자정보가 현재 더미. stores 테이블 데이터로 렌더
+- [ ] **products/ 폴더 800MB 분리**: Supabase Storage 또는 외부 CDN으로 옮겨서 git repo 가볍게
+
+### 비밀번호 / 키 정보 (집/회사 양쪽 PC에서 작업 시 참고)
+- Supabase anon key는 `web/assets/supabase.js` 안에 하드코딩 (브라우저 노출 정상)
+- 본부 로그인: `ggg709674@gmail.com` (비밀번호는 잘 기억해두기, 잊으면 Supabase Auth Dashboard에서 reset)
+- service_role key는 **절대 코드에 넣지 말 것**, 서버 사용 시에만
+
+---
+
+*최종 업데이트: 2026-05-28*
 *다음 세션에서 컨텍스트 빠르게 잡고 싶으면 이 파일부터 읽으면 됨.*
