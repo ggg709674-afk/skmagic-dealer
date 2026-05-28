@@ -247,9 +247,13 @@ const App = (() => {
     return rawData;
   }
 
-  /* ===== 멀티테넌트 매장별 admin_overrides 로드 =====
+  /* ===== 멀티테넌트 매장별 admin_overrides 로드 (본부 상속) =====
      슬러그 → store → admin_overrides 행들을 goodsId 맵으로 캐시.
+     상속: 본부(_super) 값을 base 로 깔고, 매장 자체 행이 있으면 그 상품만 덮어씀.
+       - 매장이 안 건드린 상품 → 본부값 그대로 노출 (자동 상속)
+       - 매장이 건드린 상품(행 존재) → 매장값 우선 (이후엔 매장이 알아서)
      슬러그/Supabase 없으면 빈 맵 (= 본사 원본 그대로 노출). */
+  const SUPER_SLUG = '_super';
   let _overrides = null;
   async function loadOverrides() {
     if (_overrides) return _overrides;
@@ -260,6 +264,19 @@ const App = (() => {
       if (!slug) return _overrides;
       const store = await window.skmFetchStore(slug);
       if (!store) return _overrides;
+
+      // 1) 본부(_super) 값을 base 레이어로 (매장 자신이 본부가 아니면)
+      if (slug !== SUPER_SLUG) {
+        try {
+          const superStore = await window.skmFetchStore(SUPER_SLUG);
+          if (superStore && superStore.id !== store.id) {
+            const baseRows = await window.skmFetchOverrides(superStore.id);
+            for (const r of baseRows) _overrides.set(r.goods_id, r);
+          }
+        } catch (e) { console.warn('[loadOverrides] 본부 base 로드 실패', e); }
+      }
+
+      // 2) 매장 자체 행으로 덮어쓰기 (행 단위)
       const rows = await window.skmFetchOverrides(store.id);
       for (const r of rows) _overrides.set(r.goods_id, r);
     } catch (e) {
