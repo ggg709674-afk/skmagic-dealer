@@ -900,7 +900,7 @@ const App = (() => {
           if (!chip) return;
           e.preventDefault();
           if (chip.classList.contains('on')) return;
-          const href = chip.getAttribute('href');
+          const href = navTarget(chip.getAttribute('href')) || chip.getAttribute('href');
           history.pushState({}, '', href);
           // View Transitions API로 cross-fade — 깜빡임 없이 부드럽게
           if (document.startViewTransition) {
@@ -1095,13 +1095,36 @@ const App = (() => {
     } catch { return null; }
   }
 
+  /* 프로덕션 멀티테넌트 경로(/{slug})에서 현재 매장 슬러그.
+     dev(/web/index.html), ?store= 쿼리, /index.html 직진입 시엔 null → 기존 링크 그대로. */
+  function pathSlug() {
+    const segs = (location.pathname || '/').split('/').filter(Boolean);
+    const seg = segs[0];
+    if (!seg || seg === 'web') return null;
+    if (/\.html?$/i.test(seg)) return null;
+    if (['admin', '_super', 'assets', 'products', 'data'].includes(seg)) return null;
+    return seg;
+  }
+
+  /* 내부 링크를 SPA 이동 대상 URL로 변환.
+     매장 슬러그가 path에 있으면 /{slug}?cls=…|?id=… 로 유지 (슬러그·깨끗한 URL 보존),
+     아니면 normalizeHref 결과(/index.html?…) 그대로. */
+  function navTarget(rawHref) {
+    const norm = normalizeHref(rawHref);
+    if (!norm) return null;
+    const slug = pathSlug();
+    if (!slug) return norm;
+    const u = new URL(norm, location.origin);
+    return '/' + slug + u.search + u.hash;
+  }
+
   function attachClickHandler() {
     document.addEventListener('click', (e) => {
       // 수정 키(Ctrl/Cmd/Shift) + 클릭은 새 탭 등 브라우저 기본 동작 유지
       if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button !== 0) return;
       const a = e.target.closest('a[href]');
       if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
-      const norm = normalizeHref(a.getAttribute('href'));
+      const norm = navTarget(a.getAttribute('href'));
       if (!norm) return;
       // 같은 URL이면 무시 (스크롤만 위로 가는 거 방지)
       if (norm === location.pathname + location.search + location.hash) {

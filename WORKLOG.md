@@ -441,6 +441,15 @@ document.addEventListener('visibilitychange', () => {
 - 색상 dedup 대표 G코드 기준으로만 override 적용 (admin도 동일). dedup된 sibling에 직접 진입하면 `_raw_products` fallback이라 override 미적용 — 엣지케이스.
 - anon 클라이언트는 RLS상 override write 불가 → name/가격/hidden/order는 코드 검증만 (featured는 실데이터로 끝까지 확인). 실제 수정 테스트는 형이 admin 로그인해서 해보면 됨.
 
+### 슬러그 보존 SPA 내비게이션 (clean URL)
+- 문제: `/skmagic` 에서 내부 링크(`./index.html?cls=…`)를 누르면 `/index.html?cls=…` 로 이동 → 매장 슬러그 사라지고 `.html` 노출, 새로고침·공유 시 깨짐.
+- `web/assets/app.js`:
+  - `pathSlug()` 추가 — `location.pathname` 첫 세그먼트가 유효한 매장 슬러그면 반환, dev(`/web/`)·`?store=` 직진입·`*.html`·예약어(admin/_super/assets/products/data)면 `null`.
+  - `navTarget(rawHref)` 추가 — `normalizeHref` 결과에 슬러그 있으면 `/{slug}?search#hash` 로 재작성, 없으면 기존 그대로.
+  - 클릭 핸들러·컬러칩 pushState 가 `navTarget` 사용 → gnb·상품카드·로고·색상칩 전부 슬러그 유지.
+- 로고/"인증파트너점" 클릭 → `/skmagic` 로 이동 (형 요청). brand href 는 정적 `./index.html` 유지하되 클릭 시 navTarget 이 슬러그 붙여줌.
+- 검증: `/skmagic` 에서 gnb 정수기 → `/skmagic?cls=100000005`, 카드 → `/skmagic?id=…`, 로고 → `/skmagic`. 딥링크 새로고침해도 슬러그 유지 + override 적용(MEGA ICE 추천 맨앞). 콘솔 에러 0.
+
 ---
 
 *최종 업데이트: 2026-05-29*
