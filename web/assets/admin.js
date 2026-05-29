@@ -35,7 +35,7 @@
        featured: { [goodsId]: true },
        featuredRank: { [goodsId]: number },   // 추천 켠 순서 (작을수록 먼저)
        order:    { [dispClsfNo]: [goodsId, goodsId, ...] },
-       edits:    { [goodsId]: { name, price:{title,del,num}, benefits:[], tag, memo } },
+       edits:    { [goodsId]: { name, price:{title,del,num}, benefits:[], tag } },
        updated_at: ISO 문자열
      }
   ─────────────────────────────────────────────────── */
@@ -81,7 +81,6 @@
       if (r.name_override)               ed.name = r.name_override;
       if (r.benefits_override?.length)   ed.benefits = r.benefits_override;
       if (r.tag_override != null)        ed.tag = r.tag_override;
-      if (r.memo)                        ed.memo = r.memo;
       const hasPrice = r.price_regular || r.price_sale || r.price_compete || r.price_card;
       if (hasPrice){
         ed.price = {
@@ -135,14 +134,12 @@
       price_sale:    ed.price?.sale    || null,
       price_compete: ed.price?.compete || null,
       price_card:    ed.price?.card    || null,
-      memo: ed.memo || null,
     };
   }
   function rowIsEmpty(r){
     return !r.hidden && !r.featured && r.order_index == null
       && !r.name_override && (!r.benefits_override || r.benefits_override.length === 0) && !r.tag_override
-      && !r.price_regular && !r.price_sale && !r.price_compete && !r.price_card
-      && !r.memo;
+      && !r.price_regular && !r.price_sale && !r.price_compete && !r.price_card;
   }
 
   /* ─── 즉시 클라우드 동기화 (auto-save) ──────────── */
@@ -219,7 +216,6 @@
         price_sale:    ed.price?.sale    || null,
         price_compete: ed.price?.compete || null,
         price_card:    ed.price?.card    || null,
-        memo: ed.memo || null,
       });
     }
     return rows;
@@ -340,7 +336,6 @@
     if (!ed) return false;
     return Object.keys(ed).some(k => {
       const v = ed[k];
-      if (k === 'memo') return false;
       if (v == null) return false;
       if (typeof v === 'string') return v !== '';
       if (Array.isArray(v)) return v.length > 0;
@@ -634,7 +629,6 @@
     _editingGid = gid;
     const orig = p;                       // 원본
     const cur  = effective(p);            // 오버라이드 반영본
-    const ed   = state.overrides.edits[gid] || {};
 
     // 좌측 메타
     const thumbWrap = document.getElementById('edit-thumb');
@@ -654,7 +648,6 @@
     document.getElementById('edit-price-card').value    = pr.card || '';
     document.getElementById('edit-benefits').value      = (cur.benefits || []).join(', ');
     document.getElementById('edit-tag').value           = cur.tag || '';
-    document.getElementById('edit-memo').value          = ed.memo || '';
 
     // 원본값 힌트 (정상가/할인가만 — 본사 데이터 기준)
     const op = priceOf(orig) || {};
@@ -683,7 +676,6 @@
     const pcrd  = document.getElementById('edit-price-card').value.trim();
     const bRaw  = document.getElementById('edit-benefits').value.trim();
     const tag   = document.getElementById('edit-tag').value.trim();
-    const memo  = document.getElementById('edit-memo').value.trim();
 
     // 본사 원본 정상가/할인가와 비교 → 같으면 override에 안 담음
     const op = priceOf(orig) || {};
@@ -705,8 +697,6 @@
     if (pcom) price.compete = pcom;   // 원본에 없는 값
     if (pcrd) price.card    = pcrd;
     if (Object.keys(price).length) ed.price = price;
-
-    if (memo) ed.memo = memo;
 
     if (Object.keys(ed).length === 0){
       delete state.overrides.edits[_editingGid];

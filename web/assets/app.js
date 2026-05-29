@@ -283,7 +283,6 @@ const App = (() => {
                 price_sale: r.price_sale,
                 price_compete: r.price_compete,
                 price_card: r.price_card,
-                memo: r.memo,
                 hidden: false, featured: false, featured_rank: null, order_index: null,
               });
             }
@@ -311,7 +310,6 @@ const App = (() => {
           price_sale:    r.price_sale    || base.price_sale    || null,
           price_compete: r.price_compete || base.price_compete || null,
           price_card:    r.price_card    || base.price_card    || null,
-          memo: r.memo || base.memo || null,
         });
       }
     } catch (e) {
