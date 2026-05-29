@@ -639,9 +639,10 @@ ul,ol{margin:0;padding:0;list-style:none}
 }
 .option-info{
   margin-top:14px;padding:12px 14px;background:#fafafa;border-radius:10px;
-  display:grid;grid-template-columns:auto 1fr;gap:6px 16px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:6px 20px;
   font-size:13px;color:var(--ink-2);
 }
+.option-info .oi-item{display:inline-flex;align-items:center;gap:8px}
 .option-info .k{font-weight:600;color:var(--ink-3)}
 .option-info .v{color:var(--ink-1)}
 .option-info:empty{display:none}

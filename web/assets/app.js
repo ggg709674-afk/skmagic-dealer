@@ -791,14 +791,15 @@ const App = (() => {
     const cur = opts.care_types[_optState.careIdx] || opts.care_types[0];
     const c = cur && cur.contracts && cur.contracts[_optState.contractIdx];
     if (!c) { infoEl.innerHTML = ''; return; }
+    // 방문 주기 = 정책표 관리주기. 필터 주기는 셀프형일 때만 노출
+    // (방문형은 방문 시 회사가 필터 교체 → 방문주기=필터주기라 중복 표시 안 함)
+    const isSelf = /셀프/.test(c.contract_type || '');
     const rows = [];
     if (c.duty_use_months) rows.push(['의무 사용', `${c.duty_use_months}개월`]);
-    if (c.own_get_months)  rows.push(['소유권 이전', `${c.own_get_months}개월`]);
-    if (c.visit_period)    rows.push(['방문 주기', c.visit_period]);
-    if (c.filter_period)   rows.push(['필터 주기', c.filter_period]);
-    // '약정 타입'은 관리 유형 버튼이 시각적으로 보여주므로 정보 박스에서 제외 (중복 방지)
+    if (c.visit_period)            rows.push(['방문 주기', c.visit_period]);
+    if (isSelf && c.filter_period) rows.push(['필터 주기', c.filter_period]);
     infoEl.innerHTML = rows.map(([k, v]) =>
-      `<span class="k">${escape(k)}</span><span class="v">${escape(v)}</span>`
+      `<span class="oi-item"><span class="k">${escape(k)}</span><span class="v">${escape(v)}</span></span>`
     ).join('');
   }
 
