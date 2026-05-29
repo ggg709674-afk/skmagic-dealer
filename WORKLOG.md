@@ -524,5 +524,22 @@ document.addEventListener('visibilitychange', () => {
 
 ---
 
+## 📅 2026-05-29 — 커스텀 도메인 연결 (sk-magic.kr → Vercel)
+
+### 한 일
+- 카페24에서 구매한 `sk-magic.kr` 을 Vercel `sk-magic` 프로젝트에 연결 완료.
+- 방식: **네임서버 전환**. (A레코드 방식 `216.198.79.1`/구 `76.76.21.21` 은 카페24가 막아서 못 씀 — 도메인이 안 쓰는 카페24 EC 쇼핑몰 호스팅(id `wooripr`, IP 183.111.182.231)과 커플링돼 있어 A레코드 편집 차단됨.)
+- Vercel Domains → sk-magic.kr → **Vercel DNS** 탭의 네임서버를 카페24 도메인관리 → 네임서버 변경 → "다른 네임서버"에 입력:
+  - 1차 `ns1.vercel-dns.com` (IP 198.51.44.13)
+  - 2차 `ns2.vercel-dns.com` (IP 198.51.45.13)
+- 전파 빨라서 바로 `sk-magic.kr` 로 랜딩 페이지 열림 확인.
+
+### 알아둘 점
+- 네임서버를 Vercel로 넘겼으므로 **DNS 관리권이 전부 Vercel** 로 이동. 카페24 호스팅/메일은 어차피 안 써서 무관. 서브도메인/메일 추가하려면 이제 Vercel Domains에서 관리.
+- SSL은 Vercel 자동 발급(전환 직후 잠깐 "주의 요함"/Not Secure 뜰 수 있음 → 몇 분~한 시간 뒤 자동 https). 안 풀리면 Vercel Domains에서 Refresh.
+- 카페24 안내상 네임서버 전파 최대 24~48h.
+
+---
+
 *최종 업데이트: 2026-05-29*
 *다음 세션에서 컨텍스트 빠르게 잡고 싶으면 이 파일부터 읽으면 됨.*
