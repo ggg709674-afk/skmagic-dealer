@@ -834,6 +834,11 @@ ul,ol{margin:0;padding:0;list-style:none}
   .cat-grid{grid-template-columns:repeat(4,1fr);gap:4px}  /* 좁은 모바일도 4열 한 줄 유지 */
   .product-grid{grid-template-columns:repeat(2,1fr)}
 
+  /* 필터 칩: 줄바꿈 막고 한 줄 유지 + 가로 스크롤 */
+  .filter-bar{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .filter-bar::-webkit-scrollbar{display:none}
+  .filter-bar .chip{flex-shrink:0}
+
   /* 카드 폭이 절반(약 158px)이라 글자영역이 그대로면 세로로 길쭉해짐(H/W 2.4) →
      글자·여백을 PC 비례로 줄여 PC와 같은 카드 비율(H/W ≈ 1.8)로 축소 */
   .product-card .body{padding:9px 10px 11px;gap:3px}
