@@ -265,6 +265,7 @@ const App = (() => {
       if (!slug) return _overrides;
       const store = await window.skmFetchStore(slug);
       if (!store) return _overrides;
+      renderStoreInfo(store);
 
       // 1) 본부(_super) base: 내용(가격·상품명·혜택·태그·메모)만 상속.
       //    추천·노출·정렬은 매장 개별 관리이므로 base 에서는 항상 꺼둔다.
@@ -316,6 +317,46 @@ const App = (() => {
       console.warn('[loadOverrides]', e);
     }
     return _overrides;
+  }
+
+  /* 매장 기본정보(사업자정보·연락처)를 푸터/상담 FAB 에 바인딩.
+     값이 없는 항목은 사이트에서 자동으로 숨긴다. */
+  function renderStoreInfo(store) {
+    if (!store) return;
+    const setRow = (id, val) => {
+      const dd = document.getElementById(id);
+      if (!dd) return;
+      const row = dd.closest('.biz-row');
+      if (val) { dd.textContent = val; if (row) row.hidden = false; }
+      else if (row) row.hidden = true;
+    };
+    setRow('ft-biz-name', store.name);
+    setRow('ft-biz-owner', store.biz_owner);
+    setRow('ft-biz-no', store.biz_no);
+    setRow('ft-biz-mailorder', store.mail_order_no);
+    setRow('ft-biz-address', store.address);
+    setRow('ft-biz-phone', store.phone);
+    setRow('ft-biz-email', store.email);
+
+    // 고객센터
+    const cp = document.getElementById('ft-center-phone');
+    if (cp) cp.textContent = store.phone || '상담 환영';
+    const ch = document.getElementById('ft-center-hours');
+    if (ch) { ch.textContent = store.biz_hours || ''; ch.hidden = !store.biz_hours; }
+
+    // 상담 FAB 팝업
+    const tel = document.getElementById('pop-tel');
+    if (tel) {
+      if (store.phone) { tel.textContent = store.phone; tel.href = 'tel:' + String(store.phone).replace(/[^\d+]/g, ''); tel.hidden = false; }
+      else tel.hidden = true;
+    }
+    const ph = document.getElementById('pop-hours');
+    if (ph) { ph.textContent = store.biz_hours || ''; ph.hidden = !store.biz_hours; }
+    const kakao = document.getElementById('pop-kakao');
+    if (kakao) {
+      if (store.kakao_url) { kakao.href = store.kakao_url; kakao.hidden = false; }
+      else kakao.hidden = true;
+    }
   }
 
   /* admin_overrides 를 deduped 상품 목록에 반영 (mutate).

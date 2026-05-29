@@ -301,22 +301,21 @@
       <div>
         <h4>고객센터</h4>
         <ul class="ft-info">
-          <li style="font-size:22px;color:#fff;font-weight:800;letter-spacing:-0.5px">1588 - 0000</li>
-          <li>평일 09:00 - 18:00</li>
-          <li>주말·공휴일 휴무</li>
+          <li id="ft-center-phone" style="font-size:22px;color:#fff;font-weight:800;letter-spacing:-0.5px">상담 환영</li>
+          <li id="ft-center-hours" hidden></li>
         </ul>
       </div>
     </div>
-    <!-- ===== 사업자정보 — 더미값. 실제 정보로 교체 필수. ===== -->
+    <!-- ===== 사업자정보 — 관리자 '기본 정보'에서 입력 → app.js renderStoreInfo가 채움 ===== -->
     <div class="biz-info">
       <dl class="biz-grid">
-        <div class="biz-row"><dt>상호</dt><dd>우주가전 (SK매직 인증파트너점)</dd></div>
-        <div class="biz-row"><dt>대표자</dt><dd>OOO</dd></div>
-        <div class="biz-row"><dt>사업자등록번호</dt><dd>000-00-00000</dd></div>
-        <div class="biz-row"><dt>통신판매업</dt><dd>제0000-서울OO-0000호</dd></div>
-        <div class="biz-row full"><dt>주소</dt><dd>서울특별시 OO구 OO로 00, 0층 (00동)</dd></div>
-        <div class="biz-row"><dt>대표전화</dt><dd>1588-0000</dd></div>
-        <div class="biz-row"><dt>이메일</dt><dd>contact@example.com</dd></div>
+        <div class="biz-row"><dt>상호</dt><dd id="ft-biz-name">—</dd></div>
+        <div class="biz-row"><dt>대표자</dt><dd id="ft-biz-owner">—</dd></div>
+        <div class="biz-row"><dt>사업자등록번호</dt><dd id="ft-biz-no">—</dd></div>
+        <div class="biz-row"><dt>통신판매업</dt><dd id="ft-biz-mailorder">—</dd></div>
+        <div class="biz-row full"><dt>주소</dt><dd id="ft-biz-address">—</dd></div>
+        <div class="biz-row"><dt>대표전화</dt><dd id="ft-biz-phone">—</dd></div>
+        <div class="biz-row"><dt>이메일</dt><dd id="ft-biz-email">—</dd></div>
       </dl>
       <p class="biz-note">
         본 페이지는 SK매직 정식 대리점의 영업 상담 보조용 카탈로그입니다.
@@ -338,9 +337,9 @@
 </a>
 <div class="fab-popup" id="fab-popup" hidden>
   <p class="pop-label">지금 바로 상담 가능</p>
-  <a class="pop-tel" href="tel:1588-0000">1588-0000</a>
-  <div class="pop-hours">평일 09:00 - 18:00 · 주말·공휴일 휴무</div>
-  <a class="pop-kakao" href="#" target="_blank" rel="noopener" id="pop-kakao">
+  <a class="pop-tel" href="tel:" id="pop-tel" hidden></a>
+  <div class="pop-hours" id="pop-hours" hidden></div>
+  <a class="pop-kakao" href="#" target="_blank" rel="noopener" id="pop-kakao" hidden>
     카카오톡 상담
   </a>
 </div>

@@ -740,7 +740,7 @@
     products: { title: '상품 관리', sub: '노출 여부 · 추천 배지 · 표시 순서 · 매장 자체 가격/이름 수정.', kind: 'products' },
     consult:  { title: '상담 신청',     sub: '준비 중인 메뉴예요.', kind: 'soon' },
     banner:   { title: '배너/슬라이드', sub: '준비 중인 메뉴예요.', kind: 'soon' },
-    store:    { title: '매장 정보',     sub: '준비 중인 메뉴예요.', kind: 'soon' },
+    store:    { title: '기본 정보',     sub: '사업자정보 · 연락처를 관리합니다. 사이트 하단에 표시됩니다.', kind: 'store' },
   };
   /* hash 형식: #menu  또는  #products/cat-<dispClsfNo>
      첫 segment = 메뉴, 두번째 segment = 메뉴별 상세상태(상품관리는 카테고리) */
@@ -790,10 +790,13 @@
 
     // 패널 전환
     document.querySelector('[data-panel="products"]').hidden = (meta.kind !== 'products');
+    document.querySelector('[data-panel="store"]').hidden    = (meta.kind !== 'store');
     document.querySelector('[data-panel="soon"]').hidden     = (meta.kind !== 'soon');
 
     document.getElementById('adm-page-title').textContent = meta.title;
     document.getElementById('adm-page-sub').textContent   = meta.sub;
+
+    if (meta.kind === 'store') populateStoreForm();
 
     // 상품관리 패널의 카테고리 필터도 hash 와 동기화
     if (meta.kind === 'products' && state.filterCat !== cat){
@@ -804,6 +807,63 @@
         renderTable();
       }
     }
+  }
+
+  /* ─── 기본 정보(매장) 폼 ───────────────────────── */
+  const STORE_FIELDS = {
+    'store-name':      'name',
+    'store-owner':     'biz_owner',
+    'store-bizno':     'biz_no',
+    'store-mailorder': 'mail_order_no',
+    'store-address':   'address',
+    'store-phone':     'phone',
+    'store-email':     'email',
+    'store-hours':     'biz_hours',
+    'store-kakao':     'kakao_url',
+  };
+  function populateStoreForm(){
+    const s = state.store || {};
+    for (const [id, key] of Object.entries(STORE_FIELDS)){
+      const el = document.getElementById(id);
+      if (el) el.value = s[key] || '';
+    }
+    setStoreStatus('', '');
+    const btn = document.getElementById('store-save');
+    if (btn) btn.disabled = !(state.store?.id && window.skmUpdateStore);
+    if (btn && btn.disabled) setStoreStatus('매장이 지정되지 않아 저장할 수 없어요.', 'err');
+  }
+  function setStoreStatus(msg, kind){
+    const el = document.getElementById('store-status');
+    if (!el) return;
+    el.textContent = msg || '';
+    el.className = 'adm-store-status' + (kind ? ' ' + kind : '');
+  }
+  async function saveStoreInfo(){
+    if (!state.store?.id || !window.skmUpdateStore){
+      setStoreStatus('매장이 지정되지 않아 저장할 수 없어요.', 'err');
+      return;
+    }
+    const patch = {};
+    for (const [id, key] of Object.entries(STORE_FIELDS)){
+      const v = (document.getElementById(id)?.value || '').trim();
+      patch[key] = v || null;
+    }
+    const btn = document.getElementById('store-save');
+    if (btn) btn.disabled = true;
+    setStoreStatus('저장 중…', '');
+    const { data, error } = await window.skmUpdateStore(state.store.id, patch);
+    if (btn) btn.disabled = false;
+    if (error){
+      setStoreStatus('저장 실패: ' + (error.message || '권한 또는 네트워크 오류'), 'err');
+      return;
+    }
+    state.store = data ? { ...state.store, ...data } : { ...state.store, ...patch };
+    setStoreStatus('저장됐어요. 사이트에 바로 반영됩니다.', 'ok');
+    toast('기본 정보 저장 완료');
+  }
+  function bindStoreForm(){
+    const btn = document.getElementById('store-save');
+    if (btn) btn.addEventListener('click', saveStoreInfo);
   }
 
   /* ─── Toast ─────────────────────────────────────── */
@@ -933,6 +993,7 @@
     bindHeader();
     bindSearch();
     bindFilterToggles();
+    bindStoreForm();
     state.filterCat = parseHash().cat;
     applyMenuFromHash();
     renderBackToSite();
@@ -972,6 +1033,7 @@
     renderBackToSite();
     renderChips();
     renderTable();
+    populateStoreForm();
     updateDirtyFlag();
   }
 

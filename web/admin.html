@@ -69,8 +69,8 @@
       <a class="adm-nav-item is-disabled" href="#banner" data-menu="banner" title="준비 중">
         <span class="adm-nav-ic">▭</span> 배너/슬라이드 <em class="adm-soon">soon</em>
       </a>
-      <a class="adm-nav-item is-disabled" href="#store" data-menu="store" title="준비 중">
-        <span class="adm-nav-ic">⌂</span> 매장 정보 <em class="adm-soon">soon</em>
+      <a class="adm-nav-item" href="#store" data-menu="store">
+        <span class="adm-nav-ic">⌂</span> 기본 정보
       </a>
     </div>
   </nav>
@@ -144,6 +144,50 @@
       </table>
     </div>
 
+  </section>
+
+  <!-- ===== 기본 정보(매장) 패널 ===== -->
+  <section class="adm-panel adm-store-panel" data-panel="store" hidden>
+    <div class="adm-store-card">
+
+      <div class="adm-store-group">
+        <h3>사업자 정보</h3>
+        <p class="adm-store-note">전자상거래법상 사이트 하단에 표시해야 하는 의무 항목이에요. 가능한 한 모두 채워주세요.</p>
+        <div class="adm-store-grid">
+          <label class="adm-edit-field"><span>상호</span>
+            <input id="store-name" class="adm-input" type="text" placeholder="우주가전 (SK매직 인증파트너점)"></label>
+          <label class="adm-edit-field"><span>대표자명 <em class="adm-req">필수</em></span>
+            <input id="store-owner" class="adm-input" type="text" placeholder="홍길동"></label>
+          <label class="adm-edit-field"><span>사업자등록번호</span>
+            <input id="store-bizno" class="adm-input" type="text" placeholder="000-00-00000"></label>
+          <label class="adm-edit-field"><span>통신판매업 신고번호</span>
+            <input id="store-mailorder" class="adm-input" type="text" placeholder="제0000-서울OO-0000호"></label>
+          <label class="adm-edit-field adm-store-full"><span>사업장 주소</span>
+            <input id="store-address" class="adm-input" type="text" placeholder="서울특별시 OO구 OO로 00, 0층"></label>
+        </div>
+      </div>
+
+      <div class="adm-store-group">
+        <h3>연락 · 상담</h3>
+        <p class="adm-store-note">사이트 하단과 우측 하단 상담 버튼에 표시됩니다. 비워두면 해당 항목은 사이트에서 자동으로 숨겨져요.</p>
+        <div class="adm-store-grid">
+          <label class="adm-edit-field"><span>상담 전화번호</span>
+            <input id="store-phone" class="adm-input" type="text" placeholder="1588-0000"></label>
+          <label class="adm-edit-field"><span>이메일</span>
+            <input id="store-email" class="adm-input" type="email" placeholder="contact@example.com"></label>
+          <label class="adm-edit-field adm-store-full"><span>영업시간</span>
+            <input id="store-hours" class="adm-input" type="text" placeholder="평일 09:00 - 18:00 · 주말·공휴일 휴무"></label>
+          <label class="adm-edit-field adm-store-full"><span>카카오 오픈채팅 · 채널 링크</span>
+            <input id="store-kakao" class="adm-input" type="url" placeholder="https://open.kakao.com/o/..."></label>
+        </div>
+      </div>
+
+      <div class="adm-store-foot">
+        <span class="adm-store-status" id="store-status"></span>
+        <button class="adm-btn adm-btn-primary" id="store-save">저장</button>
+      </div>
+
+    </div>
   </section>
 
   <!-- ===== 준비 중 패널 ===== -->

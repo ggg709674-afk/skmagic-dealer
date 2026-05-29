@@ -52,7 +52,7 @@
     if (!slug) return null;
     const { data, error } = await window.sb
       .from('stores')
-      .select('id, slug, name, type, parent_store_id, biz_no, biz_owner, address, phone, email, kakao_url, theme_color, logo_url')
+      .select('id, slug, name, type, parent_store_id, biz_no, biz_owner, mail_order_no, address, phone, email, biz_hours, kakao_url, theme_color, logo_url')
       .eq('slug', slug)
       .maybeSingle();
     if (error){
@@ -60,6 +60,25 @@
       return null;
     }
     return data;
+  };
+
+  /* ─── 매장 기본정보 수정 (인증된 본인 매장만 — RLS 의존) ─
+     허용 필드만 화이트리스트로 추려서 update. */
+  window.skmUpdateStore = async function(storeId, patch){
+    if (!storeId) return { error: new Error('storeId 필요') };
+    const ALLOWED = ['name','biz_owner','biz_no','mail_order_no','address','phone','email','biz_hours','kakao_url'];
+    const row = {};
+    for (const k of ALLOWED){
+      if (Object.prototype.hasOwnProperty.call(patch, k)) row[k] = patch[k];
+    }
+    const { data, error } = await window.sb
+      .from('stores')
+      .update(row)
+      .eq('id', storeId)
+      .select()
+      .maybeSingle();
+    if (error) console.warn('[skmUpdateStore]', error);
+    return { data, error };
   };
 
   /* ─── 매장의 admin_overrides 일괄 조회 ───────── */
