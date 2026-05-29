@@ -524,7 +524,7 @@ const App = (() => {
     if (monthEl) monthEl.textContent = new Date().getMonth() + 1;
 
     // best products — 매장이 '추천' 지정한 상품만, 카테고리 순서(정수기→공기청정기→비데→매트리스)로.
-    // 추천이 하나도 없으면 카테고리별 1개씩(다양성)으로 채움.
+    // 추천이 하나도 없으면 '인기 상품' 섹션 자체를 숨긴다.
     const best = document.getElementById('best-grid');
     if (best) {
       // 상품의 카테고리 중 VISIBLE_CATEGORIES 에서 가장 앞선 순위 (정렬 키)
@@ -536,25 +536,15 @@ const App = (() => {
         }
         return r;
       };
-      const featured = data.products.filter(p => p._featured && (p.categories || []).some(isVisibleCat));
-      let picks;
-      if (featured.length) {
-        // 추천 켠 상품만 — 카테고리 순서, 같은 카테고리 내에선 정렬값(_order) 순
-        picks = featured.slice().sort((a, b) =>
+      const picks = data.products
+        .filter(p => p._featured && (p.categories || []).some(isVisibleCat))
+        .sort((a, b) =>
           (catRank(a) - catRank(b)) ||
           ((a._order == null ? Infinity : a._order) - (b._order == null ? Infinity : b._order))
         );
-      } else {
-        // 추천 없음 → 카테고리별 1개씩 다양성 미리보기
-        picks = [];
-        const seen = new Set();
-        for (const c of visibleCats) {
-          if (picks.length >= HOME_PREVIEW_LIMIT) break;
-          const pick = data.products.find(p => (p.categories || []).includes(c.dispClsfNo) && !seen.has(p.goodsId));
-          if (pick) { picks.push(pick); seen.add(pick.goodsId); }
-        }
-      }
       best.innerHTML = picks.map(productCard).join('');
+      const bestSection = document.getElementById('best-section');
+      if (bestSection) bestSection.style.display = picks.length ? '' : 'none';
     }
 
     // 카테고리별 섹션 — VISIBLE만, 각 4개씩 미리보기 + 전체보기 링크
