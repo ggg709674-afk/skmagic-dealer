@@ -975,6 +975,45 @@
     location.reload();
   }
 
+  /* ─── 매장 접근 권한 판정 ──────────────────────────
+     분양형 — 매장 운영자는 자기 매장 admin 에만 접근 가능.
+     - 본부(super_admin): 모든 매장 OK
+     - 매장 운영자: URL 슬러그가 자기 매장과 일치해야 OK
+       (?store=다른매장 으로 바꿔치기 해도 차단)
+     - 연결된 매장 없음(외부 앱 계정 등): 차단 */
+  function authorizeAdmin(slug, authCtx){
+    if (!authCtx || !authCtx.user) return { ok:false, reason:'로그인이 필요합니다.' };
+    if (authCtx.isSuperAdmin) return { ok:true };
+    if (!authCtx.store){
+      return { ok:false, reason:'이 계정에 연결된 매장이 없습니다. 매장 운영자 계정으로 로그인하세요.' };
+    }
+    if (slug && slug !== authCtx.store.slug){
+      return { ok:false, reason:`이 매장(${slug}) 의 관리 권한이 없습니다.` };
+    }
+    return { ok:true };
+  }
+
+  /* 권한 거부 화면 — 로그인 게이트를 재활용해 안내 + 재로그인 */
+  function showAccessDenied(reason){
+    const gate = document.getElementById('adm-auth-gate');
+    const card = gate && gate.querySelector('.adm-auth-card');
+    if (!gate || !card) return;
+    card.innerHTML =
+      '<div class="adm-auth-brand">' +
+        '<img src="./assets/brand/logo.png" alt="SK magic" style="height:28px;width:auto">' +
+        '<div>' +
+          '<div class="adm-auth-title">접근 권한이 없습니다</div>' +
+          '<div class="adm-auth-sub">' + escape(reason || '') + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<button class="adm-btn adm-btn-primary" id="denied-signout" type="button">다른 계정으로 로그인</button>' +
+      '<div class="adm-auth-foot"><a href="./index.html" data-back-site>← 사이트로 돌아가기</a></div>';
+    gate.hidden = false;
+    const btn = document.getElementById('denied-signout');
+    if (btn) btn.addEventListener('click', signOut);
+    renderBackToSite();
+  }
+
   function renderAuthChip(authCtx){
     const chip = document.getElementById('adm-user-chip');
     const btnOut = document.getElementById('btn-signout');
@@ -1005,10 +1044,18 @@
       if (!ok) return;
     }
     const authCtx = (typeof window.skmAuthContext === 'function') ? await window.skmAuthContext() : null;
-    renderAuthChip(authCtx);
 
     // 매장 컨텍스트 로드 (URL 슬러그 우선, 없으면 로그인 user 의 매장)
     const slug = (typeof window.skmGetSlug === 'function') ? window.skmGetSlug() : null;
+
+    // ── 접근 권한 게이트 (분양 매장 간 교차 접근 차단) ──
+    if (window.sb && authCtx){
+      const verdict = authorizeAdmin(slug, authCtx);
+      if (!verdict.ok){ showAccessDenied(verdict.reason); return; }
+    }
+
+    renderAuthChip(authCtx);
+
     if (slug && window.skmFetchStore){
       try {
         state.store = await window.skmFetchStore(slug);
