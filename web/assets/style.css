@@ -620,6 +620,7 @@ ul,ol{margin:0;padding:0;list-style:none}
   border-radius:18px;padding:18px 20px;
 }
 .option-row{display:flex;align-items:center;gap:16px;padding:8px 0;flex-wrap:wrap}
+.option-row[hidden]{display:none}
 .option-row + .option-row{border-top:1px solid var(--line);margin-top:8px;padding-top:14px}
 .option-row.first-visible{border-top:none;margin-top:0;padding-top:8px}
 .option-row .op-label{
