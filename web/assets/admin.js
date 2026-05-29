@@ -1052,7 +1052,10 @@
     return db.rows.filter(r => {
       if (comState.cat !== 'all' && r.품목 !== comState.cat) return false;
       if (comState.form !== 'all' && r.형태 !== comState.form) return false;
-      if (q && !(`${r.모델} ${r.코드||''}`.toLowerCase().includes(q))) return false;
+      if (q){
+        const d = comDisplay(r);
+        if (!(`${d.name} ${d.code} ${r.모델} ${r.코드||''}`.toLowerCase().includes(q))) return false;
+      }
       return true;
     });
   }
@@ -1066,15 +1069,16 @@
       tbody.innerHTML = `<tr><td colspan="10" class="adm-empty">조건에 맞는 항목이 없어요.</td></tr>`;
       return;
     }
-    let prevModel = null;
+    let prevKey = null;
     tbody.innerHTML = list.map(r => {
-      const newModel = (r.모델 !== prevModel);
-      prevModel = r.모델;
-      const { name } = comSplitModel(r.모델);
+      const { name, code } = comDisplay(r);
+      const key = code || name;
+      const newModel = (key !== prevKey);
+      prevKey = key;
       return `<tr class="${newModel ? 'com-model-start':''}">
         <td>${escape(r.품목)}</td>
         <td class="col-com-model">${escape(name)}</td>
-        <td class="col-com-code">${r.코드 ? escape(r.코드) : '<span class="price-empty">—</span>'}</td>
+        <td class="col-com-code">${code ? escape(code) : '<span class="price-empty">—</span>'}</td>
         <td><span class="com-form com-form-${r.형태==='셀프형'?'self':'visit'}">${escape(r.형태)}</span></td>
         <td class="col-com-num">${r.의무!=null?escape(r.의무)+'개월':'<span class="price-empty">—</span>'}</td>
         <td>${escape(r.관리주기||'—')}</td>
@@ -1106,6 +1110,35 @@
     return { name: m, code: '' };
   }
 
+  /* 수수료표 행을 홈페이지(PRODUCTS_DB) 기준으로 매칭.
+     제품코드 앞 10자리(=베이스+등급 S/P)로 lookup → 홈페이지 제품명·모델코드 사용.
+     이렇게 해야 정책표 표기("스탠드형직수얼음")가 아니라 홈페이지 표기
+     ("FS직수 얼음 정수기 프리스탠딩")로 보이고, PSG 콜라보(…P)도 분리된다. */
+  let _comHomeMap = null;
+  function comHomeMap(){
+    if (_comHomeMap) return _comHomeMap;
+    const m = {};
+    const prods = (window.PRODUCTS_DB && window.PRODUCTS_DB.products) || [];
+    prods.forEach(p => {
+      if (!p.model) return;
+      const b = p.model.slice(0, 10);
+      if (!m[b]) m[b] = { name: p.name, model: p.model };
+    });
+    _comHomeMap = m;
+    return m;
+  }
+  function comHomeMatch(code){
+    if (!code) return null;
+    return comHomeMap()[String(code).slice(0, 10)] || null;
+  }
+  /* 표시용 모델명/제품코드 — 홈페이지 매칭 우선, 실패 시 정책표 파싱값 */
+  function comDisplay(r){
+    const home = comHomeMatch(r.코드);
+    if (home) return { name: home.name, code: home.model };
+    const { name } = comSplitModel(r.모델);
+    return { name, code: r.코드 || '' };
+  }
+
   /* 현재 필터된 행을 엑셀(.xlsx)로 다운로드 (SheetJS). */
   function downloadCommissionXlsx(){
     const db = comDB();
@@ -1114,9 +1147,9 @@
     if (!list.length) return;
     const aoa = [['품목','모델','제품코드','형태','의무기간','관리주기','기준가','기본요금','타사보상','수수료합계']];
     list.forEach(r => {
-      const { name } = comSplitModel(r.모델);
+      const { name, code } = comDisplay(r);
       aoa.push([
-        r.품목, name, r.코드 || '', r.형태,
+        r.품목, name, code, r.형태,
         r.의무 != null ? r.의무 + '개월' : '',
         r.관리주기 || '',
         r.기준가, r.기본요금, r.타사보상, r.수수료합계,

@@ -756,12 +756,13 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 
 /* ===== 수수료 확인 테이블 ===== */
 /* 고정 레이아웃 — 카테고리 전환해도 열 너비가 colgroup 기준으로 일정 */
-.adm-com-table{min-width:1014px; table-layout:fixed}
+.adm-com-table{min-width:1072px; table-layout:fixed}
 .adm-com-table th, .adm-com-table td{overflow:hidden; text-overflow:ellipsis}
+.adm-com-table tbody td{white-space:nowrap}
 .adm-com-table thead th.col-com-model,
 .adm-com-table thead th.col-com-code{text-align:left}
 .adm-com-table tbody td.col-com-model{text-align:left; font-weight:600; color:var(--ink-1); white-space:normal; word-break:keep-all}
-.adm-com-table tbody td.col-com-code{text-align:left; color:var(--ink-3); font-size:12.5px; font-variant-numeric:tabular-nums}
+.adm-com-table tbody td.col-com-code{text-align:left; color:var(--ink-3); font-size:12.5px; font-variant-numeric:tabular-nums; white-space:nowrap}
 .adm-com-table tbody td.col-com-num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap}
 .adm-com-table thead th.col-com-num{text-align:right}
 .adm-com-table tbody td.com-num-strong{font-weight:700; color:var(--ink-1)}
