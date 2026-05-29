@@ -60,6 +60,9 @@
       <a class="adm-nav-item on" href="#products" data-menu="products">
         <span class="adm-nav-ic">▦</span> 상품 관리
       </a>
+      <a class="adm-nav-item" href="#commission" data-menu="commission">
+        <span class="adm-nav-ic">₩</span> 수수료 확인
+      </a>
       <a class="adm-nav-item is-disabled" href="#consult" data-menu="consult" title="준비 중">
         <span class="adm-nav-ic">✉</span> 상담 신청 <em class="adm-soon">soon</em>
       </a>
@@ -144,6 +147,45 @@
       </table>
     </div>
 
+  </section>
+
+  <!-- ===== 수수료 확인 패널 ===== -->
+  <section class="adm-panel" data-panel="commission" hidden>
+    <div class="adm-filter">
+      <div class="adm-filter-row">
+        <div class="adm-chips" id="com-cat-chips"></div>
+        <div class="adm-search">
+          <input type="text" id="com-search" placeholder="모델명 / 코드 검색…" autocomplete="off">
+        </div>
+      </div>
+      <div class="adm-filter-row adm-filter-toggles">
+        <div class="adm-chips" id="com-form-chips"></div>
+        <div class="adm-count" id="com-count">—</div>
+      </div>
+    </div>
+
+    <p class="adm-panel-hint" id="com-source-hint"></p>
+
+    <div class="adm-table-wrap">
+      <table class="adm-table adm-com-table" id="commission-table">
+        <thead>
+          <tr>
+            <th>품목</th>
+            <th class="col-com-model">모델 (제품코드요약)</th>
+            <th>형태</th>
+            <th class="col-com-num">의무기간</th>
+            <th>관리주기</th>
+            <th class="col-com-num">기준가</th>
+            <th class="col-com-num">기본요금</th>
+            <th class="col-com-num">타사보상</th>
+            <th class="col-com-num">수수료합계</th>
+          </tr>
+        </thead>
+        <tbody id="commission-tbody">
+          <tr><td colspan="9" class="adm-empty">불러오는 중…</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <!-- ===== 기본 정보(매장) 패널 ===== -->
@@ -295,6 +337,7 @@
     if (css) css.href = css.getAttribute('href') + v;
     document.write('<script src="./assets/icons.js' + v + '"><\/script>');
     document.write('<script src="./assets/db.js' + v + '"><\/script>');
+    document.write('<script src="./assets/commission.js' + v + '"><\/script>');
     document.write('<script src="./assets/app.js' + v + '"><\/script>');
     document.write('<script src="./assets/supabase.js' + v + '"><\/script>');
     document.write('<script src="./assets/admin.js' + v + '"><\/script>');

@@ -738,6 +738,7 @@
   ─────────────────────────────────────────────────── */
   const MENU_META = {
     products: { title: '상품 관리', sub: '노출 여부 · 추천 배지 · 표시 순서 · 매장 자체 가격/이름 수정.', kind: 'products' },
+    commission: { title: '수수료 확인', sub: '홈페이지 등록 모델의 약정·관리방식별 수수료표입니다.', kind: 'commission' },
     consult:  { title: '상담 신청',     sub: '준비 중인 메뉴예요.', kind: 'soon' },
     banner:   { title: '배너/슬라이드', sub: '준비 중인 메뉴예요.', kind: 'soon' },
     store:    { title: '기본 정보',     sub: '사업자정보 · 연락처를 관리합니다. 사이트 하단에 표시됩니다.', kind: 'store' },
@@ -789,14 +790,16 @@
     });
 
     // 패널 전환
-    document.querySelector('[data-panel="products"]').hidden = (meta.kind !== 'products');
-    document.querySelector('[data-panel="store"]').hidden    = (meta.kind !== 'store');
-    document.querySelector('[data-panel="soon"]').hidden     = (meta.kind !== 'soon');
+    document.querySelector('[data-panel="products"]').hidden   = (meta.kind !== 'products');
+    document.querySelector('[data-panel="commission"]').hidden = (meta.kind !== 'commission');
+    document.querySelector('[data-panel="store"]').hidden      = (meta.kind !== 'store');
+    document.querySelector('[data-panel="soon"]').hidden       = (meta.kind !== 'soon');
 
     document.getElementById('adm-page-title').textContent = meta.title;
     document.getElementById('adm-page-sub').textContent   = meta.sub;
 
     if (meta.kind === 'store') populateStoreForm();
+    if (meta.kind === 'commission') initCommission();
 
     // 상품관리 패널의 카테고리 필터도 hash 와 동기화
     if (meta.kind === 'products' && state.filterCat !== cat){
@@ -807,6 +810,95 @@
         renderTable();
       }
     }
+  }
+
+  /* ─── 수수료 확인 ───────────────────────────────
+     데이터: window.COMMISSION_DB (commission.js, 수수료표에서 생성)
+     홈페이지 등록 모델만 / 색상은 묶음(요금·수수료 색상무관) */
+  let comInited = false;
+  const comState = { cat: 'all', form: 'all', q: '' };
+  function comDB(){ return window.COMMISSION_DB || null; }
+  const comFmt = (v) => (v == null || v === '') ? '<span class="price-empty">—</span>' : Number(v).toLocaleString('ko-KR');
+
+  function initCommission(){
+    const db = comDB();
+    const tbody = document.getElementById('commission-tbody');
+    if (!db){
+      if (tbody) tbody.innerHTML = `<tr><td colspan="9" class="adm-empty">수수료 데이터를 불러오지 못했어요.</td></tr>`;
+      return;
+    }
+    if (!comInited){
+      comInited = true;
+      const hint = document.getElementById('com-source-hint');
+      if (hint) hint.innerHTML = `기준: <strong>${escape(db.source || '')}</strong> · 홈페이지 등록 모델 ${new Set(db.rows.map(r=>r.모델)).size}종 · 색상은 묶어서 표시(요금·수수료 동일).`;
+      const search = document.getElementById('com-search');
+      if (search) search.addEventListener('input', () => { comState.q = search.value.trim(); renderComTable(); });
+    }
+    renderComCatChips();
+    renderComFormChips();
+    renderComTable();
+  }
+
+  function comChipHTML(val, label, cnt, active, attr){
+    return `<button class="adm-chip ${active ? 'on':''}" data-${attr}="${escape(val)}">${escape(label)}${cnt!=null?` <span class="chip-cnt">${cnt}</span>`:''}</button>`;
+  }
+  function renderComCatChips(){
+    const wrap = document.getElementById('com-cat-chips');
+    const db = comDB(); if (!wrap || !db) return;
+    const counts = {};
+    db.rows.forEach(r => { counts[r.품목] = (counts[r.품목]||0)+1; });
+    const chips = [comChipHTML('all','전체',db.rows.length,comState.cat==='all','cat')];
+    db.품목순.filter(c=>counts[c]).forEach(c => chips.push(comChipHTML(c,c,counts[c],comState.cat===c,'cat')));
+    wrap.innerHTML = chips.join('');
+    wrap.querySelectorAll('.adm-chip').forEach(el => el.addEventListener('click', () => {
+      comState.cat = el.dataset.cat; renderComCatChips(); renderComTable();
+    }));
+  }
+  function renderComFormChips(){
+    const wrap = document.getElementById('com-form-chips');
+    if (!wrap) return;
+    const forms = [['all','전체'],['방문형','방문형'],['셀프형','셀프형']];
+    wrap.innerHTML = forms.map(([v,l]) => comChipHTML(v,l,null,comState.form===v,'form')).join('');
+    wrap.querySelectorAll('.adm-chip').forEach(el => el.addEventListener('click', () => {
+      comState.form = el.dataset.form; renderComFormChips(); renderComTable();
+    }));
+  }
+  function comFiltered(){
+    const db = comDB(); if (!db) return [];
+    const q = comState.q.toLowerCase();
+    return db.rows.filter(r => {
+      if (comState.cat !== 'all' && r.품목 !== comState.cat) return false;
+      if (comState.form !== 'all' && r.형태 !== comState.form) return false;
+      if (q && !(`${r.모델} ${r.코드||''}`.toLowerCase().includes(q))) return false;
+      return true;
+    });
+  }
+  function renderComTable(){
+    const tbody = document.getElementById('commission-tbody');
+    const cntEl = document.getElementById('com-count');
+    const db = comDB(); if (!tbody || !db) return;
+    const list = comFiltered();
+    if (cntEl) cntEl.innerHTML = `<strong>${list.length}</strong>행 표시 / 전체 ${db.rows.length}행`;
+    if (!list.length){
+      tbody.innerHTML = `<tr><td colspan="9" class="adm-empty">조건에 맞는 항목이 없어요.</td></tr>`;
+      return;
+    }
+    let prevModel = null;
+    tbody.innerHTML = list.map(r => {
+      const newModel = (r.모델 !== prevModel);
+      prevModel = r.모델;
+      return `<tr class="${newModel ? 'com-model-start':''}">
+        <td>${escape(r.품목)}</td>
+        <td class="col-com-model">${escape(r.모델)}</td>
+        <td><span class="com-form com-form-${r.형태==='셀프형'?'self':'visit'}">${escape(r.형태)}</span></td>
+        <td class="col-com-num">${r.의무!=null?escape(r.의무)+'개월':'<span class="price-empty">—</span>'}</td>
+        <td>${escape(r.관리주기||'—')}</td>
+        <td class="col-com-num">${comFmt(r.기준가)}</td>
+        <td class="col-com-num com-num-strong">${comFmt(r.기본요금)}</td>
+        <td class="col-com-num">${comFmt(r.타사보상)}</td>
+        <td class="col-com-num com-fee">${comFmt(r.수수료합계)}</td>
+      </tr>`;
+    }).join('');
   }
 
   /* ─── 기본 정보(매장) 폼 ───────────────────────── */
