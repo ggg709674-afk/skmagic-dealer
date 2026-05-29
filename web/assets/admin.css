@@ -453,7 +453,9 @@ body.admin-body{
 }
 .adm-edit-right{
   padding:18px 24px;
+  min-width:0;
   overflow-y:auto;
+  overflow-x:hidden;   /* overflow-y:auto 가 가로축도 auto 로 만들어 생기는 가로 스크롤 방지 */
 }
 .adm-edit-thumb{
   width:100%; aspect-ratio:1; max-width:240px;
@@ -527,6 +529,7 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
   margin-top:5px;
   font-size:11px;
   color:var(--ink-4);
+  overflow-wrap:anywhere;
 }
 .adm-edit-orig code{
   background:var(--surface);
