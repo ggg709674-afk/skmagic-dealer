@@ -371,6 +371,54 @@ document.addEventListener('visibilitychange', () => {
   - `/{slug}/admin` → `/web/admin.html?store={slug}` (매장 관리자)
   - `/assets/:path*` → `/web/assets/:path*`
 - ※ `cleanUrls: true` 는 rewrite와 충돌해서 제거함
+
+---
+
+## 📅 2026-05-29 — 어드민 기본정보 관리 + UI 수정 + 자동배포
+
+### ★ 기본 정보(사업자정보·연락처) 관리 메뉴 신규 (커밋 `12f63f1`, `60c1782`)
+전자상거래법상 의무 표시 항목(상호·대표자·사업자번호·통신판매업번호·주소·이메일)을
+매장이 직접 입력 → 사이트 하단/상담버튼에 자동 표시되도록 함.
+- **DB**: `stores` 테이블에 컬럼 2개 ALTER 추가 (형이 Supabase SQL Editor에서 실행)
+  - `mail_order_no` (통신판매업 신고번호), `biz_hours` (영업시간)
+  - 기존 컬럼 재사용: `name, biz_owner, biz_no, address, phone, email, kakao_url`
+- **`supabase.js`**: `skmFetchStore` select에 두 컬럼 추가 + `skmUpdateStore(storeId, patch)`
+  헬퍼 신규 (허용 필드 화이트리스트만 update, 본인 매장만 — RLS 의존)
+- **`admin.html` + `admin.js`**: 사이드바 '매장 정보(soon)' → **'기본 정보'** 활성화.
+  `data-panel="store"` 입력 폼 패널 + 저장. `MENU_META.store.kind='store'`,
+  `populateStoreForm()`/`saveStoreInfo()`. 제목은 "사업자 정보 (홈페이지 하단에 표시)".
+- **`app.js` + `index.html`**: 푸터 사업자정보·고객센터·우하단 상담 FAB(전화/카카오)를
+  **store 데이터로 실제 바인딩** (`renderStoreInfo()`). 더미 하드코딩 제거.
+  **값이 빈 항목은 사이트에서 자동 숨김** (예: 카카오 링크 없으면 카카오 버튼 안 뜸).
+
+### 편집 모달 / UI 수정
+- 편집 모달 **wide 변형 안 먹던 버그** 수정 (`96818ce`): `.adm-modal-card`(680px)가
+  `.adm-modal-card-wide`(880px)보다 뒤에 선언돼 cascade로 이겨버림 →
+  `.adm-modal-card.adm-modal-card-wide`로 특정도 올려 880px 적용.
+- 편집 모달 **매장 메모(내부용) 필드 완전 제거** (`41bfb76`): admin.html UI +
+  admin.js/app.js의 memo 처리 전부 삭제. ※ DB `memo` 컬럼은 잔존(미사용) — 지우려면 ALTER.
+- 추천 안내 문구 **우측 정렬** (`bdc9f04`).
+
+### 자동 배포 정책 (중요)
+- **커밋 후 자동 `git push origin main`** — 형이 허용함. Vercel이 push에 연동돼 배포되므로
+  커밋만 하고 푸시 안 하면 사이트에 반영 안 됨("배포 늦다"의 진짜 원인이 미푸시였음).
+- 도메인 **sk-magic.kr** 연결 확인됨(Vercel 대시보드 + DNS).
+
+### 로고 흰 배경 버전
+- `web/assets/brand/logo_white_bg.png` 생성 — 원본 `logo.png`는 투명 PNG라
+  다크모드 뷰어에서 검게 보임. 순수 Node(내장 zlib)로 RGBA→흰배경 RGB 합성.
+  (이 PC엔 python·ImageMagick·sharp 없음 → 직접 디코드/합성)
+- ⚠ **현재 untracked, 커밋 여부 미정** (형 결정 대기).
+- 참고: 작업 중 `logo.png`가 로컬 작업트리에서 사라져 있어 `git checkout`으로 복원함(원격엔 정상).
+
+### 인수인계 / 다음에 할 것
+- **skmagic 매장 기본정보 미입력**: 현재 `name`·`phone`(1588-0000)만 채워짐.
+  대표자/사업자번호/통신판매업번호/주소/이메일/카카오는 비어 있음 →
+  `/skmagic/admin` → 기본 정보에서 형이 채워야 사이트 하단에 표시됨.
+- 영업시간은 **안 넣기로 함**(선택 항목, 비우면 자동 숨김).
+- ⚠ **어드민 페이지는 미리보기 도구로 렌더 불가** (스크립트를 `document.write`로 로드 →
+  preview 하베스트가 실행 안 함). 카탈로그(`/{slug}`)는 검증 가능.
+  단 dev 서버(node)는 `/index.html` 직접 접근 불가 → **`/skmagic` 같은 슬러그 경로**로 접근.
 - Push만 하면 Vercel 자동 재배포 (GitHub 연동)
 
 #### 6. 안내 페이지 (`web/landing.html`)
