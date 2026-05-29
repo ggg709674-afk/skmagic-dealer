@@ -435,7 +435,7 @@ body.admin-body{
 .adm-dirty-flag[hidden]{display:none}
 .adm-panel[hidden]{display:none}
 
-.adm-modal-card-wide{max-width:880px}
+.adm-modal-card.adm-modal-card-wide{max-width:880px}
 
 /* 편집 모달 ─ 좌측 메타 + 우측 폼 */
 .adm-edit-body{
