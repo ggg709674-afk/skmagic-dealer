@@ -738,5 +738,30 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .com-form-self{background:#eef0f3; color:var(--ink-3)}
 #com-form-chips{margin-right:auto}
 
+/* 수수료표 엑셀 업로드 (드래그앤드랍) */
+.com-upload{
+  margin-bottom:16px; padding:18px 20px;
+  border:2px dashed var(--line); border-radius:12px;
+  background:var(--surface-2, #fafbfc); cursor:pointer;
+  transition:border-color .15s, background .15s;
+}
+.com-upload:hover{border-color:var(--primary)}
+.com-upload.drag{border-color:var(--primary); background:rgba(222,79,65,.06)}
+.com-upload-inner{display:flex; align-items:center; gap:14px}
+.com-upload-ic{
+  flex:none; width:40px; height:40px; border-radius:10px;
+  display:grid; place-items:center; font-size:20px;
+  background:rgba(222,79,65,.1); color:var(--primary);
+}
+.com-upload-text{font-size:13.5px; color:var(--ink-2); line-height:1.5}
+.com-upload-text strong{color:var(--ink-1)}
+.com-upload-sub{display:block; margin-top:2px; font-size:12px; color:var(--ink-3)}
+.com-upload-status{
+  margin-top:12px; padding-top:12px; border-top:1px solid var(--line);
+  font-size:12.5px; color:var(--ink-2); cursor:default;
+}
+.com-upload-status.ok{color:#1a8f4c}
+.com-upload-status.err{color:var(--primary)}
+
 /* 관리자는 PC 전용. 창이 min-width(1024px)보다 좁아지면 레이아웃을 줄이지 않고
    가로 스크롤로 처리해 사이드바/메뉴가 세로로 찌그러지는 문제를 막는다. */

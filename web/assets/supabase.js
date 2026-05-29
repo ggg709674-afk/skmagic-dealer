@@ -124,6 +124,40 @@
     return { error };
   };
 
+  /* ─── 수수료표 조회 (본부 공통 단일행) ───────────
+     commission_data 테이블의 id=1 한 행에 전체 payload(jsonb) 저장. */
+  window.skmFetchCommission = async function(){
+    const { data, error } = await window.sb
+      .from('commission_data')
+      .select('payload, source, built_at, updated_at')
+      .eq('id', 1)
+      .maybeSingle();
+    if (error){
+      console.warn('[skmFetchCommission]', error);
+      return null;
+    }
+    return data;
+  };
+
+  /* ─── 수수료표 저장 (로그인 필요 — RLS 의존) ─────
+     payload = { source, built_at, 품목순, rows } */
+  window.skmSaveCommission = async function(payload){
+    const row = {
+      id: 1,
+      payload,
+      source: payload?.source || null,
+      built_at: payload?.built_at || null,
+      updated_at: new Date().toISOString(),
+    };
+    const { data, error } = await window.sb
+      .from('commission_data')
+      .upsert(row, { onConflict: 'id' })
+      .select()
+      .maybeSingle();
+    if (error) console.warn('[skmSaveCommission]', error);
+    return { data, error };
+  };
+
   /* ─── 현재 로그인된 사용자 + 매장 컨텍스트 ─────── */
   window.skmAuthContext = async function(){
     const { data: { user } } = await window.sb.auth.getUser();

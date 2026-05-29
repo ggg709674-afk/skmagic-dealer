@@ -816,27 +816,204 @@
      데이터: window.COMMISSION_DB (commission.js, 수수료표에서 생성)
      홈페이지 등록 모델만 / 색상은 묶음(요금·수수료 색상무관) */
   let comInited = false;
+  let comUploadBound = false;
+  let comData = null; // 업로드/Supabase 로 받은 데이터 (window.COMMISSION_DB 보다 우선)
   const comState = { cat: 'all', form: 'all', q: '' };
-  function comDB(){ return window.COMMISSION_DB || null; }
+  function comDB(){ return comData || window.COMMISSION_DB || null; }
   const comFmt = (v) => (v == null || v === '') ? '<span class="price-empty">—</span>' : Number(v).toLocaleString('ko-KR');
 
-  function initCommission(){
-    const db = comDB();
+  async function initCommission(){
+    bindComUpload();
     const tbody = document.getElementById('commission-tbody');
-    if (!db){
-      if (tbody) tbody.innerHTML = `<tr><td colspan="9" class="adm-empty">수수료 데이터를 불러오지 못했어요.</td></tr>`;
-      return;
-    }
     if (!comInited){
       comInited = true;
-      const hint = document.getElementById('com-source-hint');
-      if (hint) hint.innerHTML = `기준: <strong>${escape(db.source || '')}</strong> · 홈페이지 등록 모델 ${new Set(db.rows.map(r=>r.모델)).size}종 · 색상은 묶어서 표시(요금·수수료 동일).`;
       const search = document.getElementById('com-search');
       if (search) search.addEventListener('input', () => { comState.q = search.value.trim(); renderComTable(); });
+      // Supabase 에 저장된 최신 수수료표가 있으면 우선 사용
+      if (window.skmFetchCommission){
+        try {
+          const remote = await window.skmFetchCommission();
+          if (remote && remote.payload && Array.isArray(remote.payload.rows) && remote.payload.rows.length){
+            comData = remote.payload;
+          }
+        } catch(_){}
+      }
     }
+    const db = comDB();
+    if (!db){
+      if (tbody) tbody.innerHTML = `<tr><td colspan="9" class="adm-empty">수수료 데이터가 없어요. 위에서 엑셀(.xlsx)을 올려 주세요.</td></tr>`;
+      return;
+    }
+    updateComSourceHint();
     renderComCatChips();
     renderComFormChips();
     renderComTable();
+  }
+
+  function updateComSourceHint(){
+    const hint = document.getElementById('com-source-hint');
+    const db = comDB();
+    if (!hint || !db) return;
+    const models = new Set(db.rows.map(r=>r.모델)).size;
+    const when = db.built_at ? ` · 갱신 ${escape(db.built_at)}` : '';
+    hint.innerHTML = `기준: <strong>${escape(db.source || '')}</strong>${when} · 홈페이지 등록 모델 ${models}종 · 색상은 묶어서 표시(요금·수수료 동일).`;
+  }
+
+  /* ─── 엑셀 업로드 (드래그앤드랍 / 클릭) ───────────── */
+  function bindComUpload(){
+    if (comUploadBound) return;
+    const zone = document.getElementById('com-upload');
+    const input = document.getElementById('com-file');
+    if (!zone || !input) return;
+    comUploadBound = true;
+    zone.addEventListener('click', (e) => {
+      if (e.target.closest('.com-upload-status')) return;
+      input.click();
+    });
+    input.addEventListener('change', () => {
+      if (input.files && input.files[0]) handleCommissionFile(input.files[0]);
+      input.value = '';
+    });
+    ['dragenter','dragover'].forEach(ev => zone.addEventListener(ev, (e) => {
+      e.preventDefault(); e.stopPropagation(); zone.classList.add('drag');
+    }));
+    ['dragleave','dragend'].forEach(ev => zone.addEventListener(ev, (e) => {
+      e.preventDefault(); e.stopPropagation(); zone.classList.remove('drag');
+    }));
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault(); e.stopPropagation(); zone.classList.remove('drag');
+      const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) handleCommissionFile(f);
+    });
+  }
+
+  function setComUploadStatus(msg, kind){
+    const el = document.getElementById('com-upload-status');
+    if (!el) return;
+    el.hidden = !msg;
+    el.textContent = msg || '';
+    el.className = 'com-upload-status' + (kind ? ' ' + kind : '');
+  }
+
+  async function handleCommissionFile(file){
+    if (!file) return;
+    if (!/\.xlsx$/i.test(file.name)){
+      setComUploadStatus('xlsx 파일만 올릴 수 있어요.', 'err');
+      return;
+    }
+    setComUploadStatus('파일 분석 중…', '');
+    try {
+      if (typeof XLSX === 'undefined') throw new Error('엑셀 파서(XLSX)가 로드되지 않았어요. 새로고침 후 다시 시도해 줘.');
+      const buf = await file.arrayBuffer();
+      const payload = parseCommissionWorkbook(buf, file.name);
+      if (!payload.rows.length) throw new Error('홈페이지 등록 모델과 매칭되는 행이 없어요. 수수료표 양식을 확인해 줘.');
+      const models = new Set(payload.rows.map(r=>r.모델)).size;
+      setComUploadStatus(`분석 완료 — ${payload.rows.length}행 / ${models}종. 저장 중…`, '');
+      if (window.skmSaveCommission){
+        const { error } = await window.skmSaveCommission(payload);
+        if (error){
+          setComUploadStatus('저장 실패: ' + (error.message || '권한 또는 네트워크 오류'), 'err');
+          return;
+        }
+      }
+      comData = payload;
+      updateComSourceHint();
+      renderComCatChips();
+      renderComFormChips();
+      renderComTable();
+      setComUploadStatus(`완료 — ${payload.rows.length}행 / ${models}종 갱신됐어요.`, 'ok');
+    } catch(err){
+      setComUploadStatus('실패: ' + (err.message || err), 'err');
+    }
+  }
+
+  /* build_data.js 의 파싱 로직을 브라우저(SheetJS)로 포팅.
+     색상 묶음 + 방문/셀프 분리 + 의무기간별 행 + 홈페이지 모델만. */
+  function parseCommissionWorkbook(buf, fileName){
+    const wb = XLSX.read(buf, { type: 'array' });
+    const sheetName = wb.SheetNames.find(n => /수수료/.test(n)) || wb.SheetNames[0];
+    const ws = wb.Sheets[sheetName];
+    if (!ws || !ws['!ref']) throw new Error('시트를 읽을 수 없어요.');
+    const range = XLSX.utils.decode_range(ws['!ref']);
+
+    // 셀 값을 grid[row][col] (둘 다 0-index) 에 적재
+    const grid = {};
+    for (let r = range.s.r; r <= range.e.r; r++){
+      for (let c = range.s.c; c <= range.e.c; c++){
+        const cell = ws[XLSX.utils.encode_cell({ r, c })];
+        if (cell && cell.v != null && cell.v !== ''){
+          (grid[r] || (grid[r] = {}))[c] = cell.v;
+        }
+      }
+    }
+    // 병합 셀: 좌상단 값을 전체 범위로 전파
+    (ws['!merges'] || []).forEach(mg => {
+      const v = grid[mg.s.r] && grid[mg.s.r][mg.s.c];
+      if (v === undefined) return;
+      for (let r = mg.s.r; r <= mg.e.r; r++){
+        if (!grid[r]) grid[r] = {};
+        for (let c = mg.s.c; c <= mg.e.c; c++){
+          if (grid[r][c] === undefined) grid[r][c] = v;
+        }
+      }
+    });
+
+    const g = (r, c) => { const v = grid[r] && grid[r][c]; return v === undefined ? '' : String(v); };
+    const num = (s) => { s = String(s).replace(/[, ]/g, ''); return /^-?\d+(\.\d+)?$/.test(s) ? Number(s) : null; };
+    const form = (e) => /셀프형/.test(e) ? '셀프형' : '방문형';
+
+    // 컬럼(0-index): B=1 품목, C=2 모델, D=3 코드, E=4 컬러/형태, F=5 의무,
+    //   H=7 관리주기, I=8 기준가, J=9 운영가/기본할인, K=10 전사할인, L=11 타사보상, R=17 수수료합계
+    const CB=1, CC=2, CD=3, CE=4, CF=5, CH=7, CI=8, CJ=9, CK=10, CL=11, CR=17;
+    const rows = [];
+    let lastB = '';
+    for (let r = 12; r <= range.e.r; r++){ // 엑셀 13행부터 데이터
+      const b=g(r,CB), c=g(r,CC), d=g(r,CD), e=g(r,CE), f=g(r,CF), h=g(r,CH), i=g(r,CI), j=g(r,CJ), k=g(r,CK), l=g(r,CL), R=g(r,CR);
+      if (!c && !d) continue;
+      const 의무 = num(f), 기준가 = num(i), 합계 = num(R);
+      if (의무 === null && 기준가 === null && 합계 === null) continue;
+      const 품목 = b || lastB;
+      if (b) lastB = b;
+      const 전사 = num(k), 운영 = num(j);
+      const 기본요금 = (전사 !== null) ? 전사 : 운영; // 전사할인 있으면 그 값, 없으면 운영가(기본할인)
+      rows.push({
+        품목: 품목.replace('메트리스', '매트리스'),
+        모델: c.replace(/\s+/g, ' ').trim(),
+        코드: d,
+        형태: form(e),
+        의무: 의무,
+        관리주기: h,
+        기준가: 기준가,
+        기본요금: 기본요금,
+        타사보상: num(l),
+        수수료합계: 합계,
+      });
+    }
+
+    // 홈페이지 등록 모델만 (제품코드 앞 9자리 기준)
+    const MAIN = ['100000005','100000010','100000024','100000245','1000000245'];
+    const products = (window.PRODUCTS_DB && window.PRODUCTS_DB.products) || [];
+    const homeBase = new Set(products
+      .filter(p => p.model && p.categories && p.categories.some(cat => MAIN.includes(cat)))
+      .map(p => p.model.slice(0, 9)));
+    const onHome = (code) => code && homeBase.has(String(code).slice(0, 9));
+
+    // 색상 묶음: 품목|모델|형태|의무 1행만
+    const seen = {}, out = [];
+    for (const x of rows){
+      if (!onHome(x.코드)) continue;
+      const key = x.품목 + '|' + x.모델 + '|' + x.형태 + '|' + x.의무;
+      if (seen[key]) continue;
+      seen[key] = 1;
+      out.push(x);
+    }
+    const 품목순 = [...new Set(out.map(x => x.품목))];
+    return {
+      source: (fileName || '').replace(/\.xlsx$/i, '') || '수수료표 업로드',
+      built_at: new Date().toISOString().slice(0, 10),
+      품목순,
+      rows: out,
+    };
   }
 
   function comChipHTML(val, label, cnt, active, attr){
