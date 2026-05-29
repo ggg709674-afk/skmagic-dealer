@@ -920,6 +920,22 @@ const App = (() => {
     // 본사 model 필드는 "WPUIAC506SNW\n별점5.0 (24)" 형식이라 첫 줄(모델코드)만 사용
     const modelCode = (p.model || '').split('\n')[0].trim();
     document.getElementById('p-model').textContent = modelCode;
+
+    // 타사보상 안내 — 수수료표(COMMISSION_DB)에 타사보상 금액이 있는 모델만 노출
+    const benefitEl = document.getElementById('p-benefit');
+    if (benefitEl) {
+      const base = modelCode.slice(0, 10);
+      const rows = (window.COMMISSION_DB && window.COMMISSION_DB.rows) || [];
+      const hasCompete = rows.some(r =>
+        (r.코드 || '').slice(0, 10) === base && typeof r.타사보상 === 'number' && r.타사보상 > 0);
+      if (hasCompete) {
+        benefitEl.innerHTML = '<strong>타사 보상</strong> 지금 보고계시는 모델은 타사 보상이 가능한 제품입니다.';
+        benefitEl.hidden = false;
+      } else {
+        benefitEl.innerHTML = '';
+        benefitEl.hidden = true;
+      }
+    }
     document.getElementById('p-name').textContent = p.name || '';
     // 상품명 우측 색상명 — p._colorName 우선, 없으면 모델 코드 hint fallback
     // 비데(100000024)는 다 흰색 단품이라 색상명 생략.

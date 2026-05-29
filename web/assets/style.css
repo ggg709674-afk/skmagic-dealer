@@ -619,6 +619,18 @@ ul,ol{margin:0;padding:0;list-style:none}
   margin-top:18px;background:#fff;border:1px solid var(--line);
   border-radius:18px;padding:18px 20px;
 }
+.benefit-box{
+  margin-top:24px;padding:14px 16px;border-radius:14px;
+  background:var(--primary-soft);border:1px solid rgba(222,79,65,.18);
+  font-size:13px;color:var(--ink-2);line-height:1.55;
+  display:flex;align-items:center;gap:10px;
+}
+.benefit-box[hidden]{display:none}
+.benefit-box strong{
+  flex:none;font-size:12px;font-weight:700;color:var(--primary);
+  padding:3px 9px;border-radius:999px;background:#fff;
+  border:1px solid rgba(222,79,65,.28);
+}
 .option-row{display:flex;align-items:center;gap:16px;padding:8px 0;flex-wrap:wrap}
 .option-row[hidden]{display:none}
 .option-row + .option-row{border-top:1px solid var(--line);margin-top:8px;padding-top:14px}
