@@ -33,13 +33,19 @@
      {
        hidden:   { [goodsId]: true },
        featured: { [goodsId]: true },
+       featuredRank: { [goodsId]: number },   // 추천 켠 순서 (작을수록 먼저)
        order:    { [dispClsfNo]: [goodsId, goodsId, ...] },
        edits:    { [goodsId]: { name, price:{title,del,num}, benefits:[], tag, memo } },
        updated_at: ISO 문자열
      }
   ─────────────────────────────────────────────────── */
   function emptyOverrides(){
-    return { hidden:{}, featured:{}, order:{}, edits:{}, updated_at:null };
+    return { hidden:{}, featured:{}, featuredRank:{}, order:{}, edits:{}, updated_at:null };
+  }
+  /* 다음 추천 순번 = 현재 최대 + 1 (없으면 0) */
+  function nextFeaturedRank(ov){
+    const vals = Object.values(ov.featuredRank || {}).filter(v => typeof v === 'number');
+    return vals.length ? Math.max(...vals) + 1 : 0;
   }
 
   /* localStorage 폴백(오프라인/매장 미지정 모드) */
@@ -51,6 +57,7 @@
       return {
         hidden:   o.hidden   || {},
         featured: o.featured || {},
+        featuredRank: o.featuredRank || {},
         order:    o.order    || {},
         edits:    o.edits    || {},
         updated_at: o.updated_at || null,
@@ -65,7 +72,10 @@
     rows.forEach(r => {
       const gid = r.goods_id;
       if (r.hidden)   ov.hidden[gid]   = true;
-      if (r.featured) ov.featured[gid] = true;
+      if (r.featured) {
+        ov.featured[gid] = true;
+        if (r.featured_rank != null) ov.featuredRank[gid] = r.featured_rank;
+      }
       // edits
       const ed = {};
       if (r.name_override)               ed.name = r.name_override;
@@ -116,6 +126,7 @@
       goods_id: gid,
       hidden:   !!ov.hidden[gid],
       featured: !!ov.featured[gid],
+      featured_rank: ov.featured[gid] ? (ov.featuredRank[gid] ?? 0) : null,
       order_index,
       name_override:     ed.name || null,
       benefits_override: ed.benefits || null,
@@ -199,6 +210,7 @@
         goods_id: gid,
         hidden:   !!ov.hidden[gid],
         featured: !!ov.featured[gid],
+        featured_rank: ov.featured[gid] ? (ov.featuredRank[gid] ?? 0) : null,
         order_index,
         name_override:     ed.name || null,
         benefits_override: ed.benefits || null,
@@ -563,8 +575,13 @@
       else state.overrides.hidden[gid] = true;
       tr.classList.toggle('is-hidden', !e.target.checked);
     } else if (act === 'featured'){
-      if (e.target.checked) state.overrides.featured[gid] = true;
-      else delete state.overrides.featured[gid];
+      if (e.target.checked) {
+        state.overrides.featured[gid] = true;
+        state.overrides.featuredRank[gid] = nextFeaturedRank(state.overrides);
+      } else {
+        delete state.overrides.featured[gid];
+        delete state.overrides.featuredRank[gid];
+      }
       tr.classList.toggle('is-featured', e.target.checked);
     }
     persistOne(gid);

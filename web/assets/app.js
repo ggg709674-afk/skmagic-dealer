@@ -284,7 +284,7 @@ const App = (() => {
                 price_compete: r.price_compete,
                 price_card: r.price_card,
                 memo: r.memo,
-                hidden: false, featured: false, order_index: null,
+                hidden: false, featured: false, featured_rank: null, order_index: null,
               });
             }
           }
@@ -302,6 +302,7 @@ const App = (() => {
           goods_id: r.goods_id,
           hidden: r.hidden,
           featured: r.featured,
+          featured_rank: r.featured_rank ?? null,
           order_index: r.order_index,
           name_override: r.name_override || base.name_override || null,
           benefits_override: benefits,
@@ -336,6 +337,7 @@ const App = (() => {
         if (Array.isArray(r.benefits_override) && r.benefits_override.length) p.benefits = r.benefits_override;
         if (r.tag_override != null && r.tag_override !== '') p.tag = r.tag_override;
         p._featured = !!r.featured;
+        p._featRank = (r.featured_rank != null) ? r.featured_rank : null;
         p._order = (r.order_index != null) ? r.order_index : null;
         if (r.price_regular || r.price_sale || r.price_compete || r.price_card) {
           const orig = (p.prices && p.prices[0]) || {};
@@ -523,25 +525,14 @@ const App = (() => {
     const monthEl = document.getElementById('best-month');
     if (monthEl) monthEl.textContent = new Date().getMonth() + 1;
 
-    // best products — 매장이 '추천' 지정한 상품만, 카테고리 순서(정수기→공기청정기→비데→매트리스)로.
+    // best products — 매장이 '추천' 지정한 상품만, 추천 켠 순서(featured_rank)대로 진열.
     // 추천이 하나도 없으면 '인기 상품' 섹션 자체를 숨긴다.
     const best = document.getElementById('best-grid');
     if (best) {
-      // 상품의 카테고리 중 VISIBLE_CATEGORIES 에서 가장 앞선 순위 (정렬 키)
-      const catRank = (p) => {
-        let r = Infinity;
-        for (const c of (p.categories || [])) {
-          const i = VISIBLE_CATEGORIES.indexOf(c);
-          if (i !== -1 && i < r) r = i;
-        }
-        return r;
-      };
+      const rank = (p) => (p._featRank == null ? Infinity : p._featRank);
       const picks = data.products
         .filter(p => p._featured && (p.categories || []).some(isVisibleCat))
-        .sort((a, b) =>
-          (catRank(a) - catRank(b)) ||
-          ((a._order == null ? Infinity : a._order) - (b._order == null ? Infinity : b._order))
-        );
+        .sort((a, b) => rank(a) - rank(b));
       best.innerHTML = picks.map(productCard).join('');
       const bestSection = document.getElementById('best-section');
       if (bestSection) bestSection.style.display = picks.length ? '' : 'none';
