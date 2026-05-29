@@ -703,13 +703,14 @@ const App = (() => {
   function renderOptionTabs() {
     const opts = _optState.lastOpts;
     if (!opts) return;
-    // 사이즈 탭 — meta.specs_by_size 가 있을 때만 (매트리스 전용)
+    // 사이즈 탭 — 매트리스 카테고리 + specs_by_size 가 있을 때만
     const sizeRow = document.getElementById('p-size-row');
     const sizeTabs = document.getElementById('p-size-tabs');
     const meta = _optState.lastMeta;
+    const isMattress = ((_optState.lastP && _optState.lastP.categories) || []).includes('1000000245');
     const sbs = meta?.specs_by_size;
     const sizeKeys = sbs ? Object.keys(sbs).filter(k => k !== '_single') : [];
-    if (sizeKeys.length > 1 && sizeRow && sizeTabs) {
+    if (isMattress && sizeKeys.length > 1 && sizeRow && sizeTabs) {
       sizeRow.hidden = false;
       sizeTabs.innerHTML = sizeKeys.map(k =>
         `<button type="button" class="op-tab ${k === _optState.sizeKey ? 'on' : ''}" data-size="${escape(k)}">${escape(k)}</button>`
@@ -781,6 +782,12 @@ const App = (() => {
       }).join('');
     } else if (contractRow) {
       contractRow.hidden = true;
+    }
+    // 첫 번째로 보이는 옵션 행은 상단 구분선 제거 (사이즈 숨김 등으로 순서 바뀌어도 깔끔)
+    const block = document.getElementById('p-options');
+    if (block) {
+      const visRows = [...block.querySelectorAll('.option-row')].filter(r => !r.hidden);
+      visRows.forEach((r, i) => r.classList.toggle('first-visible', i === 0));
     }
   }
 

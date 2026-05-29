@@ -616,11 +616,12 @@ ul,ol{margin:0;padding:0;list-style:none}
 
 /* 약정/관리유형 옵션 블록 — 본사 페이지의 의무약정기간 + 관리유형 영역에 대응 */
 .option-block{
-  margin-top:18px;background:var(--surface);border:1px solid var(--line);
+  margin-top:18px;background:#fff;border:1px solid var(--line);
   border-radius:18px;padding:18px 20px;
 }
 .option-row{display:flex;align-items:center;gap:16px;padding:8px 0;flex-wrap:wrap}
 .option-row + .option-row{border-top:1px solid var(--line);margin-top:8px;padding-top:14px}
+.option-row.first-visible{border-top:none;margin-top:0;padding-top:8px}
 .option-row .op-label{
   min-width:78px;font-size:14px;font-weight:600;color:var(--ink-2);letter-spacing:-0.02em;
 }
