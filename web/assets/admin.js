@@ -860,7 +860,7 @@
     if (!hint || !db) return;
     const models = new Set(db.rows.map(r=>r.모델)).size;
     const when = db.built_at ? ` · 갱신 ${escape(db.built_at)}` : '';
-    hint.innerHTML = `기준: <strong>${escape(db.source || '')}</strong>${when} · 홈페이지 등록 모델 ${models}종 · 색상은 묶어서 표시(요금·수수료 동일).`;
+    hint.innerHTML = `기준: <strong>${escape(db.source || '')}</strong>${when} · 홈페이지 등록 모델 ${models}종 · 색상은 묶어서 표시(요금·수수료 동일)`;
   }
 
   /* ─── 엑셀 업로드 (드래그앤드랍 / 클릭) ───────────── */
