@@ -481,7 +481,7 @@ ul,ol{margin:0;padding:0;list-style:none}
 
 .product-card .body{padding:16px 16px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
 .product-card .model{font-size:11px;color:var(--ink-4);font-weight:600;letter-spacing:0.2px}
-.product-card .name{font-size:15px;font-weight:700;line-height:1.4;color:var(--ink-1);min-height:42px}
+.product-card .name{font-size:15px;font-weight:700;line-height:1.4;color:var(--ink-1);min-height:42px;word-break:keep-all}
 .product-card .benefits{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .product-card .bft{font-size:11px;color:var(--ink-3);background:var(--surface);padding:3px 8px;border-radius:6px}
 .product-card .price-row{margin-top:auto;padding-top:10px;border-top:1px dashed var(--line)}
@@ -807,6 +807,10 @@ ul,ol{margin:0;padding:0;list-style:none}
   .cat-card .nm{font-size:12.5px}
   .cat-card .cnt{font-size:10px}
   .product-grid{grid-template-columns:repeat(2,1fr)}
+  /* 2열로 좁아지면 데스크탑용 고정 높이(430px)가 과해 카드가 세로로 늘어남 → 내용 높이에 맞춤 */
+  .product-card{min-height:0}
+  /* 썸네일 패딩(16px)이 좁은 카드에선 상대적으로 커져 제품이 작아 보임 → PC와 동일한 채움 비율(~90%)로 축소 */
+  .product-card .thumb img{padding:8px}
   .detail-top{grid-template-columns:1fr;gap:30px}
   .gallery{position:relative}
   .footer-grid{grid-template-columns:1fr 1fr}
@@ -829,6 +833,19 @@ ul,ol{margin:0;padding:0;list-style:none}
 @media (max-width: 560px){
   .cat-grid{grid-template-columns:repeat(4,1fr);gap:4px}  /* 좁은 모바일도 4열 한 줄 유지 */
   .product-grid{grid-template-columns:repeat(2,1fr)}
+
+  /* 카드 폭이 절반(약 158px)이라 글자영역이 그대로면 세로로 길쭉해짐(H/W 2.4) →
+     글자·여백을 PC 비례로 줄여 PC와 같은 카드 비율(H/W ≈ 1.8)로 축소 */
+  .product-card .body{padding:9px 10px 11px;gap:3px}
+  .product-card .model{font-size:9px}
+  .product-card .name{font-size:12px;line-height:1.3;min-height:31px}
+  .product-card .benefits{gap:3px;margin-top:2px}
+  .product-card .bft{font-size:9px;padding:2px 5px}
+  .product-card .price-row{padding-top:7px}
+  .product-card .price-row .del{font-size:10px}
+  .product-card .price-row .now{font-size:11px}
+  .product-card .price-row .now strong{font-size:16px}
+
   .hero h1{font-size:28px}
   .section{padding:48px 0}
   .section-head h2{font-size:24px}
