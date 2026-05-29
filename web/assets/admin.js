@@ -845,7 +845,7 @@
     }
     const db = comDB();
     if (!db){
-      if (tbody) tbody.innerHTML = `<tr><td colspan="9" class="adm-empty">수수료 데이터가 없어요. 위에서 엑셀(.xlsx)을 올려 주세요.</td></tr>`;
+      if (tbody) tbody.innerHTML = `<tr><td colspan="10" class="adm-empty">수수료 데이터가 없어요. 헤더의 업로드 영역에 엑셀(.xlsx)을 올려 주세요.</td></tr>`;
       return;
     }
     updateComSourceHint();
@@ -1061,16 +1061,18 @@
     const list = comFiltered();
     if (cntEl) cntEl.innerHTML = `<strong>${list.length}</strong>행 표시 / 전체 ${db.rows.length}행`;
     if (!list.length){
-      tbody.innerHTML = `<tr><td colspan="9" class="adm-empty">조건에 맞는 항목이 없어요.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="10" class="adm-empty">조건에 맞는 항목이 없어요.</td></tr>`;
       return;
     }
     let prevModel = null;
     tbody.innerHTML = list.map(r => {
       const newModel = (r.모델 !== prevModel);
       prevModel = r.모델;
+      const { name, code } = comSplitModel(r.모델);
       return `<tr class="${newModel ? 'com-model-start':''}">
         <td>${escape(r.품목)}</td>
-        <td class="col-com-model">${escape(r.모델)}</td>
+        <td class="col-com-model">${escape(name)}</td>
+        <td class="col-com-code">${code ? escape(code) : '<span class="price-empty">—</span>'}</td>
         <td><span class="com-form com-form-${r.형태==='셀프형'?'self':'visit'}">${escape(r.형태)}</span></td>
         <td class="col-com-num">${r.의무!=null?escape(r.의무)+'개월':'<span class="price-empty">—</span>'}</td>
         <td>${escape(r.관리주기||'—')}</td>
@@ -1080,6 +1082,26 @@
         <td class="col-com-num com-fee">${comFmt(r.수수료합계)}</td>
       </tr>`;
     }).join('');
+  }
+
+  /* 모델 문자열을 이름 + 제품코드요약으로 분리.
+     예: "초소형플러스 WPUJAC115S" → {name:"초소형플러스", code:"WPUJAC115S"}
+         "위커힐 스탠다드(MAT-730)" → {name:"위커힐 스탠다드", code:"MAT-730"}
+         "MAT*M430R" (이름 없는 순수 코드) → {name:"MAT*M430R", code:""} */
+  function comSplitModel(model){
+    const m = String(model || '').trim();
+    if (!m) return { name: '', code: '' };
+    // 1) 끝에 괄호로 코드: "위커힐 스탠다드(MAT-730)"
+    const paren = m.match(/^(.+?)\s*\(([A-Za-z0-9][A-Za-z0-9*\-]*)\)$/);
+    if (paren) return { name: paren[1].trim(), code: paren[2] };
+    // 2) 이름 + 마지막 토큰이 코드형(영문/숫자/-/*, 숫자 1개 이상)
+    const parts = m.split(/\s+/);
+    const last = parts[parts.length - 1];
+    if (parts.length > 1 && /\d/.test(last) && /^[A-Z0-9][A-Z0-9*\-]*$/.test(last)){
+      return { name: parts.slice(0, -1).join(' '), code: last };
+    }
+    // 3) 분리 불가(순수 코드 등) — 전체를 모델명으로
+    return { name: m, code: '' };
   }
 
   /* ─── 기본 정보(매장) 폼 ───────────────────────── */

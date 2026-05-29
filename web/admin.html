@@ -97,8 +97,7 @@
       <input type="file" id="com-file" accept=".xlsx" hidden>
       <div class="com-upload-inner">
         <div class="com-upload-ic">⤓</div>
-        <div class="com-upload-text"><strong>수수료표 엑셀(.xlsx)</strong> 드래그/클릭 업로드
-          <span class="com-upload-sub">— 홈페이지 모델만 자동 갱신</span></div>
+        <div class="com-upload-text"><strong>수수료표 엑셀(.xlsx)</strong> 드래그/클릭 업로드</div>
       </div>
       <div class="com-upload-status" id="com-upload-status" hidden></div>
     </div>
@@ -117,13 +116,14 @@
     <div class="adm-filter">
       <div class="adm-filter-row">
         <div class="adm-chips" id="cat-chips"></div>
+        <span class="adm-filter-div"></span>
+        <label class="adm-toggle-pill">
+          <input type="checkbox" id="filter-hidden"> <span>숨김 포함</span>
+        </label>
+        <label class="adm-toggle-pill">
+          <input type="checkbox" id="filter-featured"> <span>추천만</span>
+        </label>
         <div class="adm-filter-tools">
-          <label class="adm-toggle-pill">
-            <input type="checkbox" id="filter-hidden"> <span>숨김 포함</span>
-          </label>
-          <label class="adm-toggle-pill">
-            <input type="checkbox" id="filter-featured"> <span>추천만</span>
-          </label>
           <div class="adm-count" id="list-count">—</div>
           <div class="adm-search">
             <input type="text" id="search-input" placeholder="모델명 / 상품명 / 코드 검색…" autocomplete="off">
@@ -183,10 +183,23 @@
 
     <div class="adm-table-wrap">
       <table class="adm-table adm-com-table" id="commission-table">
+        <colgroup>
+          <col style="width:60px">
+          <col style="width:188px">
+          <col style="width:120px">
+          <col style="width:62px">
+          <col style="width:82px">
+          <col style="width:82px">
+          <col style="width:92px">
+          <col style="width:92px">
+          <col style="width:92px">
+          <col style="width:104px">
+        </colgroup>
         <thead>
           <tr>
             <th>품목</th>
-            <th class="col-com-model">모델 (제품코드요약)</th>
+            <th class="col-com-model">모델</th>
+            <th class="col-com-code">제품코드</th>
             <th>형태</th>
             <th class="col-com-num">의무기간</th>
             <th>관리주기</th>
@@ -197,7 +210,7 @@
           </tr>
         </thead>
         <tbody id="commission-tbody">
-          <tr><td colspan="9" class="adm-empty">불러오는 중…</td></tr>
+          <tr><td colspan="10" class="adm-empty">불러오는 중…</td></tr>
         </tbody>
       </table>
     </div>
