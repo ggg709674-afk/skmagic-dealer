@@ -11,6 +11,7 @@
     { "source": "/admin",           "destination": "/web/admin.html" },
     { "source": "/admin.html",      "destination": "/web/admin.html" },
     { "source": "/assets/:path*",   "destination": "/web/assets/:path*" },
+    { "source": "/:slug/assets/:path*", "destination": "/web/assets/:path*" },
     { "source": "/:slug/admin",     "destination": "/web/admin.html?store=:slug" },
     { "source": "/:slug",           "destination": "/web/index.html?store=:slug" }
   ],
