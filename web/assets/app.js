@@ -670,6 +670,7 @@ const App = (() => {
     _optState.sizeKey = sizeKeys.length > 1 ? sizeKeys[0] : null;
     renderOptionTabs();
     renderOptionInfo();
+    renderPriceCard();
     renderSpecTableForCurrentSize();
     attachOptionHandlers();
   }
@@ -727,7 +728,8 @@ const App = (() => {
       const TYPE_TO_NAME = { '셀프형': '셀프관리', '방문형': '방문관리' };
       const myType = (opts.care_types[0]?.contracts?.[0]?.contract_type || '').trim();
       let careNames;
-      if (opts.care_types.length >= 2) {
+      if (opts.care_types.length >= 2 || opts._policy) {
+        // 정책표 연동(_policy)이면 실제 형태 그대로. (셀프만 있으면 셀프 버튼 1개)
         careNames = opts.care_types.map((ct, i) => ct.name || ('타입 ' + (i+1)));
       } else {
         // care_types 1개 — 매트리스 카테고리에 한해서만 페어 여부 정밀 판단
@@ -810,6 +812,102 @@ const App = (() => {
     ).join('');
   }
 
+  const _DUTY_YEARS = { 36: 3, 48: 4, 60: 5, 72: 6, 84: 7 };
+
+  // 수수료표(COMMISSION_DB)에서 형태(셀프/방문)×의무별 옵션 모델 생성.
+  // meta.options와 같은 shape({care_types:[{name,contracts:[...]}]})로 만들어 기존 렌더 재사용.
+  // 가격(기준가/기본요금/타사보상)·관리주기는 정책표, 필터주기는 크롤(meta) 보강.
+  function buildPolicyOptions(modelCode, meta) {
+    const rows = (window.COMMISSION_DB && window.COMMISSION_DB.rows) || [];
+    const base = (modelCode || '').slice(0, 10);
+    if (!base) return null;
+    const mine = rows.filter(r => (r.코드 || '').slice(0, 10) === base);
+    if (!mine.length) return null;
+    const dutyLabel = d => (_DUTY_YEARS[d] ? `${_DUTY_YEARS[d]}년` : `${d}개월`);
+    // 크롤 메타에서 (형태,의무) → 필터주기 조회
+    const metaContracts = [];
+    ((meta && meta.options && meta.options.care_types) || []).forEach(ct =>
+      (ct.contracts || []).forEach(c => metaContracts.push(c)));
+    const filterOf = (type, duty) => {
+      const m = metaContracts.find(c => (c.contract_type || '').trim() === type && c.duty_use_months === duty);
+      return m ? (m.filter_period || null) : null;
+    };
+    const NAME = { '셀프형': '셀프관리', '방문형': '방문관리' };
+    const groups = [];
+    ['셀프형', '방문형'].forEach(type => {
+      const trows = mine.filter(r => r.형태 === type).sort((a, b) => a.의무 - b.의무);
+      if (!trows.length) return;
+      groups.push({
+        name: NAME[type] || type, contract_type: type,
+        contracts: trows.map(r => ({
+          label: dutyLabel(r.의무), years: _DUTY_YEARS[r.의무] || null,
+          duty_use_months: r.의무, contract_type: type,
+          visit_period: (r.관리주기 && r.관리주기 !== '-') ? r.관리주기 : null,
+          filter_period: type === '셀프형' ? filterOf(type, r.의무) : null,
+          기준가: r.기준가, 기본요금: r.기본요금, 타사보상: r.타사보상
+        }))
+      });
+    });
+    return groups.length ? { care_types: groups, _policy: true } : null;
+  }
+
+  function renderPriceCard() {
+    const priceEl = document.getElementById('p-price');
+    if (!priceEl) return;
+    const p = _optState.lastP;
+    const opts = _optState.lastOpts;
+    const fmt = n => (n == null ? '-' : Number(n).toLocaleString('ko-KR'));
+    // 정책표 연동 — 선택된 형태/약정의 기준가·기본요금·타사보상
+    if (opts && opts._policy) {
+      const cur = opts.care_types[_optState.careIdx] || opts.care_types[0];
+      const c = cur && cur.contracts && cur.contracts[_optState.contractIdx];
+      if (c) {
+        let html = `
+          <div class="row">
+            <span class="label">월 렌탈료</span>
+            <span class="val">
+              ${c.기준가 ? `<span class="del">월 ${fmt(c.기준가)}</span>` : ''}
+              <small>월</small>${fmt(c.기본요금)}<small>원</small>
+            </span>
+          </div>`;
+        if (typeof c.타사보상 === 'number' && c.타사보상 > 0) {
+          html += `
+          <div class="row">
+            <span class="label">타사 보상가</span>
+            <span class="val"><small>월</small>${fmt(c.타사보상)}<small>원</small></span>
+          </div>`;
+        }
+        const tagText = (p && p.tag) || '상담 시 약정 옵션·할인 안내';
+        html += `<div class="row" style="border-top:1px solid var(--line);padding-top:14px"><span class="label" style="font-weight:600">약정 옵션</span><span style="font-size:13px;color:var(--ink-3);text-align:right;max-width:240px">${escape(tagText)}</span></div>`;
+        priceEl.innerHTML = html;
+        return;
+      }
+    }
+    // legacy — 크롤 p.prices
+    const rows = (p && p.prices || []).map(pr => `
+      <div class="row">
+        <span class="label">${escape(pr.title || '월 렌탈료')}</span>
+        <span class="val">
+          ${pr.del ? `<span class="del">${escape(pr.del)}</span>` : ''}
+          <small>월</small>${escape(pr.num || '-')}<small>원</small>
+        </span>
+      </div>
+    `).join('');
+    const ex = (p && p._priceExtra) || {};
+    const extraRows = [
+      ex.compete ? ['타사 보상가', ex.compete] : null,
+      ex.card ? ['제휴카드 할인 시', ex.card] : null,
+    ].filter(Boolean).map(([k, v]) => `
+      <div class="row">
+        <span class="label">${escape(k)}</span>
+        <span class="val"><small>월</small>${escape(v)}<small>원</small></span>
+      </div>
+    `).join('');
+    const tagText = (p && p.tag) || '상담 시 약정 옵션·할인 안내';
+    const tag = `<div class="row" style="border-top:1px solid var(--line);padding-top:14px"><span class="label" style="font-weight:600">약정 옵션</span><span style="font-size:13px;color:var(--ink-3);text-align:right;max-width:240px">${escape(tagText)}</span></div>`;
+    priceEl.innerHTML = rows + extraRows + tag;
+  }
+
   function attachOptionHandlers() {
     const block = document.getElementById('p-options');
     if (!block || block.dataset.handlerAttached) return;
@@ -820,16 +918,26 @@ const App = (() => {
       if (tab.dataset.care !== undefined) {
         const idx = parseInt(tab.dataset.care, 10);
         if (idx === _optState.careIdx) return;
+        // 관리유형 바꿔도 선택한 약정(년) 유지
+        const opts = _optState.lastOpts;
+        const prevCur = opts.care_types[_optState.careIdx] || opts.care_types[0];
+        const prevC = prevCur && prevCur.contracts && prevCur.contracts[_optState.contractIdx];
+        const prevYears = prevC ? (prevC.years || prevC.duty_use_months) : null;
         _optState.careIdx = idx;
-        _optState.contractIdx = 0;  // 관리유형 바뀌면 약정 reset
+        const newCur = opts.care_types[idx] || opts.care_types[0];
+        const newContracts = (newCur && newCur.contracts) || [];
+        const ni = newContracts.findIndex(c => (c.years || c.duty_use_months) === prevYears);
+        _optState.contractIdx = ni >= 0 ? ni : Math.min(_optState.contractIdx, Math.max(0, newContracts.length - 1));
         renderOptionTabs();
         renderOptionInfo();
+        renderPriceCard();
       } else if (tab.dataset.contract !== undefined) {
         const idx = parseInt(tab.dataset.contract, 10);
         if (idx === _optState.contractIdx) return;
         _optState.contractIdx = idx;
         renderOptionTabs();
         renderOptionInfo();
+        renderPriceCard();
       } else if (tab.dataset.size !== undefined) {
         const sz = tab.dataset.size;
         if (sz === _optState.sizeKey) return;
@@ -1033,7 +1141,8 @@ const App = (() => {
     // meta.options: { care_types: [{ id, name, contracts: [{label, years, duty_use_months, filter_period, visit_period, ...}] }] }
     // care_types > 1 이면 관리유형 탭. contracts > 0 이면 약정기간 탭. 선택값 변경 시 옵션 정보 동적 갱신.
     const optBlock = document.getElementById('p-options');
-    const opts = meta && meta.options;
+    // 정책표(수수료표) 우선 — 형태/의무별 데이터가 가장 완전. 없으면 meta.options fallback.
+    const opts = buildPolicyOptions(modelCode, meta) || (meta && meta.options);
     if (optBlock) {
       if (opts && Array.isArray(opts.care_types) && opts.care_types.length > 0
           && opts.care_types.some(ct => (ct.contracts || []).length > 0)) {
@@ -1041,36 +1150,10 @@ const App = (() => {
         renderOptionsUI(opts, p, meta);
       } else {
         optBlock.hidden = true;
+        _optState.lastOpts = null;
+        _optState.lastP = p;
+        renderPriceCard();
       }
-    }
-
-    // price card
-    const priceEl = document.getElementById('p-price');
-    if (priceEl) {
-      const rows = (p.prices || []).map(pr => `
-        <div class="row">
-          <span class="label">${escape(pr.title || '월 렌탈료')}</span>
-          <span class="val">
-            ${pr.del ? `<span class="del">${escape(pr.del)}</span>` : ''}
-            <small>월</small>${escape(pr.num || '-')}<small>원</small>
-          </span>
-        </div>
-      `).join('');
-      // 매장 지정 추가 가격 — 타사 보상가 / 제휴카드 할인 시
-      const ex = p._priceExtra || {};
-      const extraRows = [
-        ex.compete ? ['타사 보상가', ex.compete] : null,
-        ex.card ? ['제휴카드 할인 시', ex.card] : null,
-      ].filter(Boolean).map(([k, v]) => `
-        <div class="row">
-          <span class="label">${escape(k)}</span>
-          <span class="val"><small>월</small>${escape(v)}<small>원</small></span>
-        </div>
-      `).join('');
-      // 약정 옵션 행 — 색상 변형 간 카드 사이즈 통일을 위해 tag 비어있어도 기본 문구 표시
-      const tagText = p.tag || '상담 시 약정 옵션·할인 안내';
-      const tag = `<div class="row" style="border-top:1px solid var(--line);padding-top:14px"><span class="label" style="font-weight:600">약정 옵션</span><span style="font-size:13px;color:var(--ink-3);text-align:right;max-width:240px">${escape(tagText)}</span></div>`;
-      priceEl.innerHTML = rows + extraRows + tag;
     }
 
     // 제품 사양 — specs_by_size(매트리스 사이즈별) 우선, 없으면 specs
