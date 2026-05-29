@@ -833,6 +833,8 @@
       comInited = true;
       const search = document.getElementById('com-search');
       if (search) search.addEventListener('input', () => { comState.q = search.value.trim(); renderComTable(); });
+      const dl = document.getElementById('com-download');
+      if (dl) dl.addEventListener('click', downloadCommissionXlsx);
       // Supabase 에 저장된 최신 수수료표가 있으면 우선 사용
       if (window.skmFetchCommission){
         try {
@@ -1068,11 +1070,11 @@
     tbody.innerHTML = list.map(r => {
       const newModel = (r.모델 !== prevModel);
       prevModel = r.모델;
-      const { name, code } = comSplitModel(r.모델);
+      const { name } = comSplitModel(r.모델);
       return `<tr class="${newModel ? 'com-model-start':''}">
         <td>${escape(r.품목)}</td>
         <td class="col-com-model">${escape(name)}</td>
-        <td class="col-com-code">${code ? escape(code) : '<span class="price-empty">—</span>'}</td>
+        <td class="col-com-code">${r.코드 ? escape(r.코드) : '<span class="price-empty">—</span>'}</td>
         <td><span class="com-form com-form-${r.형태==='셀프형'?'self':'visit'}">${escape(r.형태)}</span></td>
         <td class="col-com-num">${r.의무!=null?escape(r.의무)+'개월':'<span class="price-empty">—</span>'}</td>
         <td>${escape(r.관리주기||'—')}</td>
@@ -1102,6 +1104,30 @@
     }
     // 3) 분리 불가(순수 코드 등) — 전체를 모델명으로
     return { name: m, code: '' };
+  }
+
+  /* 현재 필터된 행을 엑셀(.xlsx)로 다운로드 (SheetJS). */
+  function downloadCommissionXlsx(){
+    const db = comDB();
+    if (!db || typeof XLSX === 'undefined') return;
+    const list = comFiltered();
+    if (!list.length) return;
+    const aoa = [['품목','모델','제품코드','형태','의무기간','관리주기','기준가','기본요금','타사보상','수수료합계']];
+    list.forEach(r => {
+      const { name } = comSplitModel(r.모델);
+      aoa.push([
+        r.품목, name, r.코드 || '', r.형태,
+        r.의무 != null ? r.의무 + '개월' : '',
+        r.관리주기 || '',
+        r.기준가, r.기본요금, r.타사보상, r.수수료합계,
+      ]);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [{wch:8},{wch:22},{wch:16},{wch:8},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:12}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '수수료표');
+    const tag = (db.built_at || new Date().toISOString().slice(0,10));
+    XLSX.writeFile(wb, `수수료표_${tag}.xlsx`);
   }
 
   /* ─── 기본 정보(매장) 폼 ───────────────────────── */
