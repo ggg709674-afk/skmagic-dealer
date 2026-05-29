@@ -500,5 +500,29 @@ document.addEventListener('visibilitychange', () => {
 
 ---
 
+## 📅 2026-05-29 — 분양 매장 간 교차 로그인 차단 (admin 접근 권한 게이트)
+
+### 배경 / 문제
+- Supabase 프로젝트(`qpexfvwrlwkpjyihlnwz`, woozoo-apps)를 다른 앱(010king 등)과 **공유** 중 → Auth Users 목록 섞임. 프로젝트 분리는 **안 하기로 결정**(기능상 문제 없고 RLS로 권한 격리되므로).
+- 기존 admin 로그인 게이트(`ensureAuth`)는 **로그인 성공 여부만 체크**, 권한 미검증 → 로그인된 아무 계정이나 `/{anySlug}/admin` 관리화면 UI가 열림(수정은 RLS가 막지만 화면/공개데이터 노출). 분양 사업에서 매장 간 격리 필요.
+
+### 한 일 (커밋 `6de7749`)
+`web/assets/admin.js`:
+- `authorizeAdmin(slug, authCtx)` 추가 — 본부(super_admin)=전체 OK / 매장 운영자=URL 슬러그가 자기 매장과 일치해야 OK(`?store=`바꿔치기도 차단) / 연결 매장 없음(외부 앱 계정)=차단.
+- `showAccessDenied(reason)` 추가 — 로그인 게이트 카드를 "접근 권한이 없습니다" + 사유 + "다른 계정으로 로그인"(=signOut) 으로 교체.
+- `init()`: 로그인 통과 직후 `authorizeAdmin` 판정 → 실패 시 `showAccessDenied` 후 `return`(admin UI 자체가 안 뜸). 기존 중복 `const slug` 정리.
+
+### 동작 (비번 맞다는 전제)
+- 본부 → 어느 매장이든 통과. skmagic 운영자 → `/skmagic/admin`만 통과.
+- 남의 매장(`/storeB/admin`,`?store=storeB`) → 차단 안내. 외부 앱 계정(010king 등) → "연결된 매장 없음" 차단.
+- 비번 틀리면 그 전 단계(인증)에서 "로그인 실패", 권한 판정까지 안 감.
+
+### 알아둘 점
+- **클라이언트 UI 게이트** — 진짜 방어선은 RLS(이미 적용): 남의 매장 *쓰기* 차단(`is_my_store`/`is_super_admin`), 상담(고객 PII) *읽기*도 `my_visible_stores`로 차단. 이번 건 방어 2겹째.
+- stores/admin_overrides는 카탈로그 표시용 public read라 콘솔로 남의 가격/노출값은 볼 수 있음(민감정보 아님).
+- ⚠ admin은 `document.write`로 스크립트 로드(admin.html:296~) → **preview 도구 렌더 불가**. 실제 로그인 테스트는 형이 배포본/로컬 브라우저에서.
+
+---
+
 *최종 업데이트: 2026-05-29*
 *다음 세션에서 컨텍스트 빠르게 잡고 싶으면 이 파일부터 읽으면 됨.*
