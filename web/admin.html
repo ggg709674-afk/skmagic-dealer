@@ -79,6 +79,7 @@
   </nav>
 
   <div class="adm-side-foot">
+    <div class="adm-side-store" id="adm-side-store" hidden></div>
     <a href="./index.html" class="adm-side-link" data-back-site>← 사이트로 돌아가기</a>
   </div>
 </aside>
@@ -90,6 +91,18 @@
       <h1 id="adm-page-title">상품 관리</h1>
       <p class="adm-header-sub" id="adm-page-sub">노출 여부 · 추천 배지 · 표시 순서를 관리합니다.</p>
     </div>
+
+    <!-- 수수료표 엑셀 업로드 (수수료 확인 메뉴에서만 표시) -->
+    <div class="com-upload" id="com-upload" hidden>
+      <input type="file" id="com-file" accept=".xlsx" hidden>
+      <div class="com-upload-inner">
+        <div class="com-upload-ic">⤓</div>
+        <div class="com-upload-text"><strong>수수료표 엑셀(.xlsx)</strong> 드래그/클릭 업로드
+          <span class="com-upload-sub">— 홈페이지 모델만 자동 갱신</span></div>
+      </div>
+      <div class="com-upload-status" id="com-upload-status" hidden></div>
+    </div>
+
     <div class="adm-header-actions">
       <span class="adm-dirty-flag" id="adm-dirty" hidden></span>
       <span class="adm-user-chip" id="adm-user-chip" hidden></span>
@@ -104,18 +117,18 @@
     <div class="adm-filter">
       <div class="adm-filter-row">
         <div class="adm-chips" id="cat-chips"></div>
-        <div class="adm-search">
-          <input type="text" id="search-input" placeholder="모델명 / 상품명 / 코드 검색…" autocomplete="off">
+        <div class="adm-filter-tools">
+          <label class="adm-toggle-pill">
+            <input type="checkbox" id="filter-hidden"> <span>숨김 포함</span>
+          </label>
+          <label class="adm-toggle-pill">
+            <input type="checkbox" id="filter-featured"> <span>추천만</span>
+          </label>
+          <div class="adm-count" id="list-count">—</div>
+          <div class="adm-search">
+            <input type="text" id="search-input" placeholder="모델명 / 상품명 / 코드 검색…" autocomplete="off">
+          </div>
         </div>
-      </div>
-      <div class="adm-filter-row adm-filter-toggles">
-        <label class="adm-toggle-pill">
-          <input type="checkbox" id="filter-hidden"> <span>숨김 포함</span>
-        </label>
-        <label class="adm-toggle-pill">
-          <input type="checkbox" id="filter-featured"> <span>추천만</span>
-        </label>
-        <div class="adm-count" id="list-count">—</div>
       </div>
     </div>
 
@@ -152,27 +165,17 @@
   <!-- ===== 수수료 확인 패널 ===== -->
   <section class="adm-panel" data-panel="commission" hidden>
 
-    <!-- 엑셀 업로드 (드래그앤드랍) -->
-    <div class="com-upload" id="com-upload">
-      <input type="file" id="com-file" accept=".xlsx" hidden>
-      <div class="com-upload-inner">
-        <div class="com-upload-ic">⤓</div>
-        <div class="com-upload-text"><strong>수수료표 엑셀(.xlsx) 드래그</strong> 또는 클릭해서 올리기
-          <span class="com-upload-sub">— 홈페이지 등록 모델만 자동 갱신</span></div>
-      </div>
-      <div class="com-upload-status" id="com-upload-status" hidden></div>
-    </div>
-
     <div class="adm-filter">
       <div class="adm-filter-row">
         <div class="adm-chips" id="com-cat-chips"></div>
-        <div class="adm-search">
-          <input type="text" id="com-search" placeholder="모델명 / 코드 검색…" autocomplete="off">
-        </div>
-      </div>
-      <div class="adm-filter-row adm-filter-toggles">
+        <span class="adm-filter-div"></span>
         <div class="adm-chips" id="com-form-chips"></div>
-        <div class="adm-count" id="com-count">—</div>
+        <div class="adm-filter-tools">
+          <div class="adm-count" id="com-count">—</div>
+          <div class="adm-search">
+            <input type="text" id="com-search" placeholder="모델명 / 코드 검색…" autocomplete="off">
+          </div>
+        </div>
       </div>
     </div>
 

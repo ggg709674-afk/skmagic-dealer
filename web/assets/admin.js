@@ -795,6 +795,10 @@
     document.querySelector('[data-panel="store"]').hidden      = (meta.kind !== 'store');
     document.querySelector('[data-panel="soon"]').hidden       = (meta.kind !== 'soon');
 
+    // 수수료표 업로드 드롭존은 수수료 메뉴에서만 헤더에 노출
+    const comUp = document.getElementById('com-upload');
+    if (comUp) comUp.hidden = (meta.kind !== 'commission');
+
     document.getElementById('adm-page-title').textContent = meta.title;
     document.getElementById('adm-page-sub').textContent   = meta.sub;
 
@@ -1363,15 +1367,15 @@
     document.querySelectorAll('a[data-back-site]').forEach(a => { a.href = target; });
   }
 
-  /* 헤더에 현재 매장 표시 */
+  /* 사이드바에 현재 매장(상호) 표시 — 사이트로 돌아가기 위 */
   function renderStoreLabel(){
-    const subEl = document.getElementById('adm-page-sub');
-    if (!subEl) return;
-    const base = '노출 여부 · 추천 배지 · 표시 순서 · 매장 자체 가격/이름 수정.';
+    const el = document.getElementById('adm-side-store');
+    if (!el) return;
+    el.hidden = false;
     if (state.store){
-      subEl.innerHTML = `<strong style="color:var(--primary)">${escape(state.store.name)}</strong> · ${base}`;
+      el.innerHTML = `<span class="adm-side-store-name">${escape(state.store.name)}</span>`;
     } else {
-      subEl.innerHTML = `<span style="color:var(--ink-4)">⚠ 매장 미지정 (로컬 모드)</span> · ${base}`;
+      el.innerHTML = `<span class="adm-side-store-warn">⚠ 매장 미지정 (로컬 모드)</span>`;
     }
   }
 

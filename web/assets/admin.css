@@ -94,6 +94,18 @@ body.admin-body{
   text-decoration:none;
 }
 .adm-side-link:hover{color:#fff}
+.adm-side-store{
+  margin-bottom:10px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--adm-side-line);
+  line-height:1.3;
+}
+.adm-side-store-name{
+  font-size:13px; font-weight:700; color:#fff;
+}
+.adm-side-store-warn{
+  font-size:12px; color:var(--adm-side-ink-dim);
+}
 
 /* ===== Main area ===== */
 .adm-main{
@@ -102,12 +114,14 @@ body.admin-body{
 }
 
 .adm-header{
-  display:flex; align-items:center; justify-content:space-between;
+  display:flex; align-items:center;
+  gap:16px;
   padding:22px 32px 18px;
   background:#fff;
   border-bottom:1px solid var(--line);
   flex-shrink:0;
 }
+.adm-header-title{margin-right:auto; min-width:0}
 .adm-header h1{
   font-size:22px; font-weight:800; letter-spacing:-0.4px;
   margin:0;
@@ -117,6 +131,11 @@ body.admin-body{
   margin:4px 0 0;
 }
 .adm-header-actions{display:flex; align-items:center; gap:8px; flex-shrink:0}
+
+/* 헤더에 들어간 수수료 업로드 드롭존 */
+.adm-header .com-upload{
+  flex:0 1 360px; min-width:240px;
+}
 
 .adm-dirty-flag{
   display:inline-flex; align-items:center;
@@ -168,7 +187,7 @@ body.admin-body{
   margin-bottom:16px;
 }
 .adm-filter-row{
-  display:flex; align-items:center; gap:14px;
+  display:flex; align-items:center; gap:10px;
   flex-wrap:wrap;
 }
 .adm-filter-row + .adm-filter-row{margin-top:12px}
@@ -198,7 +217,7 @@ body.admin-body{
   position:relative;
 }
 .adm-search input{
-  width:280px;
+  width:200px;
   height:36px;
   padding:0 14px;
   border:1px solid var(--line-strong);
@@ -214,14 +233,27 @@ body.admin-body{
 .adm-toggle-pill{
   display:inline-flex; align-items:center; gap:6px;
   font-size:12.5px; color:var(--ink-2);
-  cursor:pointer; user-select:none;
+  cursor:pointer; user-select:none; white-space:nowrap;
 }
 .adm-toggle-pill input{margin:0}
 .adm-count{
   margin-left:auto;
-  font-size:12.5px; color:var(--ink-3);
+  font-size:12.5px; color:var(--ink-3); white-space:nowrap;
 }
 .adm-count strong{color:var(--ink-1); font-weight:700}
+
+/* 필터 한 줄: 우측 도구 묶음(체크박스·카운트·검색) */
+.adm-filter-tools{
+  display:flex; align-items:center; gap:10px;
+  margin-left:auto; flex-wrap:wrap;
+}
+.adm-filter-tools .adm-count,
+.adm-filter-tools .adm-search{margin-left:0}
+/* 칩 그룹 사이 구분선 (품목 ↔ 형태) */
+.adm-filter-div{
+  width:1px; align-self:stretch; min-height:24px;
+  background:var(--line);
+}
 
 .adm-panel-hint{
   margin:0 0 12px;
@@ -740,7 +772,7 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 
 /* 수수료표 엑셀 업로드 (드래그앤드랍) */
 .com-upload{
-  margin-bottom:12px; padding:9px 14px;
+  padding:8px 14px;
   border:1.5px dashed var(--line); border-radius:10px;
   background:var(--surface-2, #fafbfc); cursor:pointer;
   transition:border-color .15s, background .15s;
