@@ -865,10 +865,7 @@ const App = (() => {
         let html = `
           <div class="row">
             <span class="label">월 렌탈료</span>
-            <span class="val">
-              ${c.기준가 ? `<span class="del">월 ${fmt(c.기준가)}</span>` : ''}
-              <small>월</small>${fmt(c.기본요금)}<small>원</small>
-            </span>
+            <span class="val"><small>월</small>${fmt(c.기본요금)}<small>원</small></span>
           </div>`;
         if (typeof c.타사보상 === 'number' && c.타사보상 > 0) {
           html += `
