@@ -698,17 +698,41 @@ const App = (() => {
     return { careIdx, contractIdx: contractIdx < 0 ? 0 : contractIdx };
   }
 
+  // 사이즈 키(슈퍼싱글/퀸/킹) → 제품코드 4번째 사이즈 글자(S/Q/K)
+  function sizeLetterOf(sizeKey) {
+    const k = String(sizeKey || '');
+    if (/킹|king/i.test(k) || /^K/i.test(k)) return 'K';
+    if (/퀸|queen/i.test(k) || /^Q/i.test(k)) return 'Q';
+    if (/싱글|single/i.test(k) || /^S/i.test(k)) return 'S';
+    return '';
+  }
+  // 선택한 사이즈에 맞는 코드로 정책 옵션 재생성 (매트리스 전용). 실패 시 null.
+  function optionsForSize(sizeKey) {
+    const p = _optState.lastP, meta = _optState.lastMeta;
+    if (!p) return null;
+    const regCode = (p.model || '').split('\n')[0].trim();
+    if (!/^MAT/.test(regCode)) return null;       // 매트리스(MAT 코드)만
+    const letter = sizeLetterOf(sizeKey);
+    if (!letter) return null;
+    const sizeCode = regCode.slice(0, 3) + letter + regCode.slice(4);
+    return buildPolicyOptions(sizeCode, meta);
+  }
+
   function renderOptionsUI(opts, p, meta) {
     _optState.lastOpts = opts;
     _optState.lastP = p || null;
     _optState.lastMeta = meta || null;
-    const def = pickDefaultSelection(opts);
-    _optState.careIdx = def.careIdx;
-    _optState.contractIdx = def.contractIdx;
-    // 매트리스 사이즈 — specs_by_size 키 첫 번째를 기본값
+    // 매트리스 사이즈 — specs_by_size 키 첫 번째를 기본값 + 사이즈별 가격 옵션 재생성
     const sbs = meta?.specs_by_size;
     const sizeKeys = sbs ? Object.keys(sbs).filter(k => k !== '_single') : [];
     _optState.sizeKey = sizeKeys.length > 1 ? sizeKeys[0] : null;
+    if (_optState.sizeKey) {
+      const sized = optionsForSize(_optState.sizeKey);
+      if (sized) _optState.lastOpts = sized;
+    }
+    const def = pickDefaultSelection(_optState.lastOpts);
+    _optState.careIdx = def.careIdx;
+    _optState.contractIdx = def.contractIdx;
     renderOptionTabs();
     renderOptionInfo();
     renderPriceCard();
@@ -984,8 +1008,26 @@ const App = (() => {
       } else if (tab.dataset.size !== undefined) {
         const sz = tab.dataset.size;
         if (sz === _optState.sizeKey) return;
+        // 직전 선택(관리유형·약정년) 보존
+        const prevCare = _optState.lastOpts?.care_types?.[_optState.careIdx];
+        const prevContract = prevCare?.contracts?.[_optState.contractIdx];
+        const prevType = prevCare?.contract_type;
+        const prevYears = prevContract ? (prevContract.years || prevContract.duty_use_months) : null;
         _optState.sizeKey = sz;
+        // 사이즈별 코드로 가격 옵션 재생성
+        const sized = optionsForSize(sz);
+        if (sized) {
+          _optState.lastOpts = sized;
+          let ci = sized.care_types.findIndex(ct => ct.contract_type === prevType);
+          if (ci < 0) ci = 0;
+          _optState.careIdx = ci;
+          const cs = sized.care_types[ci].contracts || [];
+          let ki = cs.findIndex(c => (c.years || c.duty_use_months) === prevYears);
+          _optState.contractIdx = ki >= 0 ? ki : 0;
+        }
         renderOptionTabs();
+        renderOptionInfo();
+        renderPriceCard();
         renderSpecTableForCurrentSize();
       }
     });
@@ -1376,6 +1418,15 @@ const App = (() => {
 
   /* 외부에서 호출하는 진입점 */
   async function startRouter() {
+    // 공개 사이트도 admin 업로드(DB) 최신 수수료를 우선 사용 (없으면 정적 commission.js)
+    try {
+      if (window.skmFetchCommission) {
+        const remote = await window.skmFetchCommission();
+        if (remote && remote.payload && Array.isArray(remote.payload.rows) && remote.payload.rows.length) {
+          window.COMMISSION_DB = remote.payload;
+        }
+      }
+    } catch (_) {}
     attachClickHandler();
     window.addEventListener('popstate', () => {
       if (document.startViewTransition) {
