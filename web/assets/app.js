@@ -1103,8 +1103,8 @@ const App = (() => {
     // 워커힐 브랜드 배지 — 매트리스 카테고리만
     const galleryEl = document.querySelector('.gallery');
     if (galleryEl) {
-      const old = galleryEl.querySelector(':scope > .brand-badge');
-      if (old) old.remove();
+      // 이전 상품의 배지 제거 (SPA 재렌더)
+      galleryEl.querySelectorAll(':scope > .brand-badge, :scope > .badges, :scope > .half-badge').forEach(el => el.remove());
       const isMattress = (p.categories || []).includes('1000000245');
       if (isMattress) {
         const badge = document.createElement('span');
@@ -1112,6 +1112,23 @@ const App = (() => {
         badge.style.backgroundImage = "url('./assets/brand/walkerhill.png')";
         badge.setAttribute('aria-label', '워커힐');
         galleryEl.prepend(badge);
+      }
+      // 반값할인 배지 (좌상단) — 카드와 동일 기준(셀프/방문 5년)
+      const gModel = (p.model || '').split('\n')[0].trim();
+      const gPol = cardPolicyPrice(gModel);
+      const gMonths = gPol ? comHalfMonths(gPol) : 0;
+      if (gMonths) {
+        const hb = document.createElement('div');
+        hb.className = 'half-badge';
+        hb.innerHTML = `<span class="m">${gMonths}개월</span><span class="t">반값</span>`;
+        galleryEl.prepend(hb);
+      }
+      // 추천 배지 (우상단)
+      if (p._featured) {
+        const bd = document.createElement('div');
+        bd.className = 'badges';
+        bd.innerHTML = '<span class="badge b-best">추천</span>';
+        galleryEl.prepend(bd);
       }
     }
     if (galleryMain) galleryMain.innerHTML = `<img src="${escape(localMainImgs[0])}" alt="${escape(p.name)}" onerror="this.src='${escape(mainImgs[0]||'')}'">`;
