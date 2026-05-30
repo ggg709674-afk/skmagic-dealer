@@ -1035,15 +1035,6 @@
      이미지(업로드)·링크·새창·사용토글·순서 + 자동/수동·간격.
      데이터: banner_data(payload={mode,interval,items:[{image,link,newTab,enabled}]}), 이미지: Storage banner-assets. */
   const BN_MAX = 10;
-  // 기본 배너 — DB에 저장된 적 없을 때 현재 홈의 정적 배너 3장으로 시작(저장하면 DB로 들어감)
-  const DEFAULT_BANNERS = {
-    mode: 'auto', interval: 3,
-    items: [
-      { image: '/assets/hero/11.jpg', link:'', newTab:false, enabled:true },
-      { image: '/assets/hero/22.jpg', link:'', newTab:false, enabled:true },
-      { image: '/assets/hero/33.jpg', link:'', newTab:false, enabled:true },
-    ],
-  };
   let bnData = null;       // 편집 중 상태
   let bnInited = false;
 
@@ -1054,7 +1045,7 @@
       if (window.skmFetchBanners){
         try { const r = await window.skmFetchBanners(); if (r && r.payload && Array.isArray(r.payload.items)) bnData = r.payload; } catch(_){}
       }
-      if (!bnData) bnData = { mode: DEFAULT_BANNERS.mode, interval: DEFAULT_BANNERS.interval, items: DEFAULT_BANNERS.items.map(x => ({ ...x })) };
+      if (!bnData) bnData = { mode:'auto', interval:3, items:[] };
       if (!Array.isArray(bnData.items)) bnData.items = [];
       bnData.mode = (bnData.mode === 'manual') ? 'manual' : 'auto';
       if (!(bnData.interval > 0)) bnData.interval = 5;
