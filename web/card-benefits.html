@@ -190,7 +190,7 @@
       const o = over[c.key] || {};
       const link = (o.link && o.link.trim()) ? o.link : FALLBACK_LINK;
       const visual = o.image
-        ? `<img src="${esc(o.image)}" alt="${esc(c.name)}" style="width:100%;height:auto;display:block;border-radius:12px">`
+        ? `<img src="${esc(o.image)}" alt="${esc(c.name)}" style="width:100%;height:auto;display:block">`
         : cardSVG(c.tone,i);
       const rows = c.tiers.map(([t,d,e])=>`<tr><td>${esc(t)}</td><td class="discount">${esc(d)}원</td><td class="${e==='—'?'':'extra'}">${esc(e)}${e==='—'?'':'원'}</td></tr>`).join('');
       return `<article class="cb-item">
