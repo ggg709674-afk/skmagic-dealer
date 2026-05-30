@@ -1091,6 +1091,13 @@ const App = (() => {
           let ki = cs.findIndex(c => (c.years || c.duty_use_months) === prevYears);
           _optState.contractIdx = ki >= 0 ? ki : 0;
         }
+        // 상단 모델명도 사이즈별 코드로 갱신 (MATSM… → MATQM…/MATKM…)
+        const _reg = ((_optState.lastP && _optState.lastP.model) || '').split('\n')[0].trim();
+        const _letter = sizeLetterOf(sz);
+        if (/^MAT/.test(_reg) && _letter) {
+          const _el = document.getElementById('p-model');
+          if (_el) _el.textContent = _reg.slice(0, 3) + _letter + _reg.slice(4);
+        }
         renderOptionTabs();
         renderOptionInfo();
         renderPriceCard();
