@@ -486,17 +486,29 @@ const App = (() => {
 
   // 반값할인 개월수 — 상품 tag("구독 의무5년6개월반값 , 의무6년12개월반값")에서
   // 해당 의무기간(개월)의 반값 개월수를 파싱. tag 없거나 매칭 없으면 0(미표시).
-  const _DUTY_Y2M = { 3: 36, 4: 48, 5: 60, 6: 72, 7: 84 };
-  function halfMonthsFor(p, dutyMonths) {
-    const tag = (p && p.tag) || '';
-    if (!tag || dutyMonths == null) return 0;
-    const re = /의무\s*(\d+)\s*년\s*(\d+)\s*개월\s*반값/g;
-    let m; const map = {};
-    while ((m = re.exec(tag))) {
-      const d = _DUTY_Y2M[+m[1]]; if (d) map[d] = +m[2];
+  // 기본요금 반값할인 개월수 — 26.6월 프로모션 정책표 기준
+  //  정수기 5년=6 / 6·7년: 원코크·메가 계열 방문18·셀프15, 초소형 계열·투워터 12
+  //  공청 올클린(디아트 제외) 5·6·7년 6 / 비데 올클린케어 5년만 6
+  function comHalfMonths(r) {
+    if (!r) return 0;
+    const m = String(r.모델 || '');
+    const dur = r.의무;
+    const self = /셀프/.test(r.형태 || r.contract_type || '');
+    if (r.품목 === '정수기') {
+      if (dur < 60) return 0;
+      if (dur === 60) return 6;                                  // 5년
+      if (/원코크|메가|MEGA/i.test(m)) return self ? 15 : 18;     // 6·7년 원코크/메가 계열
+      if (/초소형|투워터/.test(m)) return 12;                      // 6·7년 초소형 계열/투워터
+      return 0;
     }
-    if (map[dutyMonths] != null) return map[dutyMonths];
-    if (dutyMonths === 84 && map[72] != null) return map[72];  // 7년 = 6년과 동일
+    if (r.품목 === '공기청정기') {
+      if (/올클린/.test(m) && !/디아트/.test(m)) return dur >= 60 ? 6 : 0;
+      return 0;
+    }
+    if (r.품목 === '비데') {
+      if (/올클린케어/.test(m)) return dur === 60 ? 6 : 0;        // 비데 5년 한정
+      return 0;
+    }
     return 0;
   }
 
@@ -519,7 +531,7 @@ const App = (() => {
     const modelCode = (p.model || '').split('\n')[0].trim();
     // 카드 표시 기준(셀프/방문 5년) 행 + 그 행의 반값할인 개월수
     const pol = cardPolicyPrice(modelCode);
-    const halfMonths = pol ? halfMonthsFor(p, pol.의무) : 0;
+    const halfMonths = pol ? comHalfMonths(pol) : 0;
     const halfBadge = halfMonths ? `<div class="half-badge"><span class="m">${halfMonths}개월</span><span class="t">반값</span></div>` : '';
     // 매트리스(1000000245) 카테고리면 워커힐 브랜드 배지 표시
     const isMattress = (p.categories || []).includes('1000000245');
@@ -954,8 +966,8 @@ const App = (() => {
       const c = cur && cur.contracts && cur.contracts[_optState.contractIdx];
       if (c) {
         // 반값할인 보조표기 — "처음 N개월 [반값금액]" (없으면 빈 문자열)
-        // 기본요금 반값 = tag 기준(6/12/18…), 타사보상 반값 = 별첨 기준(의무 5년↑ 3개월)
-        const baseMo = halfMonthsFor(p, c.의무);
+        // 기본요금 반값 = 정책표(형태·의무·계열), 타사보상 반값 = 별첨 기준(의무 5년↑ 3개월)
+        const baseMo = comHalfMonths(c);
         const compMo = (c.타사보상 != null && c.의무 >= 60) ? 3 : 0;
         const halfLine = (months, amount) => (months && amount != null)
           ? `<span class="val-half">처음 ${months}개월 ${fmt(Math.round(amount / 2))}원</span>` : '';
@@ -1121,7 +1133,7 @@ const App = (() => {
       // 반값할인 배지 (좌상단) — 카드와 동일 기준(셀프/방문 5년)
       const gModel = (p.model || '').split('\n')[0].trim();
       const gPol = cardPolicyPrice(gModel);
-      const gMonths = gPol ? halfMonthsFor(p, gPol.의무) : 0;
+      const gMonths = gPol ? comHalfMonths(gPol) : 0;
       if (gMonths) {
         const hb = document.createElement('div');
         hb.className = 'half-badge';

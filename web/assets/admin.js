@@ -947,26 +947,31 @@
     return /^MAT[SQK]/.test(s) ? s.slice(0, 3) + s.slice(4) : s;
   }
 
-  /* ─── 반값할인 개월수 — 상품 tag 기준 (공개 사이트 app.js와 동일 소스) ─────
-     수수료표 행을 제품코드로 홈페이지 상품과 매칭 → 그 상품 tag
-     ("구독 의무5년6개월반값 , 의무6년12개월반값")에서 해당 의무의 반값 개월수 파싱.
-     ① 기본요금 반값: 해당 의무의 tag 개월수
-     ② 타사보상 반값: 타사보상 있으면 동일 promo 개월수 (없으면 0) */
-  const _COM_DUTY_Y2M = { 3: 36, 4: 48, 5: 60, 6: 72, 7: 84 };
-  function comHalfMonthsFromTag(tag, dur){
-    if (!tag || dur == null) return 0;
-    const re = /의무\s*(\d+)\s*년\s*(\d+)\s*개월\s*반값/g;
-    let mm; const map = {};
-    while ((mm = re.exec(tag))) {
-      const d = _COM_DUTY_Y2M[+mm[1]]; if (d) map[d] = +mm[2];
-    }
-    if (map[dur] != null) return map[dur];
-    if (dur === 84 && map[72] != null) return map[72];  // 7년 = 6년과 동일
-    return 0;
-  }
+  /* ─── 반값할인 개월수 — 26.6월 프로모션 정책표 기준 (공개 사이트 app.js와 동일) ──
+     ① 기본요금 반값(comHalfMonths):
+        정수기 5년=6 / 6·7년: 원코크·메가 계열 방문18·셀프15, 초소형 계열·투워터 12
+        공청 올클린(디아트 제외) 5·6·7년 6 / 비데 올클린케어 5년만 6
+     ② 타사보상 반값(comCompeteHalfMonths): 별첨 기준 의무 5년 이상 3개월 (변경 없음) */
   function comHalfMonths(r){
-    const home = comHomeMatch(r.코드);
-    return comHalfMonthsFromTag(home && home.tag, r.의무);
+    const m = String(r.모델 || '');
+    const dur = r.의무;
+    const self = /셀프/.test(r.형태 || '');
+    if (r.품목 === '정수기'){
+      if (dur < 60) return 0;
+      if (dur === 60) return 6;                                  // 5년
+      if (/원코크|메가|MEGA/i.test(m)) return self ? 15 : 18;     // 6·7년 원코크/메가 계열
+      if (/초소형|투워터/.test(m)) return 12;                      // 6·7년 초소형 계열/투워터
+      return 0;
+    }
+    if (r.품목 === '공기청정기'){
+      if (/올클린/.test(m) && !/디아트/.test(m)) return dur >= 60 ? 6 : 0;
+      return 0;
+    }
+    if (r.품목 === '비데'){
+      if (/올클린케어/.test(m)) return dur === 60 ? 6 : 0;        // 비데 5년 한정
+      return 0;
+    }
+    return 0;
   }
   function comCompeteHalfMonths(r){
     if (r.타사보상 == null) return 0;        // 타사보상 없는 모델은 대상 아님
