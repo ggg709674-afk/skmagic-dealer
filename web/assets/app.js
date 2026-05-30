@@ -1188,13 +1188,15 @@ const App = (() => {
           <img src="${escape(u)}" onerror="this.src='${escape(mainImgs[i]||'')}'">
         </div>`).join('');
       galleryThumbs.querySelectorAll('.t').forEach(el => {
-        el.addEventListener('click', () => {
+        const select = () => {
           galleryThumbs.querySelectorAll('.t').forEach(x => x.classList.remove('on'));
           el.classList.add('on');
           const src = el.dataset.src;
           const fb = el.dataset.fallback;
           galleryMain.innerHTML = `<img src="${escape(src)}" onerror="this.src='${escape(fb)}'">`;
-        });
+        };
+        el.addEventListener('mouseenter', select);  // 마우스 올리면 바로 전환
+        el.addEventListener('click', select);       // 클릭(모바일/터치)도 유지
       });
     }
 
