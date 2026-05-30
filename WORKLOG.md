@@ -681,7 +681,8 @@ document.addEventListener('visibilitychange', () => {
 - **`web/faq.html`**: 아코디언 FAQ. 기본 8문항 코드 고정(`DEFAULT_FAQ`) + DB 오버라이드. 헤더/푸터/사업자정보 바인딩·하단 상담 CTA 메인과 통일. 답변에 `<a href>`만 안전 허용(`answerHTML`).
 - **라우팅**: vercel.json `/faq` redirect(`.html`→clean) + rewrite(`/:slug` 위에). card-benefits와 동일 패턴(★ `.html` 직접경로는 `/:slug`가 슬러그로 오인하므로 경로 등록 필수).
 - **링크**: 홈 util-bar(제휴카드 안내 옆) + 푸터에 자주 묻는 질문 → `/faq`. faq.html util-bar에도 2개.
-- **admin FAQ 관리**(본부 전용 그룹): 질문/답변 추가·수정·삭제 + 전체 저장. `MENU_META.faq`, `initFaq/renderFaqAdmin/syncFaqFromDom/saveFaq`, `DEFAULT_FAQ`(faq.html과 **동일 유지 필수**). admin.css `.adm-faq-*`.
+- **admin FAQ 관리**(★ '사이트 설정' 그룹 — 기본정보 아래): `MENU_META.faq`, `initFaq/renderFaqAdmin/syncFaqFromDom/saveFaq`, `DEFAULT_FAQ`(faq.html과 **동일 유지 필수**). admin.css `.adm-faq-*`.
+  - **UX**: 평소 행은 **읽기 전용 + [수정] 버튼**(실수 삭제 방지). [수정] 누르면 그 행만 편집(입력칸+[완료]/[삭제]), 삭제는 `confirm` 거침. '+ 질문 추가'는 바로 편집모드로. 모든 변경은 **[전체 저장]** 눌러야 DB 반영. (이전 인라인 input+X즉시삭제 → 개편)
 - **supabase.js**: `skmFetchFaq`/`skmSaveFaq`. **migration `007_faq.sql`**: `faq_data`(id=1 단일행 payload jsonb) + RLS(super_admin write/public read).
 - ⚠️ **`007_faq.sql`은 형이 Supabase SQL Editor에서 실행해야 admin 저장이 동작**. 실행 전에도 공개 FAQ 페이지는 코드 기본값으로 정상 표시됨(읽기는 테이블 없으면 fallback).
 

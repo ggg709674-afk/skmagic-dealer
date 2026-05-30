@@ -935,7 +935,7 @@
       }
       if (!faqItems) faqItems = DEFAULT_FAQ.map(x => ({ q:x.q, a:x.a }));
       const addBtn = document.getElementById('faq-add');
-      if (addBtn) addBtn.addEventListener('click', () => { syncFaqFromDom(); faqItems.push({ q:'', a:'' }); renderFaqAdmin(); });
+      if (addBtn) addBtn.addEventListener('click', () => { syncFaqFromDom(); faqItems.push({ q:'', a:'', _editing:true }); renderFaqAdmin(); });
       const saveBtn = document.getElementById('faq-save');
       if (saveBtn) saveBtn.addEventListener('click', saveFaq);
     }
@@ -944,18 +944,54 @@
   function renderFaqAdmin(){
     const wrap = document.getElementById('adm-faq-list');
     if (!wrap) return;
-    wrap.innerHTML = faqItems.map((it,i) => `
-      <div class="adm-faq-row" data-idx="${i}">
+    wrap.innerHTML = faqItems.map((it,i) => {
+      if (it._editing){
+        // 편집 모드 — 입력칸 + 완료/삭제
+        return `<div class="adm-faq-row editing" data-idx="${i}">
+          <div class="adm-faq-num">${i+1}</div>
+          <div class="adm-faq-body">
+            <input type="text" class="adm-input adm-faq-q" data-idx="${i}" value="${escape(it.q)}" placeholder="질문을 입력하세요">
+            <textarea class="adm-input adm-faq-a" data-idx="${i}" rows="3" placeholder="답변을 입력하세요">${escape(it.a)}</textarea>
+          </div>
+          <div class="adm-faq-row-actions">
+            <button class="adm-btn adm-btn-primary adm-faq-done" data-idx="${i}" type="button">완료</button>
+            <button class="adm-btn adm-btn-danger adm-faq-del" data-idx="${i}" type="button">삭제</button>
+          </div>
+        </div>`;
+      }
+      // 보기 모드 — 읽기 전용 + 수정 버튼 (실수 삭제 방지)
+      const qHtml = it.q ? escape(it.q) : '<span class="adm-faq-empty">(질문 없음)</span>';
+      const aHtml = it.a ? escape(it.a) : '<span class="adm-faq-empty">(답변 없음)</span>';
+      return `<div class="adm-faq-row" data-idx="${i}">
         <div class="adm-faq-num">${i+1}</div>
         <div class="adm-faq-body">
-          <input type="text" class="adm-input adm-faq-q" data-idx="${i}" value="${escape(it.q)}" placeholder="질문을 입력하세요">
-          <textarea class="adm-input adm-faq-a" data-idx="${i}" rows="3" placeholder="답변을 입력하세요">${escape(it.a)}</textarea>
+          <div class="adm-faq-view-q">${qHtml}</div>
+          <div class="adm-faq-view-a">${aHtml}</div>
         </div>
-        <button class="adm-faq-del" data-idx="${i}" title="삭제" type="button">×</button>
-      </div>`).join('') || '<p class="adm-empty">질문이 없어요. 아래 ‘질문 추가’를 눌러 추가하세요.</p>';
-    wrap.querySelectorAll('.adm-faq-del').forEach(btn => btn.addEventListener('click', () => {
+        <div class="adm-faq-row-actions">
+          <button class="adm-btn adm-btn-ghost adm-faq-edit" data-idx="${i}" type="button">수정</button>
+        </div>
+      </div>`;
+    }).join('') || '<p class="adm-empty">질문이 없어요. 아래 ‘질문 추가’를 눌러 추가하세요.</p>';
+
+    // 수정 — 그 행을 편집 모드로
+    wrap.querySelectorAll('.adm-faq-edit').forEach(btn => btn.addEventListener('click', () => {
       syncFaqFromDom();
-      faqItems.splice(Number(btn.dataset.idx), 1);
+      faqItems[Number(btn.dataset.idx)]._editing = true;
+      renderFaqAdmin();
+    }));
+    // 완료 — 입력값 반영 후 보기 모드로
+    wrap.querySelectorAll('.adm-faq-done').forEach(btn => btn.addEventListener('click', () => {
+      syncFaqFromDom();
+      delete faqItems[Number(btn.dataset.idx)]._editing;
+      renderFaqAdmin();
+    }));
+    // 삭제 — 확인 후 (전체 저장 눌러야 최종 반영)
+    wrap.querySelectorAll('.adm-faq-del').forEach(btn => btn.addEventListener('click', () => {
+      const i = Number(btn.dataset.idx);
+      if (!confirm('이 질문을 삭제할까요?\n(아래 "전체 저장"을 눌러야 사이트에 최종 반영됩니다.)')) return;
+      syncFaqFromDom();
+      faqItems.splice(i, 1);
       renderFaqAdmin();
     }));
   }
