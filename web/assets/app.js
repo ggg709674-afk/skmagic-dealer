@@ -484,22 +484,18 @@ const App = (() => {
     return row || null;
   }
 
-  // 반값할인 개월수 (admin.js comHalfMonths와 동일 규칙 — 26.6월 프로모션 기준).
-  // 원코크 18(의무5년↑) · 초소형 5년→6/6·7년→12 · 공청 올클린(디아트 제외) 6 · 비데 올클린케어 6.
-  function comHalfMonths(r) {
-    if (!r) return 0;
-    const m = String(r.모델 || '');
-    const dur = r.의무;
-    if (r.품목 === '정수기') {
-      if (/원코크/.test(m)) return (dur >= 60 ? 18 : 0);
-      if (/초소형/.test(m)) return (dur >= 72 ? 12 : (dur >= 60 ? 6 : 0));
-      if (/메가|MEGA|투워터/i.test(m)) return (dur >= 60 ? 18 : 0);
-    } else if (r.품목 === '공기청정기') {
-      if (/올클린/.test(m) && !/디아트/.test(m)) return (dur >= 60 ? 6 : 0);
-    } else if (r.품목 === '비데') {
-      if (/올클린케어/.test(m)) return (dur >= 60 ? 6 : 0);
+  // 반값할인 개월수 — 상품 tag("구독 의무5년6개월반값 , 의무6년12개월반값")에서
+  // 해당 의무기간(개월)의 반값 개월수를 파싱. tag 없거나 매칭 없으면 0(미표시).
+  const _DUTY_Y2M = { 3: 36, 4: 48, 5: 60, 6: 72, 7: 84 };
+  function halfMonthsFor(p, dutyMonths) {
+    const tag = (p && p.tag) || '';
+    if (!tag || dutyMonths == null) return 0;
+    const re = /의무\s*(\d+)\s*년\s*(\d+)\s*개월\s*반값/g;
+    let m, res = 0;
+    while ((m = re.exec(tag))) {
+      if (_DUTY_Y2M[+m[1]] === dutyMonths) res = +m[2];
     }
-    return 0;
+    return res;
   }
 
   function thumbOf(p) {
@@ -521,7 +517,7 @@ const App = (() => {
     const modelCode = (p.model || '').split('\n')[0].trim();
     // 카드 표시 기준(셀프/방문 5년) 행 + 그 행의 반값할인 개월수
     const pol = cardPolicyPrice(modelCode);
-    const halfMonths = pol ? comHalfMonths(pol) : 0;
+    const halfMonths = pol ? halfMonthsFor(p, pol.의무) : 0;
     const halfBadge = halfMonths ? `<div class="half-badge"><span class="m">${halfMonths}개월</span><span class="t">반값</span></div>` : '';
     // 매트리스(1000000245) 카테고리면 워커힐 브랜드 배지 표시
     const isMattress = (p.categories || []).includes('1000000245');
@@ -936,7 +932,8 @@ const App = (() => {
           duty_use_months: r.의무, contract_type: type,
           visit_period: (r.관리주기 && r.관리주기 !== '-') ? r.관리주기 : null,
           filter_period: type === '셀프형' ? filterOf(type, r.의무) : null,
-          기준가: r.기준가, 기본요금: r.기본요금, 타사보상: r.타사보상
+          기준가: r.기준가, 기본요금: r.기본요금, 타사보상: r.타사보상,
+          품목: r.품목, 모델: r.모델, 의무: r.의무
         }))
       });
     });
@@ -954,16 +951,20 @@ const App = (() => {
       const cur = opts.care_types[_optState.careIdx] || opts.care_types[0];
       const c = cur && cur.contracts && cur.contracts[_optState.contractIdx];
       if (c) {
+        // 반값할인 보조표기 — "처음 N개월 [반값금액]" (없으면 빈 문자열)
+        const mo = halfMonthsFor(p, c.의무);   // 선택 약정의 반값 개월수 (tag 기준)
+        const halfLine = (amount) => (mo && amount != null)
+          ? `<span class="val-half">처음 ${mo}개월 ${fmt(Math.round(amount / 2))}원</span>` : '';
         let html = `
           <div class="row">
             <span class="label">월 렌탈료</span>
-            <span class="val"><small>월</small>${fmt(c.기본요금)}<small>원</small></span>
+            <span class="val">${halfLine(c.기본요금)}<span class="val-now"><small>월</small>${fmt(c.기본요금)}<small>원</small></span></span>
           </div>`;
         if (typeof c.타사보상 === 'number' && c.타사보상 > 0) {
           html += `
           <div class="row">
             <span class="label">타사 보상가<small class="label-note">(타 브랜드 이용중인 고객 대상)</small></span>
-            <span class="val"><small>월</small>${fmt(c.타사보상)}<small>원</small></span>
+            <span class="val">${halfLine(c.타사보상)}<span class="val-now"><small>월</small>${fmt(c.타사보상)}<small>원</small></span></span>
           </div>`;
         }
         const tagText = (p && p.tag) || '상담 시 약정 옵션·할인 안내';
@@ -1116,7 +1117,7 @@ const App = (() => {
       // 반값할인 배지 (좌상단) — 카드와 동일 기준(셀프/방문 5년)
       const gModel = (p.model || '').split('\n')[0].trim();
       const gPol = cardPolicyPrice(gModel);
-      const gMonths = gPol ? comHalfMonths(gPol) : 0;
+      const gMonths = gPol ? halfMonthsFor(p, gPol.의무) : 0;
       if (gMonths) {
         const hb = document.createElement('div');
         hb.className = 'half-badge';
