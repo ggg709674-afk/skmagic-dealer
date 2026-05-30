@@ -468,6 +468,22 @@ const App = (() => {
     return p.prices[0];
   }
 
+  // 카드 표시용 정책 가격 — 셀프관리(없으면 방문관리) + 5년(60개월, 없으면 가장 가까운).
+  // 반환: { 기준가, 기본요금 } 또는 null (정책표 매칭 실패 시 크롤 가격 fallback)
+  function cardPolicyPrice(modelCode) {
+    const rows = (window.COMMISSION_DB && window.COMMISSION_DB.rows) || [];
+    const base = (modelCode || '').slice(0, 10);
+    if (!base) return null;
+    const mine = rows.filter(r => (r.코드 || '').slice(0, 10) === base);
+    if (!mine.length) return null;
+    let pool = mine.filter(r => r.형태 === '셀프형');
+    if (!pool.length) pool = mine.filter(r => r.형태 === '방문형');
+    if (!pool.length) pool = mine;
+    let row = pool.find(r => r.의무 === 60);
+    if (!row) row = pool.slice().sort((a, b) => Math.abs((a.의무 || 0) - 60) - Math.abs((b.의무 || 0) - 60))[0];
+    return row || null;
+  }
+
   function thumbOf(p) {
     /* download_thumbs.py 로 떨궈둔 ../products/<gid>/thumb.<ext> 우선 사용 */
     if (!p.thumb) return '';
@@ -502,11 +518,19 @@ const App = (() => {
           </div>
           <div class="name">${escape(p.name || '')}</div>
           <div class="benefits">${benefits}</div>
-          ${pr ? `
+          ${(() => {
+            const fmtN = n => Number(n).toLocaleString('ko-KR');
+            const pol = cardPolicyPrice(modelCode);
+            if (pol && pol.기본요금 != null) {
+              const del = (pol.기준가 != null && pol.기준가 !== pol.기본요금) ? `<div class="del">월 ${fmtN(pol.기준가)}원</div>` : '';
+              return `<div class="price-row">${del}<div class="now"><small>구독</small> 월 <strong>${fmtN(pol.기본요금)}</strong>원</div></div>`;
+            }
+            return pr ? `
             <div class="price-row">
               ${pr.del ? `<div class="del">${escape(pr.del)}</div>` : ''}
               <div class="now"><small>${escape(pr.title || '구독')}</small> 월 <strong>${escape(pr.num || '-')}</strong>원</div>
-            </div>` : ''}
+            </div>` : '';
+          })()}
         </div>
       </a>
     `;
@@ -658,12 +682,29 @@ const App = (() => {
   // 페이지 내 상태 — 현재 선택된 care_type idx, contract idx. detail 페이지마다 reset.
   const _optState = { careIdx: 0, contractIdx: 0, sizeKey: null, lastOpts: null, lastP: null, lastMeta: null };
 
+  // 기본 선택: 셀프관리(없으면 방문관리) + 5년(의무 60개월). 없으면 60에 가장 가까운 약정.
+  function pickDefaultSelection(opts) {
+    const cts = (opts && opts.care_types) || [];
+    if (!cts.length) return { careIdx: 0, contractIdx: 0 };
+    let careIdx = cts.findIndex(ct => /셀프/.test(ct.contract_type || ct.name || ''));
+    if (careIdx < 0) careIdx = 0;  // 셀프 없으면 첫 그룹(방문)
+    const contracts = cts[careIdx].contracts || [];
+    let contractIdx = contracts.findIndex(c => c.duty_use_months === 60);
+    if (contractIdx < 0 && contracts.length) {
+      let best = 0, bestDiff = Infinity;
+      contracts.forEach((c, i) => { const d = Math.abs((c.duty_use_months || 0) - 60); if (d < bestDiff) { bestDiff = d; best = i; } });
+      contractIdx = best;
+    }
+    return { careIdx, contractIdx: contractIdx < 0 ? 0 : contractIdx };
+  }
+
   function renderOptionsUI(opts, p, meta) {
     _optState.lastOpts = opts;
     _optState.lastP = p || null;
     _optState.lastMeta = meta || null;
-    _optState.careIdx = 0;
-    _optState.contractIdx = 0;
+    const def = pickDefaultSelection(opts);
+    _optState.careIdx = def.careIdx;
+    _optState.contractIdx = def.contractIdx;
     // 매트리스 사이즈 — specs_by_size 키 첫 번째를 기본값
     const sbs = meta?.specs_by_size;
     const sizeKeys = sbs ? Object.keys(sbs).filter(k => k !== '_single') : [];
