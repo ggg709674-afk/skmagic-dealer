@@ -989,6 +989,7 @@
       const err = await persistFaq();
       renderFaqAdmin();
       if (err) alert('삭제 저장 실패: ' + (err.message || '권한 또는 네트워크 오류'));
+      else admToast('삭제됐어요');
     }));
   }
   // DOM의 현재 입력값을 faqItems에 반영 (재렌더/저장 전 호출)
@@ -996,6 +997,16 @@
     document.querySelectorAll('.adm-faq-q').forEach(inp => { const i = Number(inp.dataset.idx); if (faqItems[i]) faqItems[i].q = inp.value; });
     document.querySelectorAll('.adm-faq-a').forEach(inp => { const i = Number(inp.dataset.idx); if (faqItems[i]) faqItems[i].a = inp.value; });
   }
+  // 가벼운 토스트 — alert 없이 잠깐 떴다 사라지는 저장 피드백
+  function admToast(msg){
+    let el = document.getElementById('adm-toast');
+    if (!el){ el = document.createElement('div'); el.id = 'adm-toast'; el.className = 'adm-toast'; document.body.appendChild(el); }
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 1600);
+  }
+
   // 현재 faqItems 전체를 DB에 저장 (단일행 payload). 반환: error|null
   async function persistFaq(){
     syncFaqFromDom();
@@ -1013,6 +1024,7 @@
     if (err){ if (btn){ btn.disabled = false; btn.textContent = '저장'; } alert('저장 실패: ' + (err.message || '권한 또는 네트워크 오류')); return; }
     delete faqItems[i]._editing;
     renderFaqAdmin();
+    admToast('저장됐어요');
   }
 
   async function initCommission(){
