@@ -933,6 +933,20 @@
     }
   }
 
+  /* ─── 매트리스 사이즈 헬퍼 ─────────────────────────────
+     매트리스 제품코드 4번째 글자 = 사이즈(S/Q/K). 가격이 사이즈마다 달라
+     색상처럼 묶으면 안 됨. 단, 홈페이지엔 한 사이즈만 등록돼 있어 매칭은
+     사이즈를 뺀 베이스로 해야 모든 사이즈가 같은 모델로 인식된다. */
+  const MAT_SIZE = { S: 'SS', Q: 'Q', K: 'K' };
+  function comSize(code){
+    const s = String(code || '');
+    return /^MAT[SQK]/.test(s) ? (MAT_SIZE[s[3]] || s[3]) : '';
+  }
+  function comBaseCode(code){  // 사이즈 글자 제거 → 사이즈 무관 매칭용
+    const s = String(code || '');
+    return /^MAT[SQK]/.test(s) ? s.slice(0, 3) + s.slice(4) : s;
+  }
+
   /* build_data.js 의 파싱 로직을 브라우저(SheetJS)로 포팅.
      색상 묶음 + 방문/셀프 분리 + 의무기간별 행 + 홈페이지 모델만. */
   function parseCommissionWorkbook(buf, fileName){
@@ -987,6 +1001,7 @@
         품목: 품목.replace('메트리스', '매트리스'),
         모델: c.replace(/\s+/g, ' ').trim(),
         코드: d,
+        사이즈: comSize(d),
         형태: form(e),
         의무: 의무,
         관리주기: h,
@@ -1002,14 +1017,14 @@
     const products = (window.PRODUCTS_DB && window.PRODUCTS_DB.products) || [];
     const homeBase = new Set(products
       .filter(p => p.model && p.categories && p.categories.some(cat => MAIN.includes(cat)))
-      .map(p => p.model.slice(0, 9)));
-    const onHome = (code) => code && homeBase.has(String(code).slice(0, 9));
+      .map(p => comBaseCode(p.model).slice(0, 9)));
+    const onHome = (code) => code && homeBase.has(comBaseCode(code).slice(0, 9));
 
-    // 색상 묶음: 품목|모델|형태|의무 1행만
+    // 색상 묶음: 품목|모델|형태|의무(+매트리스는 사이즈) 1행만
     const seen = {}, out = [];
     for (const x of rows){
       if (!onHome(x.코드)) continue;
-      const key = x.품목 + '|' + x.모델 + '|' + x.형태 + '|' + x.의무;
+      const key = x.품목 + '|' + x.모델 + '|' + x.형태 + '|' + x.의무 + '|' + (x.사이즈 || '');
       if (seen[key]) continue;
       seen[key] = 1;
       out.push(x);
@@ -1123,7 +1138,7 @@
     const prods = (window.PRODUCTS_DB && window.PRODUCTS_DB.products) || [];
     prods.forEach(p => {
       if (!p.model) return;
-      const b = p.model.slice(0, 10);
+      const b = comBaseCode(p.model).slice(0, 10);
       if (!m[b]) m[b] = { name: p.name, model: p.model };
     });
     _comHomeMap = m;
@@ -1131,14 +1146,16 @@
   }
   function comHomeMatch(code){
     if (!code) return null;
-    return comHomeMap()[String(code).slice(0, 10)] || null;
+    return comHomeMap()[comBaseCode(code).slice(0, 10)] || null;
   }
-  /* 표시용 모델명/제품코드 — 홈페이지 매칭 우선, 실패 시 정책표 파싱값 */
+  /* 표시용 모델명/제품코드 — 홈페이지 매칭 우선, 실패 시 정책표 파싱값.
+     매트리스는 사이즈(SS/Q/K)를 모델명 뒤에 붙이고 제품코드는 사이즈별 실제 코드 사용. */
   function comDisplay(r){
+    const sz = r.사이즈 ? ` (${r.사이즈})` : '';
     const home = comHomeMatch(r.코드);
-    if (home) return { name: home.name, code: home.model };
+    if (home) return { name: home.name + sz, code: r.사이즈 ? (r.코드 || home.model) : home.model };
     const { name } = comSplitModel(r.모델);
-    return { name, code: r.코드 || '' };
+    return { name: name + sz, code: r.코드 || '' };
   }
 
   /* 현재 필터된 행을 엑셀(.xlsx)로 다운로드 (SheetJS). */
