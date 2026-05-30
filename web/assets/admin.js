@@ -279,18 +279,39 @@
     return (p.prices && p.prices[0]) || null;
   }
 
+  /* 상품 가격 기준 정책 행 — 공개사이트 app.js cardPolicyPrice 와 동일 로직.
+     모델코드 base10 매칭 → 셀프형 우선(없으면 방문형) → 5년(의무60) 행. */
+  function comPolicyRow(mc){
+    const db = comDB();
+    const rows = (db && db.rows) || [];
+    const base = (mc || '').slice(0, 10);
+    if (!base) return null;
+    const mine = rows.filter(r => (r.코드 || '').slice(0, 10) === base);
+    if (!mine.length) return null;
+    let pool = mine.filter(r => r.형태 === '셀프형');
+    if (!pool.length) pool = mine.filter(r => r.형태 === '방문형');
+    if (!pool.length) pool = mine;
+    let row = pool.find(r => r.의무 === 60);
+    if (!row) row = pool.slice().sort((a, b) => Math.abs((a.의무 || 0) - 60) - Math.abs((b.의무 || 0) - 60))[0];
+    return row || null;
+  }
+
   /* 가격 4종 — 원본 + edits 를 합쳐 표시용으로 반환
-     반환: { regular, sale, compete, card }   (모두 숫자 문자열, 단위 ₩ 없이 "13,200" 형태) */
+     반환: { regular, sale, compete, card }   (모두 숫자 문자열, 단위 ₩ 없이 "13,200" 형태)
+     우선순위: 매장 수동 override > 정책테이블(5년+셀프/방문) > 본사 크롤(fallback). */
   function effectivePrices(p){
     const ed = state.overrides.edits[p.goodsId]?.price || {};
+    const pol = comPolicyRow(modelCode(p));
+    const polReg  = (pol && pol.기준가   != null) ? String(pol.기준가)   : '';
+    const polSale = (pol && pol.기본요금 != null) ? String(pol.기본요금) : '';
+    const polComp = (pol && typeof pol.타사보상 === 'number' && pol.타사보상 > 0) ? String(pol.타사보상) : '';
+    // 본사 크롤 fallback (정책표에 없는 모델용): del=정상가, num=할인가
     const orig = priceOf(p) || {};
-    // 본사 원본: del = 정상가 "월 70,900", num = 할인가 "25,950"
-    // 라벨/단위 제거하고 숫자/콤마만 남기는 정리.
     const stripUnit = (s) => String(s || '').replace(/^[^\d]*월?\s*/,'').replace(/\s*원\s*$/,'').trim();
     return {
-      regular: ed.regular != null && ed.regular !== '' ? ed.regular : stripUnit(orig.del),
-      sale:    ed.sale    != null && ed.sale    !== '' ? ed.sale    : stripUnit(orig.num),
-      compete: ed.compete != null ? ed.compete : '',
+      regular: ed.regular != null && ed.regular !== '' ? ed.regular : (polReg  || stripUnit(orig.del)),
+      sale:    ed.sale    != null && ed.sale    !== '' ? ed.sale    : (polSale || stripUnit(orig.num)),
+      compete: ed.compete != null && ed.compete !== '' ? ed.compete : polComp,
       card:    ed.card    != null ? ed.card    : '',
     };
   }
@@ -653,7 +674,11 @@
     const op = priceOf(orig) || {};
     const stripUnit = (s) => String(s || '').replace(/^[^\d]*월?\s*/,'').replace(/\s*원\s*$/,'').trim();
     document.getElementById('edit-name-orig').innerHTML     = `원본: <code>${escape(orig.name || '—')}</code>`;
-    document.getElementById('edit-price-orig').innerHTML    = `본사 원본: <code>정상가 ${escape(stripUnit(op.del) || '—')} / 할인가 ${escape(stripUnit(op.num) || '—')}</code>`;
+    const polH = comPolicyRow(modelCode(orig));
+    const fmtH = n => (n == null ? '' : Number(n).toLocaleString('ko-KR'));
+    document.getElementById('edit-price-orig').innerHTML    = (polH && (polH.기준가 != null || polH.기본요금 != null))
+      ? `정책 기준(5년·셀프/방문): <code>정상가 ${escape(fmtH(polH.기준가) || '—')} / 월 ${escape(fmtH(polH.기본요금) || '—')}</code> · 비우면 정책가 자동 적용`
+      : `본사 원본: <code>정상가 ${escape(stripUnit(op.del) || '—')} / 할인가 ${escape(stripUnit(op.num) || '—')}</code>`;
     document.getElementById('edit-benefits-orig').innerHTML = `원본: <code>${escape((orig.benefits || []).join(', ') || '—')}</code>`;
     document.getElementById('edit-tag-orig').innerHTML      = `원본: <code>${escape(orig.tag || '—')}</code>`;
 
@@ -677,11 +702,13 @@
     const bRaw  = document.getElementById('edit-benefits').value.trim();
     const tag   = document.getElementById('edit-tag').value.trim();
 
-    // 본사 원본 정상가/할인가와 비교 → 같으면 override에 안 담음
+    // 정책가(5년+셀프/방문)와 비교 → 같으면 override에 안 담음(정책 그대로 추종)
+    const pol = comPolicyRow(modelCode(orig));
     const op = priceOf(orig) || {};
     const stripUnit = (s) => String(s || '').replace(/^[^\d]*월?\s*/,'').replace(/\s*원\s*$/,'').trim();
-    const origRegular = stripUnit(op.del);
-    const origSale    = stripUnit(op.num);
+    const baseRegular = (pol && pol.기준가   != null) ? String(pol.기준가)   : stripUnit(op.del);
+    const baseSale    = (pol && pol.기본요금 != null) ? String(pol.기본요금) : stripUnit(op.num);
+    const baseComp    = (pol && typeof pol.타사보상 === 'number' && pol.타사보상 > 0) ? String(pol.타사보상) : '';
 
     const ed = {};
     if (name && name !== (orig.name || '')) ed.name = name;
@@ -691,10 +718,11 @@
     const origBenefits = (orig.benefits || []).slice();
     if (benefits.join('|') !== origBenefits.join('|')) ed.benefits = benefits;
 
+    // 입력값이 비었거나 정책 기준과 같으면 override 안 담음 → 정책 그대로 따름
     const price = {};
-    if (preg !== origRegular) price.regular = preg;
-    if (psal !== origSale)    price.sale    = psal;
-    if (pcom) price.compete = pcom;   // 원본에 없는 값
+    if (preg && preg !== baseRegular) price.regular = preg;
+    if (psal && psal !== baseSale)    price.sale    = psal;
+    if (pcom && pcom !== baseComp)    price.compete = pcom;
     if (pcrd) price.card    = pcrd;
     if (Object.keys(price).length) ed.price = price;
 
@@ -832,6 +860,15 @@
   let comData = null; // 업로드/Supabase 로 받은 데이터 (window.COMMISSION_DB 보다 우선)
   const comState = { cat: 'all', form: 'all', q: '' };
   function comDB(){ return comData || window.COMMISSION_DB || null; }
+  // 정책(수수료표) 최신 1회 로드 — 상품 가격이 정책테이블 기준이라 상품관리에서도 필요
+  let comFetched = false;
+  async function ensureCommissionData(){
+    if (comFetched) return;
+    comFetched = true;
+    if (window.skmFetchCommission){
+      try { const r = await window.skmFetchCommission(); if (r && r.payload && Array.isArray(r.payload.rows) && r.payload.rows.length) comData = r.payload; } catch(_){}
+    }
+  }
   const comFmt = (v) => (v == null || v === '') ? '<span class="price-empty">—</span>' : Number(v).toLocaleString('ko-KR');
 
   /* ─── 제휴카드 관리 ─────────────────────────────────
@@ -1158,15 +1195,8 @@
       if (search) search.addEventListener('input', () => { comState.q = search.value.trim(); renderComTable(); });
       const dl = document.getElementById('com-download');
       if (dl) dl.addEventListener('click', downloadCommissionXlsx);
-      // Supabase 에 저장된 최신 수수료표가 있으면 우선 사용
-      if (window.skmFetchCommission){
-        try {
-          const remote = await window.skmFetchCommission();
-          if (remote && remote.payload && Array.isArray(remote.payload.rows) && remote.payload.rows.length){
-            comData = remote.payload;
-          }
-        } catch(_){}
-      }
+      // Supabase 에 저장된 최신 수수료표 (init 에서 이미 로드됐으면 재사용)
+      await ensureCommissionData();
     }
     const db = comDB();
     if (!db){
@@ -1816,6 +1846,7 @@
     renderStoreLabel();
     renderBackToSite();
     renderChips();
+    await ensureCommissionData();   // 상품 가격이 정책테이블 기준 → 테이블 렌더 전 로드
     renderTable();
     populateStoreForm();
     updateDirtyFlag();
