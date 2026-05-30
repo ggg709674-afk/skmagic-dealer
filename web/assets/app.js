@@ -484,6 +484,24 @@ const App = (() => {
     return row || null;
   }
 
+  // 반값할인 개월수 (admin.js comHalfMonths와 동일 규칙 — 26.6월 프로모션 기준).
+  // 원코크 18(의무5년↑) · 초소형 5년→6/6·7년→12 · 공청 올클린(디아트 제외) 6 · 비데 올클린케어 6.
+  function comHalfMonths(r) {
+    if (!r) return 0;
+    const m = String(r.모델 || '');
+    const dur = r.의무;
+    if (r.품목 === '정수기') {
+      if (/원코크/.test(m)) return (dur >= 60 ? 18 : 0);
+      if (/초소형/.test(m)) return (dur >= 72 ? 12 : (dur >= 60 ? 6 : 0));
+      if (/메가|MEGA|투워터/i.test(m)) return (dur >= 60 ? 18 : 0);
+    } else if (r.품목 === '공기청정기') {
+      if (/올클린/.test(m) && !/디아트/.test(m)) return (dur >= 60 ? 6 : 0);
+    } else if (r.품목 === '비데') {
+      if (/올클린케어/.test(m)) return (dur >= 60 ? 6 : 0);
+    }
+    return 0;
+  }
+
   function thumbOf(p) {
     /* download_thumbs.py 로 떨궈둔 ../products/<gid>/thumb.<ext> 우선 사용 */
     if (!p.thumb) return '';
@@ -501,12 +519,17 @@ const App = (() => {
     const tag = p._featured ? '<span class="badge b-best">추천</span>' : '';
     // 본사 model 필드는 "코드\n별점N (수)" 형식 — 모델코드만 추출
     const modelCode = (p.model || '').split('\n')[0].trim();
+    // 카드 표시 기준(셀프/방문 5년) 행 + 그 행의 반값할인 개월수
+    const pol = cardPolicyPrice(modelCode);
+    const halfMonths = pol ? comHalfMonths(pol) : 0;
+    const halfBadge = halfMonths ? `<div class="half-badge"><span class="m">${halfMonths}개월</span><span class="t">반값</span></div>` : '';
     // 매트리스(1000000245) 카테고리면 워커힐 브랜드 배지 표시
     const isMattress = (p.categories || []).includes('1000000245');
     const brandBadge = isMattress ? '<span class="brand-badge" style="background-image:url(./assets/brand/walkerhill.png)" aria-label="워커힐"></span>' : '';
     return `
       <a class="product-card${isMattress ? ' has-brand' : ''}" href="./detail.html?id=${encodeURIComponent(p.goodsId)}">
         ${brandBadge}
+        ${halfBadge}
         <div class="thumb">
           <div class="badges">${tag}</div>
           <img loading="lazy" decoding="async" src="${escape(thumbOf(p))}" alt="${escape(p.name || '')}" data-fb="${escape(thumbFallback(p))}" onerror="if(this.dataset.fb&&this.src!==this.dataset.fb){this.src=this.dataset.fb}else{this.style.opacity=.3}">
@@ -520,7 +543,6 @@ const App = (() => {
           <div class="benefits">${benefits}</div>
           ${(() => {
             const fmtN = n => Number(n).toLocaleString('ko-KR');
-            const pol = cardPolicyPrice(modelCode);
             if (pol && pol.기본요금 != null) {
               const del = (pol.기준가 != null && pol.기준가 !== pol.기본요금) ? `<div class="del">월 ${fmtN(pol.기준가)}원</div>` : '';
               return `<div class="price-row">${del}<div class="now"><small>구독</small> 월 <strong>${fmtN(pol.기본요금)}</strong>원</div></div>`;
