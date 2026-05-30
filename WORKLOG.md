@@ -660,5 +660,40 @@ document.addEventListener('visibilitychange', () => {
 
 ---
 
+## 📅 2026-05-31 — 상담 FAB 아이콘 · why카드 카피 · 푸터 정리 · FAQ 시스템
+
+### 상담 FAB 아이콘 (수화기 → 말풍선) `8900f77`
+- 우하단 `#fab-consult`는 PC/모바일 공통 단일 버튼. 누르면 전화 아니라 팝업(전화+카카오) 토글이라 채팅 버블이 동작과 맞음.
+- `icons.js`에 `ICONS.chat()` SVG 추가, index.html 주입부 `phone()`→`chat()`. (이모지 금지 규칙대로 SVG)
+
+### '우리는 이렇게 다릅니다' 카드 사실관계 정정 `fe24d19`
+- "정품 직배송 보증/신선한 박스" → **"SK매직 정품 보증"** (정수기는 식품 아님 + 기사 방문설치라 직배송 아님)
+- "빠른 설치 일정/평균 2일 이내" → **"고객 일정 맞춤 설치"** (2일 보장 불가 = 클레임 빌미 제거)
+- "빠른 설치" 표현 자체는 유지(메타/히어로) — 구체 약속 아니라 OK(형 결정).
+
+### 푸터 '고객지원' → '안내' 정리 `d2d2b69`
+- 상담신청/설치문의/A·S 제거(셋 다 `href="#"` 더미, 상담은 FAB가 대체).
+- 제휴카드는 '지원' 아닌 '혜택' 성격 → 헤더 '안내'. 제휴카드 안내(/card-benefits) + 자주 묻는 질문만.
+- ★ 본사도 푸터엔 고객지원 안 둠(회사소개/약관/개인정보 등 법적정보만). 우리 더미는 본사 따라한 것도 아니었음.
+
+### ★ 자주 묻는 질문(FAQ) 시스템 `f46bf47`
+제휴카드 시스템을 그대로 본떠 구축:
+- **`web/faq.html`**: 아코디언 FAQ. 기본 8문항 코드 고정(`DEFAULT_FAQ`) + DB 오버라이드. 헤더/푸터/사업자정보 바인딩·하단 상담 CTA 메인과 통일. 답변에 `<a href>`만 안전 허용(`answerHTML`).
+- **라우팅**: vercel.json `/faq` redirect(`.html`→clean) + rewrite(`/:slug` 위에). card-benefits와 동일 패턴(★ `.html` 직접경로는 `/:slug`가 슬러그로 오인하므로 경로 등록 필수).
+- **링크**: 홈 util-bar(제휴카드 안내 옆) + 푸터에 자주 묻는 질문 → `/faq`. faq.html util-bar에도 2개.
+- **admin FAQ 관리**(본부 전용 그룹): 질문/답변 추가·수정·삭제 + 전체 저장. `MENU_META.faq`, `initFaq/renderFaqAdmin/syncFaqFromDom/saveFaq`, `DEFAULT_FAQ`(faq.html과 **동일 유지 필수**). admin.css `.adm-faq-*`.
+- **supabase.js**: `skmFetchFaq`/`skmSaveFaq`. **migration `007_faq.sql`**: `faq_data`(id=1 단일행 payload jsonb) + RLS(super_admin write/public read).
+- ⚠️ **`007_faq.sql`은 형이 Supabase SQL Editor에서 실행해야 admin 저장이 동작**. 실행 전에도 공개 FAQ 페이지는 코드 기본값으로 정상 표시됨(읽기는 테이블 없으면 fallback).
+
+### FAQ 기본 8문항 (리서치 기반 — 본사 FAQ + 렌탈 일반)
+의무사용기간 / 약정만료 후 / 중도해지 위약금 / 설치비 / 셀프vs방문 관리 / 제휴카드 할인 / 이전설치 / 렌탈vs구매. 답변은 매장 톤(존댓말)·금액 단정 회피("상담 시 안내")로 클레임 방지.
+
+### 남은 일
+- ⚠️ **migration 007_faq.sql 실행** (위 참조) — 안 하면 admin에서 FAQ 저장 시 실패.
+- FAQ 답변 문구는 형이 admin에서 매장 실제 정책에 맞게 다듬으면 됨(현재 일반론).
+- `comHalfMonths` 반값 정책표 26.6월 기준 — 6월 프로모션 바뀌면 갱신(app.js+admin.js 양쪽).
+
+---
+
 *최종 업데이트: 2026-05-31*
 *다음 세션에서 컨텍스트 빠르게 잡고 싶으면 이 파일부터 읽으면 됨.*
