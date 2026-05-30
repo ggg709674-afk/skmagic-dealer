@@ -473,7 +473,7 @@ ul,ol{margin:0;padding:0;list-style:none}
 /* 반값할인 배지 — 카드 좌상단 (빨간 둥근 사각형 · "N개월" 작게 / "반값" 크게) */
 .product-card .half-badge{
   position:absolute;left:12px;top:12px;z-index:5;
-  width:54px;height:54px;border-radius:12px;
+  width:54px;height:54px;border-radius:0;
   background:var(--primary);color:#fff;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   line-height:1.0;box-shadow:0 2px 6px rgba(0,0,0,.18);
@@ -483,12 +483,12 @@ ul,ol{margin:0;padding:0;list-style:none}
 .product-card .half-badge .t{font-size:18px;font-weight:800;margin-top:3px}
 /* 모바일 — 배지 축소 */
 @media (max-width:768px){
-  .product-card .half-badge{width:46px;height:46px;border-radius:10px;left:10px;top:10px}
+  .product-card .half-badge{width:46px;height:46px;border-radius:0;left:10px;top:10px}
   .product-card .half-badge .m{font-size:9px}
   .product-card .half-badge .t{font-size:15px;margin-top:2px}
 }
 @media (max-width:560px){
-  .product-card .half-badge{width:40px;height:40px;border-radius:9px;left:8px;top:8px}
+  .product-card .half-badge{width:40px;height:40px;border-radius:0;left:8px;top:8px}
   .product-card .half-badge .m{font-size:8px;letter-spacing:-0.5px}
   .product-card .half-badge .t{font-size:13px;margin-top:1px}
 }
