@@ -947,6 +947,28 @@
     return /^MAT[SQK]/.test(s) ? s.slice(0, 3) + s.slice(4) : s;
   }
 
+  /* ─── 반값할인 규칙 (26년 6월 전사 프로모션 PDF 기준 / 잠정) ──────────
+     반환: { months, fee } — 반값 적용 개월수 + 반값 월요금(기본요금/2).
+     months===0 이면 반값 대상 아님.
+     ※ PDF 정책: 원코크 최대 18개월 · 초소형 5년→6/6·7년→12 · 공청 올클린(디아트 제외)
+        6개월(의무 5·6·7년) · 비데 신모델 올클린케어 6개월(의무 5년). 모델별 검증 필요. */
+  function comHalfDiscount(r){
+    const m = String(r.모델 || '');
+    const dur = r.의무;            // 의무기간(개월): 36/48/60/72/84
+    const fee = (r.기본요금 != null) ? Math.round(r.기본요금 / 2) : null;
+    let months = 0;
+    if (r.품목 === '정수기'){
+      if (/원코크/.test(m)) months = (dur >= 60 ? 18 : 0);
+      else if (/초소형/.test(m)) months = (dur >= 72 ? 12 : (dur >= 60 ? 6 : 0));
+      else if (/메가|MEGA|투워터/i.test(m)) months = (dur >= 60 ? 18 : 0);
+    } else if (r.품목 === '공기청정기'){
+      if (/올클린/.test(m) && !/디아트/.test(m)) months = (dur >= 60 ? 6 : 0);
+    } else if (r.품목 === '비데'){
+      if (/올클린케어/.test(m)) months = (dur >= 60 ? 6 : 0);
+    }
+    return { months, fee };
+  }
+
   /* build_data.js 의 파싱 로직을 브라우저(SheetJS)로 포팅.
      색상 묶음 + 방문/셀프 분리 + 의무기간별 행 + 홈페이지 모델만. */
   function parseCommissionWorkbook(buf, fileName){
@@ -1082,7 +1104,7 @@
     const list = comFiltered();
     if (cntEl) cntEl.innerHTML = `<strong>${list.length}</strong>행 표시 / 전체 ${db.rows.length}행`;
     if (!list.length){
-      tbody.innerHTML = `<tr><td colspan="11" class="adm-empty">조건에 맞는 항목이 없어요.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="12" class="adm-empty">조건에 맞는 항목이 없어요.</td></tr>`;
       return;
     }
     let prevKey = null;
@@ -1098,6 +1120,11 @@
         <td><span class="com-form com-form-${r.형태==='셀프형'?'self':'visit'}">${escape(r.형태)}</span></td>
         <td class="col-com-num">${r.의무!=null?escape(r.의무)+'개월':'<span class="price-empty">—</span>'}</td>
         <td>${escape(r.관리주기||'—')}</td>
+        <td class="col-com-half">${(() => {
+          const h = comHalfDiscount(r);
+          if (!h.months) return '<span class="price-empty">—</span>';
+          return `<span class="com-half-mo">${h.months}개월</span> <span class="com-half-fee">${comFmt(h.fee)}원</span>`;
+        })()}</td>
         <td class="col-com-num">${comFmt(r.기준가)}</td>
         <td class="col-com-num com-num-strong">${comFmt(r.기본요금)}</td>
         <td class="col-com-num">${comFmt(r.타사보상)}</td>
