@@ -491,11 +491,13 @@ const App = (() => {
     const tag = (p && p.tag) || '';
     if (!tag || dutyMonths == null) return 0;
     const re = /의무\s*(\d+)\s*년\s*(\d+)\s*개월\s*반값/g;
-    let m, res = 0;
+    let m; const map = {};
     while ((m = re.exec(tag))) {
-      if (_DUTY_Y2M[+m[1]] === dutyMonths) res = +m[2];
+      const d = _DUTY_Y2M[+m[1]]; if (d) map[d] = +m[2];
     }
-    return res;
+    if (map[dutyMonths] != null) return map[dutyMonths];
+    if (dutyMonths === 84 && map[72] != null) return map[72];  // 7년 = 6년과 동일
+    return 0;
   }
 
   function thumbOf(p) {

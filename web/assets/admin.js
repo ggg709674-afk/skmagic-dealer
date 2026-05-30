@@ -956,11 +956,13 @@
   function comHalfMonthsFromTag(tag, dur){
     if (!tag || dur == null) return 0;
     const re = /의무\s*(\d+)\s*년\s*(\d+)\s*개월\s*반값/g;
-    let mm, res = 0;
+    let mm; const map = {};
     while ((mm = re.exec(tag))) {
-      if (_COM_DUTY_Y2M[+mm[1]] === dur) res = +mm[2];
+      const d = _COM_DUTY_Y2M[+mm[1]]; if (d) map[d] = +mm[2];
     }
-    return res;
+    if (map[dur] != null) return map[dur];
+    if (dur === 84 && map[72] != null) return map[72];  // 7년 = 6년과 동일
+    return 0;
   }
   function comHalfMonths(r){
     const home = comHomeMatch(r.코드);
