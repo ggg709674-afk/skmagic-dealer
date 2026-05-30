@@ -610,5 +610,55 @@ document.addEventListener('visibilitychange', () => {
 
 ---
 
-*최종 업데이트: 2026-05-30*
+## 2026-05-30~31 — 정책테이블 고도화 · 반값할인 · 제휴카드 시스템 · SVG카드 스킬
+
+### 정책 테이블 (admin 메뉴 '수수료 확인' → '정책 테이블'로 개명)
+- **공급가액** 컬럼 추가(= 수수료합계 / 1.1, 반올림). **기본요금·타사보상·수수료합계 빨강 강조**(com-num-strong → --primary).
+- **매트리스 사이즈(SS/Q/K) 누락 수정**: 제품코드 4번째 글자가 사이즈(MAT**S**/**Q**/**K**…). onHome 9자리 매칭 + 색상묶음 dedup이 사이즈를 뭉개 SS만 남던 것 → `comSize`/`comBaseCode`(사이즈 무관 매칭) + dedup 키에 사이즈 추가. (매트리스 15행 → 42행)
+- 테이블·필터바를 데이터 폭으로 **좌측 정렬**(`.adm-com-table width:auto`, `.adm-table-wrap fit-content`, 패널별 max-width).
+
+### 반값할인 — ★ 정책 = 상품 tag 아님, **프로모션 PDF '핵심품목 혜택' 표** 기준
+- `comHalfMonths`(app.js·admin.js **양쪽 동일** 함수):
+  - 정수기 5년=6 / **6·7년**: **원코크·메가 계열 → 방문 18 · 셀프 15** (형태별로 갈림!), **초소형·투워터 → 12**.
+  - 공청 올클린(디아트 제외) 5·6·7년 = 6 / 비데 올클린케어 = 5년만 6.
+  - 정책표에 없는 계열(스탠드형직수·탱크형 등) = 0(미표시).
+- 타사보상 반값 `comCompeteHalfMonths` = 별첨 기준 **의무 5년↑ 3개월** (기본요금 반값과 별개).
+- 상세 가격카드: 월 렌탈료 / 타사 보상가 각각 "처음 N개월 [반값금액]"을 현재 요금과 **가로** 표시.
+- 카드/갤러리 배지 = 모델 **최대** 반값 개월수(`cardMaxHalfMonths`). (처음엔 상품 tag로 했다 부정확해서 정책표로 전환한 이력)
+
+### 상세페이지 기타
+- 기본 선택 = **셀프관리(없으면 방문) + 5년**. 상품 카드 가격도 동일 기준(`cardPolicyPrice`).
+- 매트리스 **사이즈 탭 → 가격/상단 모델명/제품사양** 연동(`optionsForSize`, `sizeLetterOf`). 제품사양은 항목 최다 사이즈(슈퍼싱글) 베이스에 현재 사이즈 값 덮어쓰기 **병합**.
+- 약정 6년 버튼 **중복** 버그(비데 풀스텐케어: 같은 의무 2행) → 형태별 의무 dedup.
+- 탭(제품사양 등) 클릭 시 **맨 위로 점프** → `location.hash` 대신 `history.replaceState`.
+- 갤러리 썸네일 **hover**로 메인 이미지 전환.
+- '타사 보상 가능' 안내 박스 제거. 타사 보상가에 "(타 브랜드 이용중인 고객 대상)" 표기.
+
+### ★ 공개 사이트 DB 연동
+- app.js가 정적 `commission.js`만 읽던 것 → `startRouter`에서 `skmFetchCommission`으로 **DB 최신 수수료 우선 로드**. **admin 업로드가 공개 사이트에 반영됨.**
+
+### svg-card 스킬 — ★ `OneDrive\claude-skills`에 저장 (= `~/.claude/skills` junction, 전역)
+- 신용카드 비주얼을 AI 이미지 대신 **인라인 SVG**로(텍스트 안 깨짐). 색표/배너통합 가이드 포함. (형은 스킬을 OneDrive\claude-skills에 모음)
+
+### 제휴카드 시스템
+- **`/card-benefits`** 페이지(`web/card-benefits.html`): SVG 카드 히어로 배너 + 8개 카드 그리드(SVG카드·전월실적별 할인표·연락처·신청링크). 헤더/푸터(사업자정보 포함) 메인과 통일.
+- **vercel.json**: `/card-benefits` rewrite를 `/:slug`보다 **위**에, `/card-benefits.html`→`/card-benefits` redirect. (★ 교훈: `.html` 직접 경로는 `/:slug` rewrite가 매장 슬러그로 오인 → admin처럼 경로 등록 필요)
+- admin **'본부 전용' 그룹 > 제휴카드 관리**: 8개 카드 **이미지 업로드(Storage `card-assets`)** + 자세히보기 링크 입력 + 전체 저장.
+- migration **`006_card_benefits.sql`** (★ Supabase SQL Editor에서 **실행 완료**): `card_benefits` 테이블 + `card-assets` 버킷 + RLS(super_admin write / public read).
+- card-benefits는 `card_benefits` DB에 이미지/링크 있으면 적용, 없으면 **SVG 카드 + SK매직 공식 링크**로 fallback.
+- 카드 데이터(이름·할인표·연락처)는 `card-benefits.html`의 `CARDS` 배열에 **코드 고정**, 이미지·링크만 DB 오버라이드. 카드 key: `hyundai/samsung/kb/shinhan/lotte/hana/woori/kj`.
+- supabase.js 헬퍼: `skmFetchCardBenefits`/`skmSaveCardBenefits`/`skmUploadCardImage`.
+- 푸터 문구 정리: '본사 홈페이지로 문의'(고객 유출)·'영업 카탈로그' 표현 제거 → 매장 문의 유도.
+
+### 남은 일 / TODO
+- **8개 카드 이미지를 admin에서 등록**(아직 SVG fallback). 카드사 이미지 URL 예: 광주 `imgs.kjbank.com/resource/img/fpm/card/skmagickj_card_5413.png`. 필요시 admin에 'URL 직접 입력' 방식 추가 검토(현재 파일 업로드만).
+- 카드 SVG 색을 카드사 브랜드색에 맞출지(현재 tone 임의).
+- 반값 개월수 정책표는 **26.6월 기준** — 매달 프로모션 바뀌면 `comHalfMonths` 갱신 필요(app.js + admin.js **양쪽**).
+
+### 주요 커밋(이 구간 최신순 일부)
+- `20c4919` 푸터 문구정리 / `6ce298f` 카드페이지 사업자정보 / `95bf0e5` 제휴카드 관리 메뉴 / `d353750` /card-benefits 라우팅 / `6187427` 반값 정책표 기준 / `76d681e` 매트리스 사이즈 가격연동·공개사이트 DB / `4e77022` 매트리스 사이즈 파싱
+
+---
+
+*최종 업데이트: 2026-05-31*
 *다음 세션에서 컨텍스트 빠르게 잡고 싶으면 이 파일부터 읽으면 됨.*
