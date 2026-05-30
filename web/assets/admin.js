@@ -1685,7 +1685,6 @@
       try {
         const rows = await window.skmFetchOverrides(state.store.id);
         state.overrides = rowsToOverrides(rows, state.products);
-        toast(`${state.store.name} 데이터 로드`);
       } catch(e){
         console.warn('[admin] cloud overrides fetch 실패 → 로컬 폴백', e);
         state.overrides = loadOverridesLocal();
