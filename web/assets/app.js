@@ -794,7 +794,21 @@ const App = (() => {
     const specWrap = document.getElementById('p-spec-wrap');
     const tableWrap = specWrap?.querySelector('.spec-table-wrap');
     if (!tableWrap) return;
-    const arr = sbs[sz] || [];
+    // 가장 완전한(항목 많은) 사이즈를 베이스로 깔고, 현재 사이즈의 값으로 덮어쓰기.
+    // (퀸/킹은 사이즈별로 다른 항목만 있고 공통 사양은 슈퍼싱글에만 있으므로 보완)
+    const keys = Object.keys(sbs).filter(k => k !== '_single');
+    let baseKey = sz;
+    keys.forEach(k => { if ((sbs[k] || []).length > (sbs[baseKey] || []).length) baseKey = k; });
+    const curArr = sbs[sz] || [];
+    const curMap = {};
+    curArr.forEach(x => { if (x && x.label != null) curMap[x.label] = x.value; });
+    const seen = new Set();
+    const arr = (sbs[baseKey] || []).map(x => {
+      seen.add(x.label);
+      return { label: x.label, value: (curMap[x.label] !== undefined ? curMap[x.label] : x.value) };
+    });
+    // 현재 사이즈에만 있는 항목(베이스에 없던 것)도 뒤에 추가
+    curArr.forEach(x => { if (x && x.label != null && !seen.has(x.label)) arr.push({ label: x.label, value: x.value }); });
     let rows = '';
     for (let i = 0; i < arr.length; i += 2) {
       const a = arr[i], b = arr[i + 1];
@@ -1321,6 +1335,22 @@ const App = (() => {
       }
 
       const sizeKeys = sbs ? Object.keys(sbs).filter(k => k !== '_single') : [];
+      // 가장 완전한(항목 많은) 사이즈를 베이스로, 현재 사이즈 값으로 덮어쓰기.
+      // (퀸/킹은 사이즈별로 다른 항목만 있고 공통 사양은 슈퍼싱글에만 있으므로 보완)
+      function specForSize(sz) {
+        let baseKey = sz;
+        sizeKeys.forEach(k => { if ((sbs[k] || []).length > (sbs[baseKey] || []).length) baseKey = k; });
+        const curArr = sbs[sz] || [];
+        const curMap = {};
+        curArr.forEach(x => { if (x && x.label != null) curMap[x.label] = x.value; });
+        const seen = new Set();
+        const out = (sbs[baseKey] || []).map(x => {
+          seen.add(x.label);
+          return { label: x.label, value: (curMap[x.label] !== undefined ? curMap[x.label] : x.value) };
+        });
+        curArr.forEach(x => { if (x && x.label != null && !seen.has(x.label)) out.push({ label: x.label, value: x.value }); });
+        return out;
+      }
       if (sizeKeys.length > 1) {
         // 사이즈별 spec — 탭 + 동적 테이블
         const tabsHtml = sizeKeys.map((sz, i) =>
@@ -1328,7 +1358,7 @@ const App = (() => {
         ).join('');
         specWrap.innerHTML = `
           <div class="size-tabs">${tabsHtml}</div>
-          <div class="spec-table-wrap">${renderSpecTable(sbs[sizeKeys[0]])}</div>
+          <div class="spec-table-wrap">${renderSpecTable(specForSize(sizeKeys[0]))}</div>
         `;
         const tableWrap = specWrap.querySelector('.spec-table-wrap');
         specWrap.querySelectorAll('.size-tab').forEach(btn => {
@@ -1336,7 +1366,7 @@ const App = (() => {
             const sz = btn.dataset.size;
             specWrap.querySelectorAll('.size-tab').forEach(b => b.classList.remove('on'));
             btn.classList.add('on');
-            tableWrap.innerHTML = renderSpecTable(sbs[sz]);
+            tableWrap.innerHTML = renderSpecTable(specForSize(sz));
           });
         });
       } else if (specs.length) {
