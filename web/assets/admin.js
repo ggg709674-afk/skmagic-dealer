@@ -997,17 +997,16 @@
     document.querySelectorAll('.adm-faq-q').forEach(inp => { const i = Number(inp.dataset.idx); if (faqItems[i]) faqItems[i].q = inp.value; });
     document.querySelectorAll('.adm-faq-a').forEach(inp => { const i = Number(inp.dataset.idx); if (faqItems[i]) faqItems[i].a = inp.value; });
   }
-  // 가벼운 토스트 — alert 없이 잠깐 떴다 사라지는 저장 피드백
+  // 가벼운 토스트 — alert 없이 잠깐 떴다 사라지는 저장 피드백.
+  // 매번 새 엘리먼트로 띄워 transition 이 항상 재생되게 한다(재사용 시 안 뜨던 문제).
   function admToast(msg){
-    let el = document.getElementById('adm-toast');
-    if (!el){ el = document.createElement('div'); el.id = 'adm-toast'; el.className = 'adm-toast'; }
-    document.body.appendChild(el);   // 항상 최상위로
-    el.textContent = msg;
-    el.classList.remove('show');
-    void el.offsetWidth;             // reflow 강제 → 매번 transition 재시작(두번째부터 안 뜨던 문제)
-    el.classList.add('show');
-    clearTimeout(el._t);
-    el._t = setTimeout(() => el.classList.remove('show'), 1600);
+    const old = document.getElementById('adm-toast');
+    if (old) old.remove();
+    const el = document.createElement('div');
+    el.id = 'adm-toast'; el.className = 'adm-toast'; el.textContent = msg;
+    document.body.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+    setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 350); }, 1600);
   }
 
   // 현재 faqItems 전체를 DB에 저장 (단일행 payload). 반환: error|null
