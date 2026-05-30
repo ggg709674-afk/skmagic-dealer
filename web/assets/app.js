@@ -835,11 +835,16 @@ const App = (() => {
     const NAME = { '셀프형': '셀프관리', '방문형': '방문관리' };
     const groups = [];
     ['셀프형', '방문형'].forEach(type => {
-      const trows = mine.filter(r => r.형태 === type).sort((a, b) => a.의무 - b.의무);
+      // 의무기간 오름차순 + 같은 의무는 모델명 있는 행 우선
+      const trows = mine.filter(r => r.형태 === type)
+        .sort((a, b) => a.의무 - b.의무 || ((b.모델 ? 1 : 0) - (a.모델 ? 1 : 0)));
       if (!trows.length) return;
+      // 같은 의무기간 중복 제거 (정책표 데이터 이상 방지 — 6년 버튼 두 개 등)
+      const _seenDuty = new Set();
+      const urows = trows.filter(r => { if (_seenDuty.has(r.의무)) return false; _seenDuty.add(r.의무); return true; });
       groups.push({
         name: NAME[type] || type, contract_type: type,
-        contracts: trows.map(r => ({
+        contracts: urows.map(r => ({
           label: dutyLabel(r.의무), years: _DUTY_YEARS[r.의무] || null,
           duty_use_months: r.의무, contract_type: type,
           visit_period: (r.관리주기 && r.관리주기 !== '-') ? r.관리주기 : null,
