@@ -739,6 +739,7 @@
   const MENU_META = {
     products: { title: '상품 관리', sub: '노출 여부 · 추천 배지 · 표시 순서 · 매장 자체 가격/이름 수정.', kind: 'products' },
     commission: { title: '정책 테이블', sub: '홈페이지 등록 모델의 약정·관리방식별 정책 테이블입니다.', kind: 'commission' },
+    cards:    { title: '제휴카드 관리', sub: '카드 이미지와 자세히보기 링크를 등록합니다. 제휴카드 안내 페이지에 반영됩니다.', kind: 'cards' },
     consult:  { title: '상담 신청',     sub: '준비 중인 메뉴예요.', kind: 'soon' },
     banner:   { title: '배너/슬라이드', sub: '준비 중인 메뉴예요.', kind: 'soon' },
     store:    { title: '기본 정보',     sub: '사업자정보 · 연락처를 관리합니다. 사이트 하단에 표시됩니다.', kind: 'store' },
@@ -792,6 +793,7 @@
     // 패널 전환
     document.querySelector('[data-panel="products"]').hidden   = (meta.kind !== 'products');
     document.querySelector('[data-panel="commission"]').hidden = (meta.kind !== 'commission');
+    document.querySelector('[data-panel="cards"]').hidden      = (meta.kind !== 'cards');
     document.querySelector('[data-panel="store"]').hidden      = (meta.kind !== 'store');
     document.querySelector('[data-panel="soon"]').hidden       = (meta.kind !== 'soon');
 
@@ -804,6 +806,7 @@
 
     if (meta.kind === 'store') populateStoreForm();
     if (meta.kind === 'commission') initCommission();
+    if (meta.kind === 'cards') initCards();
 
     // 상품관리 패널의 카테고리 필터도 hash 와 동기화
     if (meta.kind === 'products' && state.filterCat !== cat){
@@ -825,6 +828,83 @@
   const comState = { cat: 'all', form: 'all', q: '' };
   function comDB(){ return comData || window.COMMISSION_DB || null; }
   const comFmt = (v) => (v == null || v === '') ? '<span class="price-empty">—</span>' : Number(v).toLocaleString('ko-KR');
+
+  /* ─── 제휴카드 관리 ─────────────────────────────────
+     8개 카드(코드 고정)별로 이미지 업로드 + 자세히보기 링크 저장.
+     데이터: card_benefits(payload.cards[key]={image,link}), 이미지: Storage card-assets. */
+  const CARD_DEFS = [
+    { key:'hyundai', name:'SK인텔릭스 현대카드' },
+    { key:'samsung', name:'SK인텔릭스 삼성카드' },
+    { key:'kb',      name:'KB국민 SK인텔릭스 올림' },
+    { key:'shinhan', name:'SK인텔릭스 신한카드' },
+    { key:'lotte',   name:'롯데 SK인텔릭스 X LOCA' },
+    { key:'hana',    name:'SK인텔릭스 플러스 하나카드' },
+    { key:'woori',   name:'SK인텔릭스 우리카드' },
+    { key:'kj',      name:'SK인텔릭스 KJ카드' },
+  ];
+  let cardData = {};
+  let cardsInited = false;
+
+  async function initCards(){
+    const wrap = document.getElementById('adm-cards-list');
+    if (!wrap) return;
+    if (!cardsInited){
+      cardsInited = true;
+      if (window.skmFetchCardBenefits){
+        try { const r = await window.skmFetchCardBenefits(); if (r && r.payload && r.payload.cards) cardData = r.payload.cards; } catch(_){}
+      }
+    }
+    renderCards();
+  }
+  function renderCards(){
+    const wrap = document.getElementById('adm-cards-list');
+    if (!wrap) return;
+    wrap.innerHTML = CARD_DEFS.map(c => {
+      const d = cardData[c.key] || {};
+      return `<div class="adm-card-row" data-key="${c.key}">
+        <div class="adm-card-thumb">${d.image ? `<img src="${escape(d.image)}" alt="">` : '<span>이미지 없음</span>'}</div>
+        <div class="adm-card-body">
+          <div class="adm-card-name">${escape(c.name)}</div>
+          <div class="adm-card-fields">
+            <label class="adm-card-file-btn">이미지 등록<input type="file" accept="image/*" class="adm-card-file" data-key="${c.key}" hidden></label>
+            <input type="url" class="adm-input adm-card-link" data-key="${c.key}" value="${escape(d.link||'')}" placeholder="자세히 보기 링크 (https://...)">
+          </div>
+          <div class="adm-card-status" data-key="${c.key}"></div>
+        </div>
+      </div>`;
+    }).join('') + `<div class="adm-cards-save"><button class="adm-btn adm-btn-primary" id="cards-save">전체 저장</button></div>`;
+    wrap.querySelectorAll('.adm-card-file').forEach(inp => inp.addEventListener('change', onCardImage));
+    const saveBtn = document.getElementById('cards-save');
+    if (saveBtn) saveBtn.addEventListener('click', saveCards);
+  }
+  async function onCardImage(e){
+    const key = e.target.dataset.key;
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const st = document.querySelector(`.adm-card-status[data-key="${key}"]`);
+    if (st) st.textContent = '업로드 중…';
+    if (!window.skmUploadCardImage){ if (st) st.textContent = '업로드 기능을 불러오지 못했어요.'; return; }
+    const { url, error } = await window.skmUploadCardImage(key, file);
+    if (error){ if (st) st.textContent = '업로드 실패: ' + (error.message || '권한 또는 네트워크 오류'); return; }
+    cardData[key] = Object.assign({}, cardData[key], { image: url });
+    if (st) st.textContent = '이미지 업로드됨 — 전체 저장을 눌러 반영하세요.';
+    const row = e.target.closest('.adm-card-row');
+    const thumb = row && row.querySelector('.adm-card-thumb');
+    if (thumb) thumb.innerHTML = `<img src="${escape(url)}" alt="">`;
+    e.target.value = '';
+  }
+  async function saveCards(){
+    document.querySelectorAll('.adm-card-link').forEach(inp => {
+      const key = inp.dataset.key;
+      cardData[key] = Object.assign({}, cardData[key], { link: inp.value.trim() });
+    });
+    const btn = document.getElementById('cards-save');
+    if (btn){ btn.disabled = true; btn.textContent = '저장 중…'; }
+    let error = null;
+    if (window.skmSaveCardBenefits){ const r = await window.skmSaveCardBenefits({ cards: cardData }); error = r.error; }
+    if (btn){ btn.disabled = false; btn.textContent = '전체 저장'; }
+    alert(error ? ('저장 실패: ' + (error.message || '권한 또는 네트워크 오류')) : '저장됐어요. 제휴카드 안내 페이지에 반영됩니다.');
+  }
 
   async function initCommission(){
     bindComUpload();

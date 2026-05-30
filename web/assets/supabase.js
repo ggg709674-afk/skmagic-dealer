@@ -158,6 +158,44 @@
     return { data, error };
   };
 
+  /* ─── 제휴카드 데이터 조회 (카드별 이미지·링크, 단일행 id=1) ─── */
+  window.skmFetchCardBenefits = async function(){
+    const { data, error } = await window.sb
+      .from('card_benefits')
+      .select('payload, updated_at')
+      .eq('id', 1)
+      .maybeSingle();
+    if (error){ console.warn('[skmFetchCardBenefits]', error); return null; }
+    return data;
+  };
+
+  /* ─── 제휴카드 데이터 저장 (super_admin — RLS 의존) ───
+     payload = { cards: { "<key>": { image, link }, ... } } */
+  window.skmSaveCardBenefits = async function(payload){
+    const { data, error } = await window.sb
+      .from('card_benefits')
+      .upsert({ id: 1, payload, updated_at: new Date().toISOString() }, { onConflict: 'id' })
+      .select()
+      .maybeSingle();
+    if (error) console.warn('[skmSaveCardBenefits]', error);
+    return { data, error };
+  };
+
+  /* ─── 카드 이미지 업로드 (Storage card-assets 버킷) → public URL 반환 ─── */
+  window.skmUploadCardImage = async function(key, file){
+    if (!key || !file) return { error: new Error('key/file 필요') };
+    const ext = (file.name.split('.').pop() || 'png').toLowerCase();
+    const path = `cards/${key}.${ext}`;
+    const { error: upErr } = await window.sb.storage
+      .from('card-assets')
+      .upload(path, file, { upsert: true, contentType: file.type || 'image/png' });
+    if (upErr){ console.warn('[skmUploadCardImage]', upErr); return { error: upErr }; }
+    const { data } = window.sb.storage.from('card-assets').getPublicUrl(path);
+    // 캐시 무력화용 쿼리 부착 (같은 경로 덮어쓰기 시 갱신)
+    const url = data?.publicUrl ? `${data.publicUrl}?t=${Date.now()}` : null;
+    return { url };
+  };
+
   /* ─── 현재 로그인된 사용자 + 매장 컨텍스트 ─────── */
   window.skmAuthContext = async function(){
     const { data: { user } } = await window.sb.auth.getUser();

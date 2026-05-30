@@ -127,6 +127,8 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./assets/supabase.js"></script>
 <script>
   // ===== SVG 카드 생성 (svg-card 스킬 기반) =====
   const TONES = {
@@ -157,53 +159,59 @@
     </svg>`;
   }
 
-  // ===== 제휴카드 데이터 =====
+  // ===== 제휴카드 데이터 (카드명·할인표·연락처 고정 / 이미지·링크는 admin DB 오버라이드) =====
+  const FALLBACK_LINK = 'https://www.skmagic.com/event/skmagic-card-benefits';
   const CARDS = [
-    { name:'SK인텔릭스 현대카드', tone:'dark', tel:'1670-0445',
-      link:'https://www.skmagic.com/event/skmagic-card-benefits',
+    { key:'hyundai', name:'SK인텔릭스 현대카드', tone:'dark', tel:'1670-0445',
       tiers:[['40만원 이상','8,000','+13,000'],['80만원 이상','12,000','+12,000'],['120만원 이상','16,000','+10,000']] },
-    { name:'SK인텔릭스 삼성카드', tone:'blue', tel:'1599-6758',
-      link:'https://www.skmagic.com/event/skmagic-card-benefits',
+    { key:'samsung', name:'SK인텔릭스 삼성카드', tone:'blue', tel:'1599-6758',
       tiers:[['30만원 이상','7,000','+13,000'],['70만원 이상','10,000','+12,000'],['120만원 이상','13,000','+11,000']] },
-    { name:'KB국민 SK인텔릭스 올림', tone:'gold', tel:'1644-8466',
-      link:'https://www.skmagic.com/event/skmagic-card-benefits',
+    { key:'kb', name:'KB국민 SK인텔릭스 올림', tone:'gold', tel:'1644-8466',
       tiers:[['30만원 이상','11,000','+9,000'],['70만원 이상','15,000','+5,000'],['100만원 이상','20,000','—']] },
-    { name:'SK인텔릭스 신한카드', tone:'blue', tel:'1833-3045',
-      link:'https://www.skmagic.com/event/skmagic-card-benefits',
+    { key:'shinhan', name:'SK인텔릭스 신한카드', tone:'blue', tel:'1833-3045',
       tiers:[['30만원 이상','12,000','—'],['70만원 이상','15,000','+3,000'],['150만원 이상','25,000','+3,000']] },
-    { name:'롯데 SK인텔릭스 X LOCA', tone:'dark', tel:'1577-5320',
-      link:'https://www.skmagic.com/event/skmagic-card-benefits',
+    { key:'lotte', name:'롯데 SK인텔릭스 X LOCA', tone:'dark', tel:'1577-5320',
       tiers:[['30만원 이상','13,000','+2,000'],['70만원 이상','16,000','+1,000'],['150만원 이상','25,000','+2,000']] },
-    { name:'SK인텔릭스 플러스 하나카드', tone:'silver', tel:'1599-4284',
-      link:'https://www.skmagic.com/event/skmagic-card-benefits',
+    { key:'hana', name:'SK인텔릭스 플러스 하나카드', tone:'silver', tel:'1599-4284',
       tiers:[['30만원 이상','13,000','—'],['100만원 이상','18,000','—'],['150만원 이상','25,000','—']] },
-    { name:'SK인텔릭스 우리카드', tone:'blue', tel:'1800-4135',
-      link:'https://www.skmagic.com/event/skmagic-card-benefits',
+    { key:'woori', name:'SK인텔릭스 우리카드', tone:'blue', tel:'1800-4135',
       tiers:[['30만원 이상','10,000','—'],['70만원 이상','15,000','—'],['120만원 이상','20,000','—']] },
-    { name:'SK인텔릭스 KJ카드', tone:'silver', tel:'1833-3684',
-      link:'https://www.skmagic.com/event/skmagic-card-benefits',
+    { key:'kj', name:'SK인텔릭스 KJ카드', tone:'silver', tel:'1833-3684',
       tiers:[['30만원 이상','10,000','—'],['70만원 이상','16,000','—'],['120만원 이상','23,000','—']] },
   ];
 
-  // 히어로 카드 (실버)
-  document.getElementById('hero-card').innerHTML = cardSVG('silver','hero');
-
-  // 카드 그리드 렌더
   const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  document.getElementById('cb-grid').innerHTML = CARDS.map((c,i)=>{
-    const rows = c.tiers.map(([t,d,e])=>`<tr><td>${esc(t)}</td><td class="discount">${esc(d)}원</td><td class="${e==='—'?'':'extra'}">${esc(e)}${e==='—'?'':'원'}</td></tr>`).join('');
-    return `<article class="cb-item">
-      <div class="cb-item-top">
-        <div class="cb-mini">${cardSVG(c.tone,i)}</div>
-        <div><h3>${esc(c.name)}</h3><p class="cb-tel">카드 문의 <b>${esc(c.tel)}</b></p></div>
-      </div>
-      <table class="cb-tier">
-        <thead><tr><th>전월 실적</th><th>월 구독료 할인</th><th>행사 추가할인<br>(60개월)</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-      <div class="cb-actions"><a class="cb-apply" href="${esc(c.link)}" target="_blank" rel="noopener">카드 자세히 보기 / 신청</a></div>
-    </article>`;
-  }).join('');
+
+  // over = { key: {image, link} } (admin에서 등록한 값). 없으면 SVG 카드 + 기본 링크.
+  function renderCards(over){
+    over = over || {};
+    document.getElementById('hero-card').innerHTML = cardSVG('silver','hero');
+    document.getElementById('cb-grid').innerHTML = CARDS.map((c,i)=>{
+      const o = over[c.key] || {};
+      const link = (o.link && o.link.trim()) ? o.link : FALLBACK_LINK;
+      const visual = o.image
+        ? `<img src="${esc(o.image)}" alt="${esc(c.name)}" style="width:100%;height:auto;display:block;border-radius:12px">`
+        : cardSVG(c.tone,i);
+      const rows = c.tiers.map(([t,d,e])=>`<tr><td>${esc(t)}</td><td class="discount">${esc(d)}원</td><td class="${e==='—'?'':'extra'}">${esc(e)}${e==='—'?'':'원'}</td></tr>`).join('');
+      return `<article class="cb-item">
+        <div class="cb-item-top">
+          <div class="cb-mini">${visual}</div>
+          <div><h3>${esc(c.name)}</h3><p class="cb-tel">카드 문의 <b>${esc(c.tel)}</b></p></div>
+        </div>
+        <table class="cb-tier">
+          <thead><tr><th>전월 실적</th><th>월 구독료 할인</th><th>행사 추가할인<br>(60개월)</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div class="cb-actions"><a class="cb-apply" href="${esc(link)}" target="_blank" rel="noopener">카드 자세히 보기 / 신청</a></div>
+      </article>`;
+    }).join('');
+  }
+
+  // 기본(SVG) 렌더 → admin DB에 등록된 이미지/링크 있으면 적용해 다시 렌더
+  renderCards();
+  if (window.skmFetchCardBenefits){
+    window.skmFetchCardBenefits().then(r => { if (r && r.payload && r.payload.cards) renderCards(r.payload.cards); }).catch(()=>{});
+  }
 </script>
 </body>
 </html>
