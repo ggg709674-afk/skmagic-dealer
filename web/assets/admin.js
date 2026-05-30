@@ -1000,8 +1000,11 @@
   // 가벼운 토스트 — alert 없이 잠깐 떴다 사라지는 저장 피드백
   function admToast(msg){
     let el = document.getElementById('adm-toast');
-    if (!el){ el = document.createElement('div'); el.id = 'adm-toast'; el.className = 'adm-toast'; document.body.appendChild(el); }
+    if (!el){ el = document.createElement('div'); el.id = 'adm-toast'; el.className = 'adm-toast'; }
+    document.body.appendChild(el);   // 항상 최상위로
     el.textContent = msg;
+    el.classList.remove('show');
+    void el.offsetWidth;             // reflow 강제 → 매번 transition 재시작(두번째부터 안 뜨던 문제)
     el.classList.add('show');
     clearTimeout(el._t);
     el._t = setTimeout(() => el.classList.remove('show'), 1600);
