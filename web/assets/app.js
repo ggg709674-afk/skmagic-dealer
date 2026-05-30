@@ -870,7 +870,7 @@ const App = (() => {
         if (typeof c.타사보상 === 'number' && c.타사보상 > 0) {
           html += `
           <div class="row">
-            <span class="label">타사 보상가</span>
+            <span class="label">타사 보상가<small class="label-note">(타 브랜드 이용중인 고객 대상)</small></span>
             <span class="val"><small>월</small>${fmt(c.타사보상)}<small>원</small></span>
           </div>`;
         }
@@ -896,7 +896,7 @@ const App = (() => {
       ex.card ? ['제휴카드 할인 시', ex.card] : null,
     ].filter(Boolean).map(([k, v]) => `
       <div class="row">
-        <span class="label">${escape(k)}</span>
+        <span class="label">${escape(k)}${k === '타사 보상가' ? '<small class="label-note">(타 브랜드 이용중인 고객 대상)</small>' : ''}</span>
         <span class="val"><small>월</small>${escape(v)}<small>원</small></span>
       </div>
     `).join('');
