@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>제휴카드 혜택 | SK매직 인증파트너점</title>
+<meta name="description" content="SK인텔릭스 제휴 신용카드로 월 렌탈료 할인 혜택을 받아보세요. 8개 카드사 전월실적별 청구할인 안내.">
+<link rel="preload" href="./assets/fonts/Pretendard-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="./assets/fonts/Pretendard-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="./assets/fonts/Pretendard-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="./assets/style.css">
+<link rel="icon" type="image/png" sizes="32x32" href="./assets/brand/favicon-32.png">
+<meta name="theme-color" content="#DE4F41">
+<style>
+  /* ===== 제휴카드 히어로 배너 ===== */
+  .cb-hero{position:relative;overflow:hidden;border-radius:18px;min-height:300px;display:flex;align-items:center;margin:24px 0 8px;
+    background:radial-gradient(120% 150% at 86% 22%,var(--glow) 0%,transparent 52%),radial-gradient(90% 130% at 8% 95%,var(--glow2) 0%,transparent 60%),linear-gradient(115deg,var(--g1) 0%,var(--g2) 100%);
+    --g1:#ece6f8;--g2:#f6ebf3;--glow:rgba(255,190,225,.65);--glow2:rgba(190,195,250,.4);--blob:#e7d5f3}
+  .cb-hero::before{content:'';position:absolute;width:520px;height:520px;border-radius:50%;right:-60px;top:-160px;background:var(--blob);opacity:.5;filter:blur(8px)}
+  .cb-hero-inner{position:relative;z-index:2;width:100%;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 48px}
+  .cb-hero-text{color:#3a2b63}
+  .cb-eyebrow{display:inline-block;font-size:13px;font-weight:700;background:rgba(255,255,255,.6);padding:6px 14px;border-radius:999px;margin-bottom:16px;color:#5b4a8a}
+  .cb-hero-text h1{font-size:32px;font-weight:800;line-height:1.32;letter-spacing:-.5px}
+  .cb-hero-sub{margin-top:12px;font-size:15px;opacity:.82;font-weight:500}
+  .cb-hero-tags{margin-top:20px;display:flex;gap:8px;flex-wrap:wrap}
+  .cb-hero-tags span{font-size:12.5px;font-weight:600;color:#5b4a8a;background:rgba(255,255,255,.62);padding:7px 14px;border-radius:999px}
+  .cb-hero-card{flex:0 0 auto;width:400px;transform:rotate(-8deg);filter:drop-shadow(0 20px 34px rgba(50,35,80,.3))}
+  .cb-hero-card svg{width:100%;height:auto;display:block}
+
+  .cb-note{font-size:12.5px;color:var(--ink-3);margin:6px 0 26px}
+
+  /* ===== 카드 그리드 ===== */
+  .cb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:60px}
+  .cb-item{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 24px;display:flex;flex-direction:column}
+  .cb-item-top{display:flex;gap:18px;align-items:center}
+  .cb-mini{flex:0 0 auto;width:150px;filter:drop-shadow(0 8px 16px rgba(40,30,60,.16))}
+  .cb-mini svg{width:100%;height:auto;display:block}
+  .cb-item h3{font-size:17px;font-weight:800;color:var(--ink-1);line-height:1.35}
+  .cb-tel{margin-top:6px;font-size:13px;color:var(--ink-3);font-weight:600}
+  .cb-tel b{color:var(--primary);font-weight:800}
+  table.cb-tier{width:100%;border-collapse:collapse;margin-top:18px;font-size:13px}
+  table.cb-tier th{background:var(--surface);color:var(--ink-3);font-weight:700;font-size:12px;padding:8px 10px;text-align:center;border-bottom:1px solid var(--line)}
+  table.cb-tier td{padding:9px 10px;text-align:center;border-bottom:1px solid var(--line);color:var(--ink-2)}
+  table.cb-tier td.discount{font-weight:800;color:var(--ink-1)}
+  table.cb-tier td.extra{font-weight:700;color:var(--primary)}
+  table.cb-tier tr:last-child td{border-bottom:0}
+  .cb-actions{margin-top:18px}
+  .cb-apply{display:block;text-align:center;background:var(--primary);color:#fff;font-weight:700;font-size:14px;padding:13px;border-radius:10px;text-decoration:none}
+  .cb-apply:hover{background:var(--primary-dark,#c33f33)}
+
+  @media (max-width:860px){
+    .cb-grid{grid-template-columns:1fr}
+    .cb-hero-card{display:none}
+    .cb-hero-inner{padding:0 28px}
+    .cb-item-top{flex-direction:column;align-items:flex-start}
+    .cb-mini{width:200px}
+  }
+</style>
+</head>
+<body>
+
+<div class="util-bar">
+  <div class="container"><a href="./card-benefits.html">제휴카드 안내</a></div>
+</div>
+
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="./index.html">
+      <img class="brand-logo" src="./assets/brand/logo.png" alt="SK magic">
+      <span class="partner-label">인증파트너점</span>
+    </a>
+    <nav class="gnb">
+      <a href="./index.html?cls=100000005">정수기</a>
+      <a href="./index.html?cls=100000010">공기청정기</a>
+      <a href="./index.html?cls=100000024">비데</a>
+      <a href="./index.html?cls=1000000245">매트리스</a>
+    </nav>
+    <div class="header-actions"></div>
+  </div>
+</header>
+
+<main class="container">
+  <!-- 히어로 배너 -->
+  <section class="cb-hero">
+    <div class="cb-hero-inner">
+      <div class="cb-hero-text">
+        <span class="cb-eyebrow">SK매직 X SK인텔릭스 카드</span>
+        <h1>SK인텔릭스 제휴카드로<br>월 렌탈료를 더 가볍게</h1>
+        <p class="cb-hero-sub">8개 카드사 · 전월 실적별 월 구독료 청구 할인</p>
+        <div class="cb-hero-tags"><span># 월 구독료 할인</span><span># 무이자 할부</span><span># 청구 할인</span></div>
+      </div>
+      <div class="cb-hero-card" id="hero-card"></div>
+    </div>
+  </section>
+  <p class="cb-note">※ 카드별 혜택·전월실적 기준은 카드사 사정에 따라 변경될 수 있어요. 자세한 내용은 각 카드사 안내(ARS/신청 페이지)에서 확인해 주세요.</p>
+
+  <!-- 카드 그리드 -->
+  <section class="cb-grid" id="cb-grid"></section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="brand" style="color:#fff">
+          <img class="brand-logo" src="./assets/brand/logo_white.png" alt="SK magic">
+          <span class="partner-label">인증파트너점</span>
+        </div>
+        <p style="font-size:13px;line-height:1.7;margin-top:12px;color:#A0A0A0">정수기·공기청정기·비데·매트리스 렌탈 전문.<br>궁금한 점은 언제든 편하게 문의주세요.</p>
+      </div>
+      <div><h4>쇼핑</h4><ul>
+        <li><a href="./index.html?cls=100000005">정수기</a></li>
+        <li><a href="./index.html?cls=100000010">공기청정기</a></li>
+        <li><a href="./index.html?cls=100000024">비데</a></li>
+        <li><a href="./index.html?cls=1000000245">매트리스</a></li>
+      </ul></div>
+      <div><h4>안내</h4><ul>
+        <li><a href="./card-benefits.html">제휴카드 혜택</a></li>
+        <li><a href="./index.html">상품 보기</a></li>
+      </ul></div>
+      <div><h4>고객센터</h4><ul class="ft-info"><li style="font-size:22px;color:#fff;font-weight:800;letter-spacing:-0.5px">상담 환영</li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 SK매직 인증파트너점. 본 페이지는 영업 카탈로그입니다.</span>
+      <span>이용약관 · 개인정보처리방침</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ===== SVG 카드 생성 (svg-card 스킬 기반) =====
+  const TONES = {
+    silver: { cg:['#f6f6f9','#dadae1','#bcbcc6'], ink:'#3b3b42', sub:'#86868f' },
+    dark:   { cg:['#3a3d4a','#23252e','#15161c'], ink:'#ffffff', sub:'#b9bcc7' },
+    blue:   { cg:['#3b5a9a','#2b4170','#1d2c4d'], ink:'#ffffff', sub:'#cdd8ef' },
+    gold:   { cg:['#f3e6c4','#e3cd95','#cbab66'], ink:'#5a4620', sub:'#8a7038' },
+  };
+  function cardSVG(tone, id){
+    const t = TONES[tone] || TONES.silver;
+    const g = 'cg'+id;
+    return `<svg viewBox="0 0 400 252" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="제휴 신용카드">
+      <defs>
+        <linearGradient id="${g}" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="${t.cg[0]}"/><stop offset=".48" stop-color="${t.cg[1]}"/><stop offset="1" stop-color="${t.cg[2]}"/>
+        </linearGradient>
+        <linearGradient id="gl${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+        <linearGradient id="ch${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ecd089"/><stop offset="1" stop-color="#b8902f"/></linearGradient>
+      </defs>
+      <rect x="2" y="2" width="396" height="248" rx="22" fill="url(#${g})" stroke="#fff" stroke-opacity=".35"/>
+      <path d="M2 24 L210 2 L398 60 L398 150 L120 250 L2 250 Z" fill="url(#gl${id})"/>
+      <rect x="38" y="98" width="54" height="42" rx="8" fill="url(#ch${id})"/>
+      <path d="M65 98 v42 M38 112 h54 M38 126 h54" stroke="#9a7820" stroke-width="1.6" stroke-opacity=".55"/>
+      <text x="38" y="62" font-family="Pretendard,sans-serif" font-size="26" font-weight="800" fill="${t.ink}">SK<tspan font-weight="600" fill="${t.sub}"> intellix</tspan></text>
+      <text x="38" y="186" font-family="Pretendard,sans-serif" font-size="20" font-weight="600" letter-spacing="3" fill="${t.ink}" opacity=".85">0000  0000  0000  0000</text>
+      <text x="38" y="224" font-family="Pretendard,sans-serif" font-size="14" font-weight="700" letter-spacing="1" fill="${t.sub}">skintellix</text>
+      <text x="362" y="226" text-anchor="end" font-family="Pretendard,sans-serif" font-size="14" font-weight="800" fill="${t.sub}">SK<tspan font-weight="600"> magic</tspan></text>
+    </svg>`;
+  }
+
+  // ===== 제휴카드 데이터 =====
+  const CARDS = [
+    { name:'SK인텔릭스 현대카드', tone:'dark', tel:'1670-0445',
+      link:'https://www.hyundaicard.com/cpc/cr/CPCCR0201_01.hc?cardWcd=SKIHC&eventCode=SKI1A',
+      tiers:[['40만원 이상','8,000','+13,000'],['80만원 이상','12,000','+12,000'],['120만원 이상','16,000','+10,000']] },
+    { name:'SK인텔릭스 삼성카드', tone:'blue', tel:'1599-6758',
+      link:'https://www.samsungcard.com/home/card/cardinfo/PGHPPCCCardCardinfoDetails001?code=AAP1686&site=QISKMAGIC1',
+      tiers:[['30만원 이상','7,000','+13,000'],['70만원 이상','10,000','+12,000'],['120만원 이상','13,000','+11,000']] },
+    { name:'KB국민 SK인텔릭스 올림', tone:'gold', tel:'1644-8466',
+      link:'https://card.kbcard.com/CRD/DVIEW/HCAMCXPRICAC0076?mainCC=a&cooperationcode=04418&solicitorcode=7024418000',
+      tiers:[['30만원 이상','11,000','+9,000'],['70만원 이상','15,000','+5,000'],['100만원 이상','20,000','—']] },
+    { name:'SK인텔릭스 신한카드', tone:'blue', tel:'1833-3045',
+      link:'https://www.shinhancard.com/pconts/html/card/apply/credit/1236413_2207.html?empSeq=501&btnApp=dp01',
+      tiers:[['30만원 이상','12,000','—'],['70만원 이상','15,000','+3,000'],['150만원 이상','25,000','+3,000']] },
+    { name:'롯데 SK인텔릭스 X LOCA', tone:'dark', tel:'1577-5320',
+      link:'https://www.lottecard.co.kr/app/LPBOHAA_V100.lc?bId=92292&vtCdKndC=P14685-A14685',
+      tiers:[['30만원 이상','13,000','+2,000'],['70만원 이상','16,000','+1,000'],['150만원 이상','25,000','+2,000']] },
+    { name:'SK인텔릭스 플러스 하나카드', tone:'silver', tel:'1599-4284',
+      link:'https://www.hanacard.co.kr/OPI42000000D.web?schID=pcd&mID=PI41015414P&CD_PD_SEQ=17400',
+      tiers:[['30만원 이상','13,000','—'],['100만원 이상','18,000','—'],['150만원 이상','25,000','—']] },
+    { name:'SK인텔릭스 우리카드', tone:'blue', tel:'1800-4135',
+      link:'https://pc.wooricard.com/dcpc/yh1/crd/crd01/H1CRD101S02.do?cdPrdCd=102859',
+      tiers:[['30만원 이상','10,000','—'],['70만원 이상','15,000','—'],['120만원 이상','20,000','—']] },
+    { name:'SK인텔릭스 KJ카드', tone:'silver', tel:'1833-3684',
+      link:'https://www.kjbank.com/ib20/mnu/FPMCARD020103?ib20_wc=FPMCARD050102V10:FPMCARD050102V20',
+      tiers:[['30만원 이상','10,000','—'],['70만원 이상','16,000','—'],['120만원 이상','23,000','—']] },
+  ];
+
+  // 히어로 카드 (실버)
+  document.getElementById('hero-card').innerHTML = cardSVG('silver','hero');
+
+  // 카드 그리드 렌더
+  const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  document.getElementById('cb-grid').innerHTML = CARDS.map((c,i)=>{
+    const rows = c.tiers.map(([t,d,e])=>`<tr><td>${esc(t)}</td><td class="discount">${esc(d)}원</td><td class="${e==='—'?'':'extra'}">${esc(e)}${e==='—'?'':'원'}</td></tr>`).join('');
+    return `<article class="cb-item">
+      <div class="cb-item-top">
+        <div class="cb-mini">${cardSVG(c.tone,i)}</div>
+        <div><h3>${esc(c.name)}</h3><p class="cb-tel">카드 문의 <b>${esc(c.tel)}</b></p></div>
+      </div>
+      <table class="cb-tier">
+        <thead><tr><th>전월 실적</th><th>월 구독료 할인</th><th>행사 추가할인<br>(60개월)</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="cb-actions"><a class="cb-apply" href="${esc(c.link)}" target="_blank" rel="noopener">카드 자세히 보기 / 신청</a></div>
+    </article>`;
+  }).join('');
+</script>
+</body>
+</html>
