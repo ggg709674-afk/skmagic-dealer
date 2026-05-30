@@ -495,11 +495,12 @@ const App = (() => {
     const dur = r.의무;
     const self = /셀프/.test(r.형태 || r.contract_type || '');
     if (r.품목 === '정수기') {
+      const wonMega = /원코크|메가|MEGA/i.test(m);   // 원코크·원코크+·MEGA ICE·mini
+      const choso = /초소형|투워터/.test(m);          // 초소형·초소형+·라이트·투워터
+      if (!wonMega && !choso) return 0;               // 정책표에 없는 계열(스탠드/탱크형 등)
       if (dur < 60) return 0;
-      if (dur === 60) return 6;                                  // 5년
-      if (/원코크|메가|MEGA/i.test(m)) return self ? 15 : 18;     // 6·7년 원코크/메가 계열
-      if (/초소형|투워터/.test(m)) return 12;                      // 6·7년 초소형 계열/투워터
-      return 0;
+      if (dur === 60) return 6;                       // 5년
+      return wonMega ? (self ? 15 : 18) : 12;         // 6·7년: 원코크/메가 방문18·셀프15, 초소형 12
     }
     if (r.품목 === '공기청정기') {
       if (/올클린/.test(m) && !/디아트/.test(m)) return dur >= 60 ? 6 : 0;
@@ -510,6 +511,18 @@ const App = (() => {
       return 0;
     }
     return 0;
+  }
+  // 카드/갤러리 배지용 — 해당 모델의 최대 반값 개월수(전 약정·형태 중 최댓값)
+  function cardMaxHalfMonths(modelCode) {
+    const rows = (window.COMMISSION_DB && window.COMMISSION_DB.rows) || [];
+    const base = (modelCode || '').slice(0, 10);
+    if (!base) return 0;
+    let max = 0;
+    rows.forEach(r => {
+      if ((r.코드 || '').slice(0, 10) !== base) return;
+      const v = comHalfMonths(r); if (v > max) max = v;
+    });
+    return max;
   }
 
   function thumbOf(p) {
@@ -531,7 +544,7 @@ const App = (() => {
     const modelCode = (p.model || '').split('\n')[0].trim();
     // 카드 표시 기준(셀프/방문 5년) 행 + 그 행의 반값할인 개월수
     const pol = cardPolicyPrice(modelCode);
-    const halfMonths = pol ? comHalfMonths(pol) : 0;
+    const halfMonths = cardMaxHalfMonths(modelCode);
     const halfBadge = halfMonths ? `<div class="half-badge"><span class="m">${halfMonths}개월</span><span class="t">반값</span></div>` : '';
     // 매트리스(1000000245) 카테고리면 워커힐 브랜드 배지 표시
     const isMattress = (p.categories || []).includes('1000000245');
@@ -1132,8 +1145,7 @@ const App = (() => {
       }
       // 반값할인 배지 (좌상단) — 카드와 동일 기준(셀프/방문 5년)
       const gModel = (p.model || '').split('\n')[0].trim();
-      const gPol = cardPolicyPrice(gModel);
-      const gMonths = gPol ? comHalfMonths(gPol) : 0;
+      const gMonths = cardMaxHalfMonths(gModel);
       if (gMonths) {
         const hb = document.createElement('div');
         hb.className = 'half-badge';

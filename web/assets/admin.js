@@ -957,11 +957,12 @@
     const dur = r.의무;
     const self = /셀프/.test(r.형태 || '');
     if (r.품목 === '정수기'){
+      const wonMega = /원코크|메가|MEGA/i.test(m);
+      const choso = /초소형|투워터/.test(m);
+      if (!wonMega && !choso) return 0;               // 정책표에 없는 계열(스탠드/탱크형 등)
       if (dur < 60) return 0;
-      if (dur === 60) return 6;                                  // 5년
-      if (/원코크|메가|MEGA/i.test(m)) return self ? 15 : 18;     // 6·7년 원코크/메가 계열
-      if (/초소형|투워터/.test(m)) return 12;                      // 6·7년 초소형 계열/투워터
-      return 0;
+      if (dur === 60) return 6;                       // 5년
+      return wonMega ? (self ? 15 : 18) : 12;         // 6·7년
     }
     if (r.품목 === '공기청정기'){
       if (/올클린/.test(m) && !/디아트/.test(m)) return dur >= 60 ? 6 : 0;
