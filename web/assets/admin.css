@@ -791,9 +791,10 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 /* 편집 입력칸 — height 지정으로 글자 세로 가운데 정렬 */
 .adm-faq-q{font-weight:600;font-size:14px;height:40px;line-height:1.4}
 .adm-faq-a{font-size:13px;line-height:1.6;resize:vertical;font-family:inherit}
-/* 행 우측 버튼 (수정 / 완료·삭제) */
-.adm-faq-row-actions{flex:0 0 auto;display:flex;flex-direction:column;gap:8px}
-.adm-faq-row-actions .adm-btn{height:34px;padding:0 16px;font-size:13px}
+/* 행 우측 버튼 (수정 / 저장·삭제) — 폭 고정으로 클릭 시 좌우 흔들림 방지 */
+.adm-faq-row-actions{flex:0 0 92px;display:flex;flex-direction:column;gap:8px}
+.adm-faq-row-actions .adm-btn{width:100%;height:34px;padding:0;font-size:13px}
+.adm-faq-row-actions .adm-btn:disabled{opacity:.55;cursor:default}
 .adm-faq-actions{display:flex;gap:10px;margin-top:16px;max-width:760px}
 
 /* ===== 토스트 (가벼운 저장 피드백) ===== */

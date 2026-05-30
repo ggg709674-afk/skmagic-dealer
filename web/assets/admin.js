@@ -1019,9 +1019,9 @@
   async function saveFaqOne(i, btn){
     syncFaqFromDom();
     if (!(faqItems[i] && (faqItems[i].q || '').trim())){ alert('질문을 입력해 주세요.'); return; }
-    if (btn){ btn.disabled = true; btn.textContent = '저장 중…'; }
+    if (btn){ btn.disabled = true; }   // 텍스트는 그대로 — 폭 변동(흔들림) 방지
     const err = await persistFaq();
-    if (err){ if (btn){ btn.disabled = false; btn.textContent = '저장'; } alert('저장 실패: ' + (err.message || '권한 또는 네트워크 오류')); return; }
+    if (err){ if (btn){ btn.disabled = false; } alert('저장 실패: ' + (err.message || '권한 또는 네트워크 오류')); return; }
     delete faqItems[i]._editing;
     renderFaqAdmin();
     admToast('저장됐어요');
