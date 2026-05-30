@@ -740,6 +740,7 @@
     products: { title: '상품 관리', sub: '노출 여부 · 추천 배지 · 표시 순서 · 매장 자체 가격/이름 수정.', kind: 'products' },
     commission: { title: '정책 테이블', sub: '홈페이지 등록 모델의 약정·관리방식별 정책 테이블입니다.', kind: 'commission' },
     cards:    { title: '제휴카드 관리', sub: '카드 이미지와 자세히보기 링크를 등록합니다. 제휴카드 안내 페이지에 반영됩니다.', kind: 'cards' },
+    faq:      { title: 'FAQ 관리', sub: '자주 묻는 질문의 질문·답변을 추가·수정·삭제합니다. 자주 묻는 질문 페이지에 반영됩니다.', kind: 'faq' },
     consult:  { title: '상담 신청',     sub: '준비 중인 메뉴예요.', kind: 'soon' },
     banner:   { title: '배너/슬라이드', sub: '준비 중인 메뉴예요.', kind: 'soon' },
     store:    { title: '기본 정보',     sub: '사업자정보 · 연락처를 관리합니다. 사이트 하단에 표시됩니다.', kind: 'store' },
@@ -794,6 +795,7 @@
     document.querySelector('[data-panel="products"]').hidden   = (meta.kind !== 'products');
     document.querySelector('[data-panel="commission"]').hidden = (meta.kind !== 'commission');
     document.querySelector('[data-panel="cards"]').hidden      = (meta.kind !== 'cards');
+    document.querySelector('[data-panel="faq"]').hidden        = (meta.kind !== 'faq');
     document.querySelector('[data-panel="store"]').hidden      = (meta.kind !== 'store');
     document.querySelector('[data-panel="soon"]').hidden       = (meta.kind !== 'soon');
 
@@ -807,6 +809,7 @@
     if (meta.kind === 'store') populateStoreForm();
     if (meta.kind === 'commission') initCommission();
     if (meta.kind === 'cards') initCards();
+    if (meta.kind === 'faq') initFaq();
 
     // 상품관리 패널의 카테고리 필터도 hash 와 동기화
     if (meta.kind === 'products' && state.filterCat !== cat){
@@ -904,6 +907,73 @@
     if (window.skmSaveCardBenefits){ const r = await window.skmSaveCardBenefits({ cards: cardData }); error = r.error; }
     if (btn){ btn.disabled = false; btn.textContent = '전체 저장'; }
     alert(error ? ('저장 실패: ' + (error.message || '권한 또는 네트워크 오류')) : '저장됐어요. 제휴카드 안내 페이지에 반영됩니다.');
+  }
+
+  /* ─── FAQ 관리 ─────────────────────────────────────
+     질문/답변 목록을 추가·수정·삭제 후 전체 저장.
+     데이터: faq_data(payload.items=[{q,a}]). DB 비었으면 DEFAULT_FAQ 로 시작.
+     ※ DEFAULT_FAQ 는 프런트(faq.html)의 DEFAULT_FAQ 와 동일하게 유지할 것. */
+  const DEFAULT_FAQ = [
+    { q:'의무 사용 기간이 뭐예요?', a:'렌탈 계약 시 정한 기간으로, 이 기간 안에 해지하면 위약금이 발생해요. 의무 사용 기간이 지난 뒤에는 위약금 없이 해지하거나, 약정 만료 시 제품 소유권을 이전받을 수 있어요. 약정 기간은 제품과 관리 방식에 따라 다르니 상담 시 안내해 드려요.' },
+    { q:'약정이 끝나면 어떻게 되나요?', a:'계약 기간이 만료되면 보통 ① 제품 소유권을 무상으로 이전받거나, ② 새 제품으로 다시 렌탈하거나, ③ 반납·해지하는 것 중에서 선택하실 수 있어요. 제품·약정에 따라 조건이 달라서 만료 전에 미리 상담받으시는 걸 추천드려요.' },
+    { q:'중간에 해지하면 위약금이 얼마인가요?', a:'의무 사용 기간이 남아 있을 때 해지하면 남은 기간에 따라 위약금이 발생해요. 사용 기간이 길수록 부담이 줄어드는 구조라서, 정확한 금액은 가입하신 약정과 사용 기간 기준으로 상담 시 안내해 드려요.' },
+    { q:'설치비가 따로 드나요?', a:'기본 설치는 무료로 진행돼요. 다만 추가 배관 작업이나 특수 타공 등 현장 사정에 따라 추가 비용이 생길 수 있어요. 설치 전에 기사님이 확인 후 안내해 드리니 걱정하지 않으셔도 돼요.' },
+    { q:'셀프 관리랑 방문 관리는 뭐가 달라요?', a:'방문 관리는 전문 매니저가 정기적으로 방문해 필터 교체·점검을 해드리는 방식이고, 셀프 관리는 고객님이 직접 필터를 교체하시는 대신 월 요금이 더 저렴해요. 생활 패턴에 맞춰 자유롭게 고르실 수 있고, 상세 페이지에서 두 방식의 월 요금을 비교해 보실 수 있어요.' },
+    { q:'제휴카드 할인은 어떻게 받나요?', a:'SK인텔릭스 제휴 신용카드를 발급받아 월 렌탈료를 그 카드로 자동 납부 등록하시면, 카드사·전월 실적에 따라 매월 청구 할인을 받을 수 있어요. 카드사별 할인 금액은 <a href="/card-benefits">제휴카드 안내</a> 페이지에서 확인하실 수 있어요.' },
+    { q:'이사 가면 제품은 어떻게 하나요?', a:'이전 설치 서비스를 신청하시면 전문 기사가 새 집으로 방문해 다시 설치해 드려요. 이사 일정이 정해지면 미리 연락 주시면 일정에 맞춰 안내해 드릴게요.' },
+    { q:'렌탈이 구매보다 나은가요?', a:'렌탈은 초기 비용 부담이 적고, 정기 점검·필터 교체·A/S가 요금에 포함돼 관리가 편한 게 장점이에요. 사용 기간과 관리 방식에 따라 유불리가 달라지니, 상담 때 사용 환경에 맞는 방식을 함께 따져보고 안내해 드려요.' },
+  ];
+  let faqItems = null;   // [{q,a}] — 편집 중 상태
+  let faqInited = false;
+
+  async function initFaq(){
+    if (!document.getElementById('adm-faq-list')) return;
+    if (!faqInited){
+      faqInited = true;
+      if (window.skmFetchFaq){
+        try { const r = await window.skmFetchFaq(); if (r && r.payload && Array.isArray(r.payload.items) && r.payload.items.length) faqItems = r.payload.items.map(x => ({ q:x.q||'', a:x.a||'' })); } catch(_){}
+      }
+      if (!faqItems) faqItems = DEFAULT_FAQ.map(x => ({ q:x.q, a:x.a }));
+      const addBtn = document.getElementById('faq-add');
+      if (addBtn) addBtn.addEventListener('click', () => { syncFaqFromDom(); faqItems.push({ q:'', a:'' }); renderFaqAdmin(); });
+      const saveBtn = document.getElementById('faq-save');
+      if (saveBtn) saveBtn.addEventListener('click', saveFaq);
+    }
+    renderFaqAdmin();
+  }
+  function renderFaqAdmin(){
+    const wrap = document.getElementById('adm-faq-list');
+    if (!wrap) return;
+    wrap.innerHTML = faqItems.map((it,i) => `
+      <div class="adm-faq-row" data-idx="${i}">
+        <div class="adm-faq-num">${i+1}</div>
+        <div class="adm-faq-body">
+          <input type="text" class="adm-input adm-faq-q" data-idx="${i}" value="${escape(it.q)}" placeholder="질문을 입력하세요">
+          <textarea class="adm-input adm-faq-a" data-idx="${i}" rows="3" placeholder="답변을 입력하세요">${escape(it.a)}</textarea>
+        </div>
+        <button class="adm-faq-del" data-idx="${i}" title="삭제" type="button">×</button>
+      </div>`).join('') || '<p class="adm-empty">질문이 없어요. 아래 ‘질문 추가’를 눌러 추가하세요.</p>';
+    wrap.querySelectorAll('.adm-faq-del').forEach(btn => btn.addEventListener('click', () => {
+      syncFaqFromDom();
+      faqItems.splice(Number(btn.dataset.idx), 1);
+      renderFaqAdmin();
+    }));
+  }
+  // DOM의 현재 입력값을 faqItems에 반영 (재렌더/저장 전 호출)
+  function syncFaqFromDom(){
+    document.querySelectorAll('.adm-faq-q').forEach(inp => { const i = Number(inp.dataset.idx); if (faqItems[i]) faqItems[i].q = inp.value; });
+    document.querySelectorAll('.adm-faq-a').forEach(inp => { const i = Number(inp.dataset.idx); if (faqItems[i]) faqItems[i].a = inp.value; });
+  }
+  async function saveFaq(){
+    syncFaqFromDom();
+    const items = faqItems.map(it => ({ q:(it.q||'').trim(), a:(it.a||'').trim() })).filter(it => it.q || it.a);
+    const btn = document.getElementById('faq-save');
+    if (btn){ btn.disabled = true; btn.textContent = '저장 중…'; }
+    let error = null;
+    if (window.skmSaveFaq){ const r = await window.skmSaveFaq({ items }); error = r.error; }
+    if (btn){ btn.disabled = false; btn.textContent = '전체 저장'; }
+    if (!error){ faqItems = items.map(x => ({ q:x.q, a:x.a })); renderFaqAdmin(); }
+    alert(error ? ('저장 실패: ' + (error.message || '권한 또는 네트워크 오류')) : '저장됐어요. 자주 묻는 질문 페이지에 반영됩니다.');
   }
 
   async function initCommission(){

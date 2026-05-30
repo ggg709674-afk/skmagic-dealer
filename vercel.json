@@ -5,13 +5,15 @@
     { "source": "/index.html",    "destination": "/skmagic", "permanent": false },
     { "source": "/category.html", "destination": "/skmagic", "permanent": false },
     { "source": "/detail.html",   "destination": "/skmagic", "permanent": false },
-    { "source": "/card-benefits.html", "destination": "/card-benefits", "permanent": false }
+    { "source": "/card-benefits.html", "destination": "/card-benefits", "permanent": false },
+    { "source": "/faq.html", "destination": "/faq", "permanent": false }
   ],
   "rewrites": [
     { "source": "/",                "destination": "/web/landing.html" },
     { "source": "/admin",           "destination": "/web/admin.html" },
     { "source": "/admin.html",      "destination": "/web/admin.html" },
     { "source": "/card-benefits",   "destination": "/web/card-benefits.html" },
+    { "source": "/faq",             "destination": "/web/faq.html" },
     { "source": "/assets/:path*",   "destination": "/web/assets/:path*" },
     { "source": "/:slug/assets/:path*", "destination": "/web/assets/:path*" },
     { "source": "/:slug/admin",     "destination": "/web/admin.html?store=:slug" },

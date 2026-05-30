@@ -196,6 +196,30 @@
     return { url };
   };
 
+  /* ─── 자주 묻는 질문(FAQ) 조회 (본부 공통 단일행 id=1) ───
+     payload = { items: [ { q, a }, ... ] }. 없으면 프런트 기본 FAQ 사용. */
+  window.skmFetchFaq = async function(){
+    const { data, error } = await window.sb
+      .from('faq_data')
+      .select('payload, updated_at')
+      .eq('id', 1)
+      .maybeSingle();
+    if (error){ console.warn('[skmFetchFaq]', error); return null; }
+    return data;
+  };
+
+  /* ─── FAQ 저장 (super_admin — RLS 의존) ───
+     payload = { items: [ { q, a }, ... ] } */
+  window.skmSaveFaq = async function(payload){
+    const { data, error } = await window.sb
+      .from('faq_data')
+      .upsert({ id: 1, payload, updated_at: new Date().toISOString() }, { onConflict: 'id' })
+      .select()
+      .maybeSingle();
+    if (error) console.warn('[skmSaveFaq]', error);
+    return { data, error };
+  };
+
   /* ─── 현재 로그인된 사용자 + 매장 컨텍스트 ─────── */
   window.skmAuthContext = async function(){
     const { data: { user } } = await window.sb.auth.getUser();

@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>자주 묻는 질문 | SK매직 인증파트너점</title>
+<meta name="description" content="SK매직 렌탈 약정·의무사용기간·설치·해지·제휴카드 할인 등 자주 묻는 질문을 한눈에 정리했습니다.">
+<link rel="preload" href="./assets/fonts/Pretendard-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="./assets/fonts/Pretendard-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="./assets/fonts/Pretendard-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="./assets/style.css">
+<link rel="icon" type="image/png" sizes="32x32" href="./assets/brand/favicon-32.png">
+<meta name="theme-color" content="#DE4F41">
+<style>
+  /* ===== FAQ 히어로 ===== */
+  .faq-hero{margin:24px 0 28px}
+  .faq-hero h1{font-size:30px;font-weight:800;letter-spacing:-.5px;color:var(--ink-1);line-height:1.3}
+  .faq-hero p{margin-top:10px;font-size:15px;color:var(--ink-3);font-weight:500}
+
+  /* ===== 아코디언 ===== */
+  .faq-list{margin-bottom:56px;border-top:1px solid var(--line)}
+  .faq-item{border-bottom:1px solid var(--line)}
+  .faq-q{width:100%;background:none;border:0;cursor:pointer;display:flex;align-items:center;gap:14px;
+    padding:22px 8px;text-align:left;font-family:inherit}
+  .faq-q .faq-badge{flex:0 0 auto;width:26px;height:26px;border-radius:7px;background:var(--surface);color:var(--primary);
+    font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center}
+  .faq-q .faq-qtext{flex:1;font-size:16px;font-weight:700;color:var(--ink-1);letter-spacing:-.3px}
+  .faq-q .faq-chevron{flex:0 0 auto;width:20px;height:20px;color:var(--ink-3);transition:transform .25s ease}
+  .faq-item.open .faq-chevron{transform:rotate(180deg)}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease}
+  .faq-a-inner{padding:0 8px 22px 48px;font-size:14.5px;line-height:1.75;color:var(--ink-2)}
+  .faq-a-inner a{color:var(--primary);font-weight:700;text-decoration:none}
+  .faq-a-inner a:hover{text-decoration:underline}
+
+  /* ===== 하단 상담 유도 ===== */
+  .faq-cta{background:var(--surface);border-radius:18px;padding:32px;text-align:center;margin-bottom:56px}
+  .faq-cta h2{font-size:20px;font-weight:800;color:var(--ink-1)}
+  .faq-cta p{margin-top:8px;font-size:14px;color:var(--ink-3)}
+  .faq-cta .faq-cta-tel{display:inline-block;margin-top:18px;font-size:26px;font-weight:800;color:var(--primary);letter-spacing:-.5px;text-decoration:none}
+
+  @media (max-width:860px){
+    .faq-hero h1{font-size:24px}
+    .faq-q .faq-qtext{font-size:15px}
+    .faq-a-inner{padding-left:40px}
+  }
+</style>
+</head>
+<body>
+
+<div class="util-bar">
+  <div class="container">
+    <a href="/card-benefits">제휴카드 안내</a>
+    <a href="/faq">자주 묻는 질문</a>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="./index.html">
+      <img class="brand-logo" src="./assets/brand/logo.png" alt="SK magic">
+      <span class="partner-label">인증파트너점</span>
+    </a>
+    <nav class="gnb">
+      <a href="./index.html?cls=100000005">정수기</a>
+      <a href="./index.html?cls=100000010">공기청정기</a>
+      <a href="./index.html?cls=100000024">비데</a>
+      <a href="./index.html?cls=1000000245">매트리스</a>
+    </nav>
+    <div class="header-actions"></div>
+  </div>
+</header>
+
+<main class="container">
+  <section class="faq-hero">
+    <h1>자주 묻는 질문</h1>
+    <p>렌탈 약정·설치·관리·해지에 대해 고객님들이 자주 궁금해하시는 내용을 모았어요.</p>
+  </section>
+
+  <section class="faq-list" id="faq-list"></section>
+
+  <section class="faq-cta">
+    <h2>더 궁금한 점이 있으신가요?</h2>
+    <p>제품·가격·설치·약정 상담은 저희 매장으로 편하게 문의해 주세요.</p>
+    <a class="faq-cta-tel" id="faq-cta-tel" href="tel:">상담 환영</a>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="brand" style="color:#fff">
+          <img class="brand-logo" src="./assets/brand/logo_white.png" alt="SK magic">
+          <span class="partner-label">인증파트너점</span>
+        </div>
+        <p style="font-size:13px;line-height:1.7;margin-top:12px;color:#A0A0A0">정수기·공기청정기·비데·매트리스 렌탈 전문.<br>궁금한 점은 언제든 편하게 문의주세요.</p>
+      </div>
+      <div><h4>쇼핑</h4><ul>
+        <li><a href="./index.html?cls=100000005">정수기</a></li>
+        <li><a href="./index.html?cls=100000010">공기청정기</a></li>
+        <li><a href="./index.html?cls=100000024">비데</a></li>
+        <li><a href="./index.html?cls=1000000245">매트리스</a></li>
+      </ul></div>
+      <div><h4>안내</h4><ul>
+        <li><a href="/card-benefits">제휴카드 안내</a></li>
+        <li><a href="/faq">자주 묻는 질문</a></li>
+      </ul></div>
+      <div><h4>고객센터</h4><ul class="ft-info"><li id="ft-center-phone" style="font-size:22px;color:#fff;font-weight:800;letter-spacing:-0.5px">상담 환영</li></ul></div>
+    </div>
+    <div class="biz-info">
+      <dl class="biz-grid">
+        <div class="biz-row"><dt>상호</dt><dd id="ft-biz-name">—</dd></div>
+        <div class="biz-row"><dt>대표자</dt><dd id="ft-biz-owner">—</dd></div>
+        <div class="biz-row"><dt>사업자등록번호</dt><dd id="ft-biz-no">—</dd></div>
+        <div class="biz-row"><dt>통신판매업</dt><dd id="ft-biz-mailorder">—</dd></div>
+        <div class="biz-row full"><dt>주소</dt><dd id="ft-biz-address">—</dd></div>
+        <div class="biz-row"><dt>대표전화</dt><dd id="ft-biz-phone">—</dd></div>
+        <div class="biz-row"><dt>이메일</dt><dd id="ft-biz-email">—</dd></div>
+      </dl>
+      <p class="biz-note">본 페이지는 SK매직 정식 인증파트너점의 상품 안내 페이지입니다. 상품·가격·설치·약정 상담은 저희 매장으로 편하게 문의해 주세요. 친절하게 안내해 드립니다.</p>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 SK매직 인증파트너점</span>
+      <span>이용약관 · 개인정보처리방침</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./assets/supabase.js"></script>
+<script>
+  // ===== 기본 FAQ (DB 비었을 때 사용 / admin 첫 편집 기준값) =====
+  // ※ admin(FAQ 관리)의 DEFAULT_FAQ 와 동일하게 유지할 것.
+  const DEFAULT_FAQ = [
+    { q:'의무 사용 기간이 뭐예요?', a:'렌탈 계약 시 정한 기간으로, 이 기간 안에 해지하면 위약금이 발생해요. 의무 사용 기간이 지난 뒤에는 위약금 없이 해지하거나, 약정 만료 시 제품 소유권을 이전받을 수 있어요. 약정 기간은 제품과 관리 방식에 따라 다르니 상담 시 안내해 드려요.' },
+    { q:'약정이 끝나면 어떻게 되나요?', a:'계약 기간이 만료되면 보통 ① 제품 소유권을 무상으로 이전받거나, ② 새 제품으로 다시 렌탈하거나, ③ 반납·해지하는 것 중에서 선택하실 수 있어요. 제품·약정에 따라 조건이 달라서 만료 전에 미리 상담받으시는 걸 추천드려요.' },
+    { q:'중간에 해지하면 위약금이 얼마인가요?', a:'의무 사용 기간이 남아 있을 때 해지하면 남은 기간에 따라 위약금이 발생해요. 사용 기간이 길수록 부담이 줄어드는 구조라서, 정확한 금액은 가입하신 약정과 사용 기간 기준으로 상담 시 안내해 드려요.' },
+    { q:'설치비가 따로 드나요?', a:'기본 설치는 무료로 진행돼요. 다만 추가 배관 작업이나 특수 타공 등 현장 사정에 따라 추가 비용이 생길 수 있어요. 설치 전에 기사님이 확인 후 안내해 드리니 걱정하지 않으셔도 돼요.' },
+    { q:'셀프 관리랑 방문 관리는 뭐가 달라요?', a:'방문 관리는 전문 매니저가 정기적으로 방문해 필터 교체·점검을 해드리는 방식이고, 셀프 관리는 고객님이 직접 필터를 교체하시는 대신 월 요금이 더 저렴해요. 생활 패턴에 맞춰 자유롭게 고르실 수 있고, 상세 페이지에서 두 방식의 월 요금을 비교해 보실 수 있어요.' },
+    { q:'제휴카드 할인은 어떻게 받나요?', a:'SK인텔릭스 제휴 신용카드를 발급받아 월 렌탈료를 그 카드로 자동 납부 등록하시면, 카드사·전월 실적에 따라 매월 청구 할인을 받을 수 있어요. 카드사별 할인 금액은 <a href="/card-benefits">제휴카드 안내</a> 페이지에서 확인하실 수 있어요.' },
+    { q:'이사 가면 제품은 어떻게 하나요?', a:'이전 설치 서비스를 신청하시면 전문 기사가 새 집으로 방문해 다시 설치해 드려요. 이사 일정이 정해지면 미리 연락 주시면 일정에 맞춰 안내해 드릴게요.' },
+    { q:'렌탈이 구매보다 나은가요?', a:'렌탈은 초기 비용 부담이 적고, 정기 점검·필터 교체·A/S가 요금에 포함돼 관리가 편한 게 장점이에요. 사용 기간과 관리 방식에 따라 유불리가 달라지니, 상담 때 사용 환경에 맞는 방식을 함께 따져보고 안내해 드려요.' },
+  ];
+
+  const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  // 답변은 일부 링크(<a>)를 허용해야 해서, 안전한 태그만 통과시킨다.
+  function answerHTML(a){
+    // 허용: <a href="...">텍스트</a> 만. 나머지는 escape.
+    const parts = String(a).split(/(<a\s+href="[^"]*">.*?<\/a>)/g);
+    return parts.map(p => {
+      const m = p.match(/^<a\s+href="([^"]*)">(.*?)<\/a>$/);
+      if (m) return `<a href="${esc(m[1])}">${esc(m[2])}</a>`;
+      return esc(p);
+    }).join('');
+  }
+
+  function renderFaq(items){
+    const list = document.getElementById('faq-list');
+    list.innerHTML = items.map((it,i) => `
+      <div class="faq-item">
+        <button class="faq-q" type="button" aria-expanded="false">
+          <span class="faq-badge">Q</span>
+          <span class="faq-qtext">${esc(it.q)}</span>
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">${answerHTML(it.a)}</div></div>
+      </div>`).join('');
+    list.querySelectorAll('.faq-q').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.faq-item');
+        const ans = item.querySelector('.faq-a');
+        const open = item.classList.toggle('open');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        ans.style.maxHeight = open ? ans.scrollHeight + 'px' : '0';
+      });
+    });
+  }
+
+  // 기본 FAQ 먼저 렌더 → DB에 등록된 게 있으면 교체
+  renderFaq(DEFAULT_FAQ);
+  if (window.skmFetchFaq){
+    window.skmFetchFaq().then(r => {
+      if (r && r.payload && Array.isArray(r.payload.items) && r.payload.items.length) renderFaq(r.payload.items);
+    }).catch(()=>{});
+  }
+
+  // 푸터 사업자정보 + 상담 전화 — 매장 정보 채움 (card-benefits.html 과 동일)
+  (async () => {
+    if (!window.skmFetchStore) return;
+    let slug = (window.skmGetSlug && window.skmGetSlug()) || '';
+    if (!slug || slug === 'faq') slug = 'skmagic';
+    let store = await window.skmFetchStore(slug);
+    if (!store && slug !== 'skmagic') store = await window.skmFetchStore('skmagic');
+    if (!store) return;
+    const set = (id, v) => {
+      const dd = document.getElementById(id); if (!dd) return;
+      const row = dd.closest('.biz-row');
+      if (v) { dd.textContent = v; if (row) row.hidden = false; }
+      else if (row) row.hidden = true;
+    };
+    set('ft-biz-name', store.name); set('ft-biz-owner', store.biz_owner);
+    set('ft-biz-no', store.biz_no); set('ft-biz-mailorder', store.mail_order_no);
+    set('ft-biz-address', store.address); set('ft-biz-phone', store.phone);
+    set('ft-biz-email', store.email);
+    const cp = document.getElementById('ft-center-phone');
+    if (cp && store.phone) cp.textContent = store.phone;
+    const ctaTel = document.getElementById('faq-cta-tel');
+    if (ctaTel && store.phone){ ctaTel.textContent = store.phone; ctaTel.href = 'tel:' + store.phone.replace(/[^0-9+]/g,''); }
+  })();
+</script>
+</body>
+</html>
