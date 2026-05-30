@@ -1067,7 +1067,7 @@
     const list = comFiltered();
     if (cntEl) cntEl.innerHTML = `<strong>${list.length}</strong>행 표시 / 전체 ${db.rows.length}행`;
     if (!list.length){
-      tbody.innerHTML = `<tr><td colspan="10" class="adm-empty">조건에 맞는 항목이 없어요.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="11" class="adm-empty">조건에 맞는 항목이 없어요.</td></tr>`;
       return;
     }
     let prevKey = null;
@@ -1086,6 +1086,7 @@
         <td class="col-com-num">${comFmt(r.기준가)}</td>
         <td class="col-com-num com-num-strong">${comFmt(r.기본요금)}</td>
         <td class="col-com-num">${comFmt(r.타사보상)}</td>
+        <td class="col-com-num">${r.수수료합계!=null ? comFmt(Math.round(r.수수료합계/1.1)) : '<span class="price-empty">—</span>'}</td>
         <td class="col-com-num com-fee">${comFmt(r.수수료합계)}</td>
       </tr>`;
     }).join('');
