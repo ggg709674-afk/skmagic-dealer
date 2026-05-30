@@ -434,14 +434,14 @@
         if (el) el.style.display = (p === pane) ? '' : 'none';
       });
     }
-    // 클릭 시 hash 갱신만 — hashchange 가 applyPane 처리
+    // 클릭 시 탭 전환 — location.hash 직접 변경은 맨 위로 스크롤 점프를 유발하므로
+    // replaceState 로 URL 해시만 갱신(앵커 스크롤 없음)하고 applyPane 직접 호출.
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-view="detail"] .tabbar button');
       if (!btn) return;
       e.preventDefault();
-      const target = '#' + btn.dataset.pane;
-      if (location.hash === target) applyPane();
-      else location.hash = target;
+      history.replaceState(null, '', '#' + btn.dataset.pane);
+      applyPane();
     });
     window.addEventListener('hashchange', applyPane);
     // detail view 가 활성화될 때마다(라우터 진입) 동기화 필요 → MutationObserver
