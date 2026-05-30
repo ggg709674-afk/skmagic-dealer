@@ -118,7 +118,19 @@
         <li><a href="/card-benefits">제휴카드 혜택</a></li>
         <li><a href="./index.html">상품 보기</a></li>
       </ul></div>
-      <div><h4>고객센터</h4><ul class="ft-info"><li style="font-size:22px;color:#fff;font-weight:800;letter-spacing:-0.5px">상담 환영</li></ul></div>
+      <div><h4>고객센터</h4><ul class="ft-info"><li id="ft-center-phone" style="font-size:22px;color:#fff;font-weight:800;letter-spacing:-0.5px">상담 환영</li></ul></div>
+    </div>
+    <div class="biz-info">
+      <dl class="biz-grid">
+        <div class="biz-row"><dt>상호</dt><dd id="ft-biz-name">—</dd></div>
+        <div class="biz-row"><dt>대표자</dt><dd id="ft-biz-owner">—</dd></div>
+        <div class="biz-row"><dt>사업자등록번호</dt><dd id="ft-biz-no">—</dd></div>
+        <div class="biz-row"><dt>통신판매업</dt><dd id="ft-biz-mailorder">—</dd></div>
+        <div class="biz-row full"><dt>주소</dt><dd id="ft-biz-address">—</dd></div>
+        <div class="biz-row"><dt>대표전화</dt><dd id="ft-biz-phone">—</dd></div>
+        <div class="biz-row"><dt>이메일</dt><dd id="ft-biz-email">—</dd></div>
+      </dl>
+      <p class="biz-note">본 페이지는 SK매직 정식 대리점의 영업 상담 보조용 카탈로그입니다. 모든 상품·가격 정보의 최종 확인은 본사 공식 홈페이지(skmagic.com) 또는 매장 상담으로 진행해주세요.</p>
     </div>
     <div class="footer-bottom">
       <span>© 2026 SK매직 인증파트너점. 본 페이지는 영업 카탈로그입니다.</span>
@@ -212,6 +224,28 @@
   if (window.skmFetchCardBenefits){
     window.skmFetchCardBenefits().then(r => { if (r && r.payload && r.payload.cards) renderCards(r.payload.cards); }).catch(()=>{});
   }
+
+  // 푸터 사업자정보 — 매장 정보 채움 (메인 사이트와 동일)
+  (async () => {
+    if (!window.skmFetchStore) return;
+    let slug = (window.skmGetSlug && window.skmGetSlug()) || '';
+    if (!slug || slug === 'card-benefits') slug = 'skmagic';
+    let store = await window.skmFetchStore(slug);
+    if (!store && slug !== 'skmagic') store = await window.skmFetchStore('skmagic');
+    if (!store) return;
+    const set = (id, v) => {
+      const dd = document.getElementById(id); if (!dd) return;
+      const row = dd.closest('.biz-row');
+      if (v) { dd.textContent = v; if (row) row.hidden = false; }
+      else if (row) row.hidden = true;
+    };
+    set('ft-biz-name', store.name); set('ft-biz-owner', store.biz_owner);
+    set('ft-biz-no', store.biz_no); set('ft-biz-mailorder', store.mail_order_no);
+    set('ft-biz-address', store.address); set('ft-biz-phone', store.phone);
+    set('ft-biz-email', store.email);
+    const cp = document.getElementById('ft-center-phone');
+    if (cp && store.phone) cp.textContent = store.phone;
+  })();
 </script>
 </body>
 </html>
