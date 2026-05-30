@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>제휴카드 배너 데모</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  :root{ --container:1200px; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Pretendard',-apple-system,sans-serif;background:#f4f5f7;color:#1a1a1a;padding:32px 0}
+  .wrap{max-width:var(--container);margin:0 auto;padding:0 20px}
+  h1.demo{font-size:18px;margin-bottom:8px}
+  p.demo{font-size:13px;color:#888;margin-bottom:24px}
+  .label{font-size:13px;font-weight:700;color:#555;margin:28px 0 10px}
+
+  /* ===== 제휴카드 히어로 배너 ===== */
+  .card-hero{
+    position:relative;overflow:hidden;border-radius:18px;
+    background:linear-gradient(115deg,var(--g1) 0%,var(--g2) 100%);
+    height:300px;
+    display:flex;align-items:center;
+  }
+  .ch-inner{
+    position:relative;width:100%;max-width:var(--container);margin:0 auto;
+    padding:0 56px;display:flex;align-items:center;justify-content:space-between;gap:24px;
+  }
+  .ch-text{color:#fff;z-index:2}
+  .ch-eyebrow{
+    display:inline-block;font-size:13px;font-weight:700;letter-spacing:.3px;
+    background:rgba(255,255,255,.18);padding:6px 14px;border-radius:999px;margin-bottom:18px;
+    backdrop-filter:blur(4px);
+  }
+  .ch-text h2{font-size:34px;font-weight:800;line-height:1.3;letter-spacing:-.5px}
+  .ch-text h2 b{font-weight:800}
+  .ch-sub{margin-top:14px;font-size:15px;opacity:.85;font-weight:500}
+
+  /* 카드 + 카드 위 텍스트 */
+  .ch-card{position:relative;flex:0 0 auto;width:340px;height:240px}
+  .ch-card img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 18px 30px rgba(0,0,0,.28))}
+  /* 카드 면 각도에 맞춘 이름 (대략치 — 조정 가능) */
+  .ch-card .name-en{
+    position:absolute;left:38%;top:33%;
+    transform:rotate(-15deg) skewX(-8deg);transform-origin:left center;
+    color:#fff;font-size:20px;font-weight:800;letter-spacing:.5px;
+    text-shadow:0 1px 2px rgba(0,0,0,.25);
+  }
+  .ch-card .name-ko{
+    position:absolute;left:38%;top:44%;
+    transform:rotate(-15deg) skewX(-8deg);transform-origin:left center;
+    color:rgba(255,255,255,.92);font-size:13px;font-weight:600;letter-spacing:1px;
+    text-shadow:0 1px 2px rgba(0,0,0,.25);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="demo">제휴카드 배너 색상 데모</h1>
+  <p class="demo">배경색·문구·카드 위 글자 위치 보고 골라줘. 카드 면 글자 각도는 미세조정 가능.</p>
+
+  <div class="label">A. Teal → Green (쿠쿠풍)</div>
+  <div class="card-hero" style="--g1:#1aa6a0;--g2:#54b06f">
+    <div class="ch-inner">
+      <div class="ch-text">
+        <span class="ch-eyebrow">SK매직 X SK인텔릭스 카드</span>
+        <h2>카드 결합 시<br><b>월 렌탈료 최대 2.5만원 할인</b></h2>
+        <p class="ch-sub">skintellix x 8개 카드사 제휴</p>
+      </div>
+      <div class="ch-card">
+        <img src="./assets/brand/card.png" alt="제휴카드">
+        <span class="name-en">skintellix</span>
+        <span class="name-ko">인텔릭스</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="label">B. SK매직 Red → Orange (브랜드 톤)</div>
+  <div class="card-hero" style="--g1:#de4f41;--g2:#f0903c">
+    <div class="ch-inner">
+      <div class="ch-text">
+        <span class="ch-eyebrow">SK매직 X SK인텔릭스 카드</span>
+        <h2>카드 결합 시<br><b>월 렌탈료 최대 2.5만원 할인</b></h2>
+        <p class="ch-sub">skintellix x 8개 카드사 제휴</p>
+      </div>
+      <div class="ch-card">
+        <img src="./assets/brand/card.png" alt="제휴카드">
+        <span class="name-en">skintellix</span>
+        <span class="name-ko">인텔릭스</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="label">C. Navy → Blue (프리미엄)</div>
+  <div class="card-hero" style="--g1:#283c6b;--g2:#4f72ad">
+    <div class="ch-inner">
+      <div class="ch-text">
+        <span class="ch-eyebrow">SK매직 X SK인텔릭스 카드</span>
+        <h2>카드 결합 시<br><b>월 렌탈료 최대 2.5만원 할인</b></h2>
+        <p class="ch-sub">skintellix x 8개 카드사 제휴</p>
+      </div>
+      <div class="ch-card">
+        <img src="./assets/brand/card.png" alt="제휴카드">
+        <span class="name-en">skintellix</span>
+        <span class="name-ko">인텔릭스</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="label">D. Purple → Indigo</div>
+  <div class="card-hero" style="--g1:#6a4ea0;--g2:#9b6fc9">
+    <div class="ch-inner">
+      <div class="ch-text">
+        <span class="ch-eyebrow">SK매직 X SK인텔릭스 카드</span>
+        <h2>카드 결합 시<br><b>월 렌탈료 최대 2.5만원 할인</b></h2>
+        <p class="ch-sub">skintellix x 8개 카드사 제휴</p>
+      </div>
+      <div class="ch-card">
+        <img src="./assets/brand/card.png" alt="제휴카드">
+        <span class="name-en">skintellix</span>
+        <span class="name-ko">인텔릭스</span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
