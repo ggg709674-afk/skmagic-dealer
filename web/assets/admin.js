@@ -947,29 +947,28 @@
     return /^MAT[SQK]/.test(s) ? s.slice(0, 3) + s.slice(4) : s;
   }
 
-  /* ─── 반값할인 규칙 (26년 6월 전사 프로모션 PDF 기준 / 잠정) ──────────
-     ① 일반(기본요금) 반값 개월수 — comHalfMonths
-        원코크 최대 18개월 · 초소형 5년→6/6·7년→12 · 공청 올클린(디아트 제외)
-        6개월(의무 5·6·7년) · 비데 신모델 올클린케어 6개월(의무 5년).
-     ② 타사보상 반값 개월수 — comCompeteHalfMonths
-        PDF 별첨 패턴: 타사보상 적용 모델은 의무 5년 이상 시 3개월. (모델별 검증 필요) */
-  function comHalfMonths(r){
-    const m = String(r.모델 || '');
-    const dur = r.의무;            // 의무기간(개월): 36/48/60/72/84
-    if (r.품목 === '정수기'){
-      if (/원코크/.test(m)) return (dur >= 60 ? 18 : 0);
-      if (/초소형/.test(m)) return (dur >= 72 ? 12 : (dur >= 60 ? 6 : 0));
-      if (/메가|MEGA|투워터/i.test(m)) return (dur >= 60 ? 18 : 0);
-    } else if (r.품목 === '공기청정기'){
-      if (/올클린/.test(m) && !/디아트/.test(m)) return (dur >= 60 ? 6 : 0);
-    } else if (r.품목 === '비데'){
-      if (/올클린케어/.test(m)) return (dur >= 60 ? 6 : 0);
+  /* ─── 반값할인 개월수 — 상품 tag 기준 (공개 사이트 app.js와 동일 소스) ─────
+     수수료표 행을 제품코드로 홈페이지 상품과 매칭 → 그 상품 tag
+     ("구독 의무5년6개월반값 , 의무6년12개월반값")에서 해당 의무의 반값 개월수 파싱.
+     ① 기본요금 반값: 해당 의무의 tag 개월수
+     ② 타사보상 반값: 타사보상 있으면 동일 promo 개월수 (없으면 0) */
+  const _COM_DUTY_Y2M = { 3: 36, 4: 48, 5: 60, 6: 72, 7: 84 };
+  function comHalfMonthsFromTag(tag, dur){
+    if (!tag || dur == null) return 0;
+    const re = /의무\s*(\d+)\s*년\s*(\d+)\s*개월\s*반값/g;
+    let mm, res = 0;
+    while ((mm = re.exec(tag))) {
+      if (_COM_DUTY_Y2M[+mm[1]] === dur) res = +mm[2];
     }
-    return 0;
+    return res;
+  }
+  function comHalfMonths(r){
+    const home = comHomeMatch(r.코드);
+    return comHalfMonthsFromTag(home && home.tag, r.의무);
   }
   function comCompeteHalfMonths(r){
     if (r.타사보상 == null) return 0;        // 타사보상 없는 모델은 대상 아님
-    return (r.의무 >= 60) ? 3 : 0;
+    return comHalfMonths(r);                  // 동일 promo 기간 적용
   }
 
   /* build_data.js 의 파싱 로직을 브라우저(SheetJS)로 포팅.
@@ -1174,7 +1173,7 @@
     prods.forEach(p => {
       if (!p.model) return;
       const b = comBaseCode(p.model).slice(0, 10);
-      if (!m[b]) m[b] = { name: p.name, model: p.model };
+      if (!m[b]) m[b] = { name: p.name, model: p.model, tag: p.tag };
     });
     _comHomeMap = m;
     return m;
