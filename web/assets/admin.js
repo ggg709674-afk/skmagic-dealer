@@ -936,8 +936,6 @@
       if (!faqItems) faqItems = DEFAULT_FAQ.map(x => ({ q:x.q, a:x.a }));
       const addBtn = document.getElementById('faq-add');
       if (addBtn) addBtn.addEventListener('click', () => { syncFaqFromDom(); faqItems.push({ q:'', a:'', _editing:true }); renderFaqAdmin(); });
-      const saveBtn = document.getElementById('faq-save');
-      if (saveBtn) saveBtn.addEventListener('click', saveFaq);
     }
     renderFaqAdmin();
   }
@@ -954,7 +952,7 @@
             <textarea class="adm-input adm-faq-a" data-idx="${i}" rows="3" placeholder="답변을 입력하세요">${escape(it.a)}</textarea>
           </div>
           <div class="adm-faq-row-actions">
-            <button class="adm-btn adm-btn-primary adm-faq-done" data-idx="${i}" type="button">완료</button>
+            <button class="adm-btn adm-btn-primary adm-faq-save-one" data-idx="${i}" type="button">저장</button>
             <button class="adm-btn adm-btn-danger adm-faq-del" data-idx="${i}" type="button">삭제</button>
           </div>
         </div>`;
@@ -980,19 +978,17 @@
       faqItems[Number(btn.dataset.idx)]._editing = true;
       renderFaqAdmin();
     }));
-    // 완료 — 입력값 반영 후 보기 모드로
-    wrap.querySelectorAll('.adm-faq-done').forEach(btn => btn.addEventListener('click', () => {
-      syncFaqFromDom();
-      delete faqItems[Number(btn.dataset.idx)]._editing;
-      renderFaqAdmin();
-    }));
-    // 삭제 — 확인 후 (전체 저장 눌러야 최종 반영)
-    wrap.querySelectorAll('.adm-faq-del').forEach(btn => btn.addEventListener('click', () => {
+    // 저장 — 이 항목만 즉시 저장(개별)
+    wrap.querySelectorAll('.adm-faq-save-one').forEach(btn => btn.addEventListener('click', () => saveFaqOne(Number(btn.dataset.idx), btn)));
+    // 삭제 — 확인 후 즉시 반영
+    wrap.querySelectorAll('.adm-faq-del').forEach(btn => btn.addEventListener('click', async () => {
       const i = Number(btn.dataset.idx);
-      if (!confirm('이 질문을 삭제할까요?\n(아래 "전체 저장"을 눌러야 사이트에 최종 반영됩니다.)')) return;
+      if (!confirm('이 질문을 삭제할까요?')) return;
       syncFaqFromDom();
       faqItems.splice(i, 1);
+      const err = await persistFaq();
       renderFaqAdmin();
+      if (err) alert('삭제 저장 실패: ' + (err.message || '권한 또는 네트워크 오류'));
     }));
   }
   // DOM의 현재 입력값을 faqItems에 반영 (재렌더/저장 전 호출)
@@ -1000,16 +996,23 @@
     document.querySelectorAll('.adm-faq-q').forEach(inp => { const i = Number(inp.dataset.idx); if (faqItems[i]) faqItems[i].q = inp.value; });
     document.querySelectorAll('.adm-faq-a').forEach(inp => { const i = Number(inp.dataset.idx); if (faqItems[i]) faqItems[i].a = inp.value; });
   }
-  async function saveFaq(){
+  // 현재 faqItems 전체를 DB에 저장 (단일행 payload). 반환: error|null
+  async function persistFaq(){
     syncFaqFromDom();
     const items = faqItems.map(it => ({ q:(it.q||'').trim(), a:(it.a||'').trim() })).filter(it => it.q || it.a);
-    const btn = document.getElementById('faq-save');
+    if (!window.skmSaveFaq) return null;
+    const { error } = await window.skmSaveFaq({ items });
+    return error || null;
+  }
+  // 이 항목만 저장 — 질문 비었으면 막고, 성공하면 보기 모드로
+  async function saveFaqOne(i, btn){
+    syncFaqFromDom();
+    if (!(faqItems[i] && (faqItems[i].q || '').trim())){ alert('질문을 입력해 주세요.'); return; }
     if (btn){ btn.disabled = true; btn.textContent = '저장 중…'; }
-    let error = null;
-    if (window.skmSaveFaq){ const r = await window.skmSaveFaq({ items }); error = r.error; }
-    if (btn){ btn.disabled = false; btn.textContent = '전체 저장'; }
-    if (!error){ faqItems = items.map(x => ({ q:x.q, a:x.a })); renderFaqAdmin(); }
-    alert(error ? ('저장 실패: ' + (error.message || '권한 또는 네트워크 오류')) : '저장됐어요. 자주 묻는 질문 페이지에 반영됩니다.');
+    const err = await persistFaq();
+    if (err){ if (btn){ btn.disabled = false; btn.textContent = '저장'; } alert('저장 실패: ' + (err.message || '권한 또는 네트워크 오류')); return; }
+    delete faqItems[i]._editing;
+    renderFaqAdmin();
   }
 
   async function initCommission(){

@@ -682,7 +682,7 @@ document.addEventListener('visibilitychange', () => {
 - **라우팅**: vercel.json `/faq` redirect(`.html`→clean) + rewrite(`/:slug` 위에). card-benefits와 동일 패턴(★ `.html` 직접경로는 `/:slug`가 슬러그로 오인하므로 경로 등록 필수).
 - **링크**: 홈 util-bar(제휴카드 안내 옆) + 푸터에 자주 묻는 질문 → `/faq`. faq.html util-bar에도 2개.
 - **admin FAQ 관리**(★ '사이트 설정' 그룹 — 기본정보 아래): `MENU_META.faq`, `initFaq/renderFaqAdmin/syncFaqFromDom/saveFaq`, `DEFAULT_FAQ`(faq.html과 **동일 유지 필수**). admin.css `.adm-faq-*`.
-  - **UX**: 평소 행은 **읽기 전용 + [수정] 버튼**(실수 삭제 방지). [수정] 누르면 그 행만 편집(입력칸+[완료]/[삭제]), 삭제는 `confirm` 거침. '+ 질문 추가'는 바로 편집모드로. 모든 변경은 **[전체 저장]** 눌러야 DB 반영. (이전 인라인 input+X즉시삭제 → 개편)
+  - **UX**: 평소 행은 **읽기 전용 + [수정] 버튼**(실수 삭제 방지). [수정] → 그 행만 편집(입력칸+[저장]/[삭제]). **개별 저장** — 행마다 [저장] 누르면 그 즉시 DB upsert(`persistFaq`/`saveFaqOne`, 질문 비면 막음), 삭제도 `confirm` 후 즉시 반영. '+질문 추가'는 바로 편집모드. (전체저장 버튼·패널 힌트 제거, 이전 인라인 input+X즉시삭제 → 개편)
 - **supabase.js**: `skmFetchFaq`/`skmSaveFaq`. **migration `007_faq.sql`**: `faq_data`(id=1 단일행 payload jsonb) + RLS(super_admin write/public read).
 - ⚠️ **`007_faq.sql`은 형이 Supabase SQL Editor에서 실행해야 admin 저장이 동작**. 실행 전에도 공개 FAQ 페이지는 코드 기본값으로 정상 표시됨(읽기는 테이블 없으면 fallback).
 
