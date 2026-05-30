@@ -69,8 +69,8 @@
       <a class="adm-nav-item" href="#store" data-menu="store">
         <span class="adm-nav-ic">⌂</span> 기본 정보
       </a>
-      <a class="adm-nav-item is-disabled" href="#banner" data-menu="banner" title="준비 중">
-        <span class="adm-nav-ic">▭</span> 배너/슬라이드 <em class="adm-soon">soon</em>
+      <a class="adm-nav-item" href="#banner" data-menu="banner">
+        <span class="adm-nav-ic">▭</span> 배너/슬라이드
       </a>
       <a class="adm-nav-item" href="#faq" data-menu="faq">
         <span class="adm-nav-ic">?</span> FAQ 관리
@@ -303,6 +303,32 @@
     <div class="adm-faq-list" id="adm-faq-list"></div>
     <div class="adm-faq-actions">
       <button class="adm-btn" id="faq-add">+ 질문 추가</button>
+    </div>
+  </section>
+
+  <!-- ===== 배너/슬라이드 관리 패널 ===== -->
+  <section class="adm-panel" data-panel="banner" hidden>
+    <p class="adm-panel-hint">권장 사이즈 <strong>1920 × 600 px (16:5)</strong> · 다른 크기도 등록되지만 이 비율 영역에 맞춰 표시돼요 · 최대 <strong>10개</strong></p>
+
+    <!-- 슬라이드 동작 설정 -->
+    <div class="adm-bn-settings">
+      <div class="adm-bn-setrow">
+        <span class="adm-bn-setlabel">전환 방식</span>
+        <label class="adm-bn-radio"><input type="radio" name="bn-mode" value="auto"> 자동 슬라이드</label>
+        <label class="adm-bn-radio"><input type="radio" name="bn-mode" value="manual"> 수동 (화살표)</label>
+      </div>
+      <div class="adm-bn-setrow" id="bn-interval-row">
+        <span class="adm-bn-setlabel">전환 간격</span>
+        <input type="number" class="adm-input adm-bn-interval-input" id="bn-interval" min="1" max="60" step="1" value="5"> 초마다
+      </div>
+    </div>
+
+    <!-- 배너 목록 (세로) -->
+    <div class="adm-bn-list" id="adm-bn-list"></div>
+
+    <div class="adm-bn-actions">
+      <label class="adm-btn adm-bn-add" id="bn-add-label">+ 배너 이미지 추가<input type="file" accept="image/*" id="bn-file" hidden></label>
+      <button class="adm-btn adm-btn-primary" id="bn-save">저장</button>
     </div>
   </section>
 

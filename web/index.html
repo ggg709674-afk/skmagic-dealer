@@ -373,38 +373,67 @@
   document.getElementById('wh-2').innerHTML = ICONS.spark();
   document.getElementById('wh-3').innerHTML = ICONS.truck();
 
-  /* ===== Hero Slider — 3초 자동전환 + 좌우 버튼 + 점 인디케이터 ===== */
-  (function(){
+  /* ===== Hero Slider — DB(배너) 기반 + 자동/수동 + 1개시 화살표 숨김 =====
+     관리자(배너/슬라이드)에서 등록한 배너가 있으면 그걸로 슬라이드를 재구성.
+     없거나 로드 실패 시 정적 fallback(11/22/33.jpg) 유지. 인라인이라 throw 방지 위해 try-catch. */
+  (async function(){
     const root = document.getElementById('hero-slider');
     if (!root) return;
+
+    let cfg = { mode: 'auto', interval: 3 };   // fallback 기본값
+    try {
+      if (window.skmFetchBanners){
+        const r = await window.skmFetchBanners();
+        if (r && r.payload && Array.isArray(r.payload.items)){
+          const items = r.payload.items.filter(it => it && it.image && it.enabled !== false);
+          if (items.length){
+            cfg.mode = (r.payload.mode === 'manual') ? 'manual' : 'auto';
+            cfg.interval = (r.payload.interval > 0) ? r.payload.interval : 5;
+            const esc = s => String(s).replace(/"/g, '&quot;');
+            const track = root.querySelector('.hs-track');
+            const dotsWrap = root.querySelector('.hs-dots');
+            track.innerHTML = items.map((it, i) => {
+              const img = `<img src="${esc(it.image)}" alt="" loading="${i === 0 ? 'eager' : 'lazy'}">`;
+              const inner = it.link ? `<a href="${esc(it.link)}"${it.newTab ? ' target="_blank" rel="noopener"' : ''}>${img}</a>` : img;
+              return `<div class="hs-slide${i === 0 ? ' on' : ''}">${inner}</div>`;
+            }).join('');
+            if (dotsWrap) dotsWrap.innerHTML = items.map((_, i) =>
+              `<button class="hs-dot${i === 0 ? ' on' : ''}" type="button" data-i="${i}" aria-label="${i + 1}번"></button>`).join('');
+          }
+        }
+      }
+    } catch (_) { /* DB 실패 → 정적 fallback 유지 */ }
+
     const slides = root.querySelectorAll('.hs-slide');
     const dots = root.querySelectorAll('.hs-dot');
     if (!slides.length) return;
-    let cur = 0;
-    let timer = null;
-    const AUTO_MS = 3000;
 
+    const single = slides.length <= 1;
+    if (single){   // 1개면 화살표·점 숨김 + 자동전환 없음
+      root.querySelectorAll('.hs-nav').forEach(n => n.style.display = 'none');
+      const dw = root.querySelector('.hs-dots'); if (dw) dw.style.display = 'none';
+    }
+
+    let cur = 0, timer = null;
+    const AUTO_MS = Math.max(1, cfg.interval) * 1000;
     function go(idx){
       idx = (idx + slides.length) % slides.length;
-      slides[cur].classList.remove('on');
-      dots[cur] && dots[cur].classList.remove('on');
+      slides[cur].classList.remove('on'); dots[cur] && dots[cur].classList.remove('on');
       cur = idx;
-      slides[cur].classList.add('on');
-      dots[cur] && dots[cur].classList.add('on');
+      slides[cur].classList.add('on'); dots[cur] && dots[cur].classList.add('on');
     }
     function next(){ go(cur + 1); }
     function prev(){ go(cur - 1); }
-    function start(){ stop(); timer = setInterval(next, AUTO_MS); }
-    function stop(){ if (timer) { clearInterval(timer); timer = null; } }
+    function start(){ stop(); if (cfg.mode === 'auto' && !single) timer = setInterval(next, AUTO_MS); }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } }
 
-    root.querySelector('.hs-next').addEventListener('click', () => { next(); start(); });
-    root.querySelector('.hs-prev').addEventListener('click', () => { prev(); start(); });
-    dots.forEach(d => d.addEventListener('click', () => {
-      go(parseInt(d.dataset.i, 10) || 0); start();
-    }));
-    // 탭이 백그라운드일 때만 멈춤 (배터리·성능). hover로는 안 멈춤.
+    const nextBtn = root.querySelector('.hs-next'), prevBtn = root.querySelector('.hs-prev');
+    if (nextBtn) nextBtn.addEventListener('click', () => { next(); start(); });
+    if (prevBtn) prevBtn.addEventListener('click', () => { prev(); start(); });
+    dots.forEach(d => d.addEventListener('click', () => { go(parseInt(d.dataset.i, 10) || 0); start(); }));
+    // 탭이 백그라운드일 때만 멈춤 (자동 모드만)
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) stop(); else start();
+      if (document.hidden) stop(); else if (cfg.mode === 'auto') start();
     });
     start();
   })();

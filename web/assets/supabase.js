@@ -220,6 +220,44 @@
     return { data, error };
   };
 
+  /* ─── 홈 배너/슬라이드 조회 (본부 공통 단일행 id=1) ───
+     payload = { mode, interval, items:[{image,link,newTab,enabled}] }. 없으면 프런트 기본 배너. */
+  window.skmFetchBanners = async function(){
+    const { data, error } = await window.sb
+      .from('banner_data')
+      .select('payload, updated_at')
+      .eq('id', 1)
+      .maybeSingle();
+    if (error){ console.warn('[skmFetchBanners]', error); return null; }
+    return data;
+  };
+
+  /* ─── 배너 저장 (super_admin — RLS 의존) ─── */
+  window.skmSaveBanners = async function(payload){
+    const { data, error } = await window.sb
+      .from('banner_data')
+      .upsert({ id: 1, payload, updated_at: new Date().toISOString() }, { onConflict: 'id' })
+      .select()
+      .maybeSingle();
+    if (error) console.warn('[skmSaveBanners]', error);
+    return { data, error };
+  };
+
+  /* ─── 배너 이미지 업로드 (Storage banner-assets) → public URL ───
+     배너는 여러 개라 파일명을 매번 고유하게 생성. */
+  window.skmUploadBannerImage = async function(file){
+    if (!file) return { error: new Error('file 필요') };
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const rand = Math.random().toString(36).slice(2, 8);
+    const path = `banners/${Date.now()}_${rand}.${ext}`;
+    const { error: upErr } = await window.sb.storage
+      .from('banner-assets')
+      .upload(path, file, { upsert: true, contentType: file.type || 'image/jpeg' });
+    if (upErr){ console.warn('[skmUploadBannerImage]', upErr); return { error: upErr }; }
+    const { data } = window.sb.storage.from('banner-assets').getPublicUrl(path);
+    return { url: data?.publicUrl || null };
+  };
+
   /* ─── 현재 로그인된 사용자 + 매장 컨텍스트 ─────── */
   window.skmAuthContext = async function(){
     const { data: { user } } = await window.sb.auth.getUser();

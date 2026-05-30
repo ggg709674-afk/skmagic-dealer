@@ -742,7 +742,7 @@
     cards:    { title: '제휴카드 관리', sub: '카드 이미지와 자세히보기 링크를 등록합니다. 제휴카드 안내 페이지에 반영됩니다.', kind: 'cards' },
     faq:      { title: 'FAQ 관리', sub: '자주 묻는 질문의 질문·답변을 추가·수정·삭제합니다. 자주 묻는 질문 페이지에 반영됩니다.', kind: 'faq' },
     consult:  { title: '상담 신청',     sub: '준비 중인 메뉴예요.', kind: 'soon' },
-    banner:   { title: '배너/슬라이드', sub: '준비 중인 메뉴예요.', kind: 'soon' },
+    banner:   { title: '배너/슬라이드', sub: '홈 화면 상단 배너 이미지와 슬라이드 동작을 관리합니다. 홈 페이지에 반영됩니다.', kind: 'banner' },
     store:    { title: '기본 정보',     sub: '사업자정보 · 연락처를 관리합니다. 사이트 하단에 표시됩니다.', kind: 'store' },
   };
   /* hash 형식: #menu  또는  #products/cat-<dispClsfNo>
@@ -796,6 +796,7 @@
     document.querySelector('[data-panel="commission"]').hidden = (meta.kind !== 'commission');
     document.querySelector('[data-panel="cards"]').hidden      = (meta.kind !== 'cards');
     document.querySelector('[data-panel="faq"]').hidden        = (meta.kind !== 'faq');
+    document.querySelector('[data-panel="banner"]').hidden     = (meta.kind !== 'banner');
     document.querySelector('[data-panel="store"]').hidden      = (meta.kind !== 'store');
     document.querySelector('[data-panel="soon"]').hidden       = (meta.kind !== 'soon');
 
@@ -810,6 +811,7 @@
     if (meta.kind === 'commission') initCommission();
     if (meta.kind === 'cards') initCards();
     if (meta.kind === 'faq') initFaq();
+    if (meta.kind === 'banner') initBanner();
 
     // 상품관리 패널의 카테고리 필터도 hash 와 동기화
     if (meta.kind === 'products' && state.filterCat !== cat){
@@ -1027,6 +1029,122 @@
     delete faqItems[i]._editing;
     renderFaqAdmin();
     admToast('저장됐어요');
+  }
+
+  /* ─── 배너/슬라이드 관리 ───────────────────────────
+     이미지(업로드)·링크·새창·사용토글·순서 + 자동/수동·간격.
+     데이터: banner_data(payload={mode,interval,items:[{image,link,newTab,enabled}]}), 이미지: Storage banner-assets. */
+  const BN_MAX = 10;
+  let bnData = null;       // 편집 중 상태
+  let bnInited = false;
+
+  async function initBanner(){
+    if (!document.getElementById('adm-bn-list')) return;
+    if (!bnInited){
+      bnInited = true;
+      if (window.skmFetchBanners){
+        try { const r = await window.skmFetchBanners(); if (r && r.payload && Array.isArray(r.payload.items)) bnData = r.payload; } catch(_){}
+      }
+      if (!bnData) bnData = { mode:'auto', interval:5, items:[] };
+      if (!Array.isArray(bnData.items)) bnData.items = [];
+      bnData.mode = (bnData.mode === 'manual') ? 'manual' : 'auto';
+      if (!(bnData.interval > 0)) bnData.interval = 5;
+      // 전환 방식 라디오
+      document.querySelectorAll('input[name="bn-mode"]').forEach(r => {
+        r.checked = (r.value === bnData.mode);
+        r.addEventListener('change', () => { if (r.checked){ bnData.mode = r.value; updateBnIntervalRow(); } });
+      });
+      // 간격
+      const iv = document.getElementById('bn-interval');
+      if (iv){ iv.value = bnData.interval; iv.addEventListener('input', () => { bnData.interval = Math.max(1, Math.min(60, parseInt(iv.value,10)||5)); }); }
+      updateBnIntervalRow();
+      // 이미지 추가
+      const file = document.getElementById('bn-file');
+      if (file) file.addEventListener('change', onBannerImage);
+      // 저장
+      const saveBtn = document.getElementById('bn-save');
+      if (saveBtn) saveBtn.addEventListener('click', saveBanners);
+    }
+    renderBanners();
+  }
+  function updateBnIntervalRow(){
+    const row = document.getElementById('bn-interval-row');
+    if (row) row.style.display = (bnData.mode === 'auto') ? '' : 'none';
+  }
+  function renderBanners(){
+    const wrap = document.getElementById('adm-bn-list');
+    if (!wrap) return;
+    if (!bnData.items.length){
+      wrap.innerHTML = '<p class="adm-empty">등록된 배너가 없어요. 아래 ‘배너 이미지 추가’를 눌러 등록하세요.</p>';
+    } else {
+      wrap.innerHTML = bnData.items.map((it,i) => `
+        <div class="adm-bn-row" data-idx="${i}">
+          <div class="adm-bn-order">
+            <button class="adm-bn-up" data-idx="${i}" type="button" title="위로" ${i===0?'disabled':''}>▲</button>
+            <span class="adm-bn-num">${i+1}</span>
+            <button class="adm-bn-down" data-idx="${i}" type="button" title="아래로" ${i===bnData.items.length-1?'disabled':''}>▼</button>
+          </div>
+          <div class="adm-bn-thumb${it.enabled===false?' off':''}"><img src="${escape(it.image)}" alt=""></div>
+          <div class="adm-bn-body">
+            <label class="adm-bn-check"><input type="checkbox" class="adm-bn-enabled" data-idx="${i}" ${it.enabled!==false?'checked':''}> 이 배너 사용</label>
+            <input type="url" class="adm-input adm-bn-link" data-idx="${i}" value="${escape(it.link||'')}" placeholder="클릭 시 이동할 링크 (비우면 클릭 안 됨)">
+            <label class="adm-bn-check"><input type="checkbox" class="adm-bn-newtab" data-idx="${i}" ${it.newTab?'checked':''}> 새 창으로 열기</label>
+          </div>
+          <button class="adm-btn adm-btn-danger adm-bn-del" data-idx="${i}" type="button">삭제</button>
+        </div>`).join('');
+    }
+    wrap.querySelectorAll('.adm-bn-up').forEach(b => b.addEventListener('click', () => moveBanner(Number(b.dataset.idx), -1)));
+    wrap.querySelectorAll('.adm-bn-down').forEach(b => b.addEventListener('click', () => moveBanner(Number(b.dataset.idx), 1)));
+    wrap.querySelectorAll('.adm-bn-del').forEach(b => b.addEventListener('click', () => {
+      if (!confirm('이 배너를 삭제할까요?')) return;
+      syncBannersFromDom();
+      bnData.items.splice(Number(b.dataset.idx), 1);
+      renderBanners();
+    }));
+  }
+  // DOM 입력값(토글/링크)을 bnData 에 반영 (재렌더/저장/이동 전 호출)
+  function syncBannersFromDom(){
+    document.querySelectorAll('.adm-bn-enabled').forEach(c => { const i=Number(c.dataset.idx); if (bnData.items[i]) bnData.items[i].enabled = c.checked; });
+    document.querySelectorAll('.adm-bn-newtab').forEach(c => { const i=Number(c.dataset.idx); if (bnData.items[i]) bnData.items[i].newTab = c.checked; });
+    document.querySelectorAll('.adm-bn-link').forEach(c => { const i=Number(c.dataset.idx); if (bnData.items[i]) bnData.items[i].link = c.value.trim(); });
+  }
+  function moveBanner(i, dir){
+    syncBannersFromDom();
+    const j = i + dir;
+    if (j < 0 || j >= bnData.items.length) return;
+    const t = bnData.items[i]; bnData.items[i] = bnData.items[j]; bnData.items[j] = t;
+    renderBanners();
+  }
+  async function onBannerImage(e){
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    if (bnData.items.length >= BN_MAX){ alert(`배너는 최대 ${BN_MAX}개까지 등록할 수 있어요.`); return; }
+    if (!window.skmUploadBannerImage){ alert('업로드 기능을 불러오지 못했어요.'); return; }
+    admToast('업로드 중…');
+    const { url, error } = await window.skmUploadBannerImage(file);
+    if (error){ alert('업로드 실패: ' + (error.message || '권한 또는 네트워크 오류')); return; }
+    syncBannersFromDom();
+    bnData.items.push({ image: url, link:'', newTab:false, enabled:true });
+    renderBanners();
+    admToast('배너가 추가됐어요. 저장을 눌러 반영하세요.');
+  }
+  async function saveBanners(){
+    syncBannersFromDom();
+    const payload = {
+      mode: bnData.mode === 'manual' ? 'manual' : 'auto',
+      interval: Math.max(1, Math.min(60, parseInt(bnData.interval,10)||5)),
+      items: bnData.items
+        .map(it => ({ image: it.image, link:(it.link||'').trim(), newTab: !!it.newTab, enabled: it.enabled !== false }))
+        .filter(it => it.image),
+    };
+    const btn = document.getElementById('bn-save');
+    if (btn) btn.disabled = true;
+    let error = null;
+    if (window.skmSaveBanners){ const r = await window.skmSaveBanners(payload); error = r.error; }
+    if (btn) btn.disabled = false;
+    if (!error){ bnData = payload; renderBanners(); admToast('저장됐어요. 홈 배너에 반영됩니다.'); }
+    else alert('저장 실패: ' + (error.message || '권한 또는 네트워크 오류'));
   }
 
   async function initCommission(){

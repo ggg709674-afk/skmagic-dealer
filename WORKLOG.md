@@ -696,5 +696,39 @@ document.addEventListener('visibilitychange', () => {
 
 ---
 
+## 📅 2026-05-31 (2) — 홈 배너/슬라이드 시스템 (DB 관리형)
+
+### ★ 개요
+홈 hero 슬라이더가 정적(`hero/11·22·33.jpg` 하드코딩)이던 것 → **admin 관리형 DB 배너**로 전환.
+제휴카드/FAQ와 동일 패턴(단일행 payload + Storage 버킷 + RLS).
+
+### DB / migration `008_banners.sql` (★ Supabase SQL Editor에서 실행 필요)
+- `banner_data`(id=1 단일행 payload jsonb) + Storage 버킷 `banner-assets` + RLS(super_admin write/public read).
+- payload = `{ mode:'auto'|'manual', interval:초, items:[{image,link,newTab,enabled}] }`. 순서=배열순서, 최대 10개.
+- ⚠️ **실행 전에도 공개 홈은 정적 fallback(11/22/33.jpg)으로 정상**. 실행해야 admin 저장·공개 반영됨.
+
+### supabase.js
+- `skmFetchBanners`/`skmSaveBanners`/`skmUploadBannerImage`(파일명 매번 고유: `banners/{ts}_{rand}.ext`).
+
+### admin '사이트 설정 > 배너/슬라이드' (soon → 활성화)
+- 권장 사이즈 안내 **1920×600 (16:5)** — 다른 크기도 등록되되 그 비율 영역에 cover.
+- 전환 방식 **자동/수동** 라디오, 자동이면 **간격(초)** 입력(수동이면 간격행 숨김).
+- 배너 목록(세로): 썸네일(16:5 미리보기 340px) + **사용 토글** + **링크 입력** + **새 창 토글** + **▲▼ 순서** + 삭제.
+- **+배너 이미지 추가**(Storage 업로드, 최대 10개) / **저장**(전체, 토스트 피드백).
+- `initBanner/renderBanners/syncBannersFromDom/moveBanner/onBannerImage/saveBanners`. admin.css `.adm-bn-*`.
+
+### 공개 홈 hero (index.html 인라인 슬라이더 재작성)
+- `skmFetchBanners`로 enabled 배너 있으면 `.hs-track`/`.hs-dots` **동적 재구성**, 없거나 실패 시 **정적 fallback 유지**(인라인이라 try-catch로 throw 방지 — 라우터 사망 교훈).
+- **자동**: interval초 전환 / **수동**: 화살표만(자동 안 함). **1개면 화살표·점 숨김 + 자동 없음**.
+- 링크 있으면 `<a>`로 감싸고 newTab이면 `target=_blank rel=noopener`. 비율은 기존 `aspect-ratio:16/5` 유지(1920×600 기준).
+
+### 남은 일 / 확인
+- ⚠️ **`008_banners.sql` 실행** 후 admin에서 배너 등록·저장 가능.
+- admin 썸네일 "2/3 미리보기"는 340px 폭으로 잡음 — 형이 크기 보고 조정 요청 가능.
+- 모바일에서 수동(manual) 모드 시 화살표가 CSS상 숨겨질 수 있음(기존 모바일=자동+점 전제). 다배너 수동을 모바일에서도 조작하려면 별도 처리 필요.
+- 배너 저장은 현재 전체 저장(개별 아님) — FAQ는 개별이었음. 필요 시 개별로 전환 검토.
+
+---
+
 *최종 업데이트: 2026-05-31*
 *다음 세션에서 컨텍스트 빠르게 잡고 싶으면 이 파일부터 읽으면 됨.*
