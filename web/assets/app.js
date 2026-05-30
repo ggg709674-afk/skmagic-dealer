@@ -952,19 +952,21 @@ const App = (() => {
       const c = cur && cur.contracts && cur.contracts[_optState.contractIdx];
       if (c) {
         // 반값할인 보조표기 — "처음 N개월 [반값금액]" (없으면 빈 문자열)
-        const mo = halfMonthsFor(p, c.의무);   // 선택 약정의 반값 개월수 (tag 기준)
-        const halfLine = (amount) => (mo && amount != null)
-          ? `<span class="val-half">처음 ${mo}개월 ${fmt(Math.round(amount / 2))}원</span>` : '';
+        // 기본요금 반값 = tag 기준(6/12/18…), 타사보상 반값 = 별첨 기준(의무 5년↑ 3개월)
+        const baseMo = halfMonthsFor(p, c.의무);
+        const compMo = (c.타사보상 != null && c.의무 >= 60) ? 3 : 0;
+        const halfLine = (months, amount) => (months && amount != null)
+          ? `<span class="val-half">처음 ${months}개월 ${fmt(Math.round(amount / 2))}원</span>` : '';
         let html = `
           <div class="row">
             <span class="label">월 렌탈료</span>
-            <span class="val">${halfLine(c.기본요금)}<span class="val-now"><small>월</small>${fmt(c.기본요금)}<small>원</small></span></span>
+            <span class="val">${halfLine(baseMo, c.기본요금)}<span class="val-now"><small>월</small>${fmt(c.기본요금)}<small>원</small></span></span>
           </div>`;
         if (typeof c.타사보상 === 'number' && c.타사보상 > 0) {
           html += `
           <div class="row">
             <span class="label">타사 보상가<small class="label-note">(타 브랜드 이용중인 고객 대상)</small></span>
-            <span class="val">${halfLine(c.타사보상)}<span class="val-now"><small>월</small>${fmt(c.타사보상)}<small>원</small></span></span>
+            <span class="val">${halfLine(compMo, c.타사보상)}<span class="val-now"><small>월</small>${fmt(c.타사보상)}<small>원</small></span></span>
           </div>`;
         }
         const tagText = (p && p.tag) || '상담 시 약정 옵션·할인 안내';

@@ -968,7 +968,7 @@
   }
   function comCompeteHalfMonths(r){
     if (r.타사보상 == null) return 0;        // 타사보상 없는 모델은 대상 아님
-    return comHalfMonths(r);                  // 동일 promo 기간 적용
+    return (r.의무 >= 60) ? 3 : 0;            // 별첨 타사보상 반값: 의무 5년 이상 3개월
   }
 
   /* build_data.js 의 파싱 로직을 브라우저(SheetJS)로 포팅.
