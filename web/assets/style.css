@@ -107,11 +107,13 @@ ul,ol{margin:0;padding:0;list-style:none}
 /* ---------- Layout ---------- */
 .container{max-width:var(--container);margin:0 auto;padding:0 20px}
 
-/* ---------- Top point line (구 유틸바 대체) ---------- */
+/* ---------- Top utility bar ---------- */
 .util-bar{
-  background:var(--primary);
-  height:5px;
+  background:var(--ink-1);color:#CCCCCC;font-size:12px;
 }
+.util-bar .container{display:flex;align-items:center;justify-content:flex-end;gap:18px;height:34px}
+.util-bar a{color:#CCCCCC;opacity:.85}
+.util-bar a:hover{opacity:1;color:#fff}
 
 /* ---------- Header ---------- */
 /* sticky 끔 — 스크롤 따라오는 게 거슬린다는 피드백 반영. 정적 헤더로. */
