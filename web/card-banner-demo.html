@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>제휴카드 배너 데모 (CSS 배경)</title>
+<title>제휴카드 배너 데모 (SVG 카드)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <style>
   :root{ --container:1200px; }
@@ -14,48 +14,33 @@
   p.demo{font-size:13px;color:#888;margin-bottom:20px}
   .label{font-size:13px;font-weight:700;color:#555;margin:26px 0 10px}
 
-  /* ===== 제휴카드 히어로 배너 (CSS 배경 — 요란한 도형 없이 깔끔) ===== */
   .card-hero{
-    position:relative;overflow:hidden;border-radius:18px;height:300px;display:flex;align-items:center;
+    position:relative;overflow:hidden;border-radius:18px;height:320px;display:flex;align-items:center;
     background:
       radial-gradient(120% 150% at 86% 22%, var(--glow) 0%, transparent 52%),
       radial-gradient(90% 130% at 8% 95%, var(--glow2) 0%, transparent 60%),
       linear-gradient(115deg, var(--g1) 0%, var(--g2) 100%);
   }
-  /* 은은한 큰 blob 1개만 (배경 깊이감) */
-  .card-hero::before{
-    content:'';position:absolute;width:520px;height:520px;border-radius:50%;
-    right:-60px;top:-160px;background:var(--blob);opacity:.5;filter:blur(8px);
-  }
-  .ch-inner{
-    position:relative;z-index:2;width:100%;max-width:var(--container);margin:0 auto;
-    padding:0 56px;display:flex;align-items:center;justify-content:space-between;gap:24px;
-  }
+  .card-hero::before{content:'';position:absolute;width:520px;height:520px;border-radius:50%;right:-60px;top:-160px;background:var(--blob);opacity:.5;filter:blur(8px)}
+  .ch-inner{position:relative;z-index:2;width:100%;max-width:var(--container);margin:0 auto;padding:0 56px;display:flex;align-items:center;justify-content:space-between;gap:24px}
   .ch-text{color:var(--ink,#33235b)}
-  .ch-eyebrow{
-    display:inline-block;font-size:13px;font-weight:700;letter-spacing:.2px;
-    background:rgba(255,255,255,.55);padding:6px 14px;border-radius:999px;margin-bottom:16px;color:#5b4a8a;
-  }
+  .ch-eyebrow{display:inline-block;font-size:13px;font-weight:700;background:rgba(255,255,255,.55);padding:6px 14px;border-radius:999px;margin-bottom:16px;color:#5b4a8a}
   .ch-text h2{font-size:32px;font-weight:800;line-height:1.32;letter-spacing:-.5px}
   .ch-sub{margin-top:12px;font-size:15px;opacity:.8;font-weight:500}
   .ch-tags{margin-top:22px;display:flex;gap:8px;flex-wrap:wrap}
   .ch-tags span{font-size:12.5px;font-weight:600;color:#5b4a8a;background:rgba(255,255,255,.6);padding:7px 14px;border-radius:999px}
 
-  .ch-card{position:relative;flex:0 0 auto;width:330px;height:230px}
-  .ch-card img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 16px 28px rgba(60,40,90,.25))}
-  .ch-card .name-en{position:absolute;left:38%;top:33%;transform:rotate(-15deg) skewX(-8deg);transform-origin:left center;color:#5a5a5a;font-size:19px;font-weight:800;letter-spacing:.4px}
-  .ch-card .name-ko{position:absolute;left:38%;top:44%;transform:rotate(-15deg) skewX(-8deg);transform-origin:left center;color:#8a8a8a;font-size:12.5px;font-weight:600;letter-spacing:1px}
-  /* 효과 없이 카드 그대로 */
-  .ch-card-plain{flex:0 0 auto;width:500px;height:360px;display:flex;align-items:center;justify-content:center;margin-right:-30px}
-  .ch-card-plain img{max-width:100%;max-height:100%;object-fit:contain}
+  /* SVG 카드 */
+  .ch-card-svg{flex:0 0 auto;width:430px;transform:rotate(-8deg);filter:drop-shadow(0 20px 34px rgba(50,35,80,.3))}
+  .ch-card-svg svg{width:100%;height:auto;display:block}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1 class="demo">제휴카드 배너 — CSS 배경 (요란한 도형 X, 깔끔)</h1>
-  <p class="demo">부드러운 그라데이션 + 우측 은은한 글로우만. 색은 자유롭게 변경 가능.</p>
+  <h1 class="demo">제휴카드 배너 — SVG 카드 시안</h1>
+  <p class="demo">카드를 SVG로 직접 그림(텍스트 안 깨짐, 색 자유). 디자인 보고 조정해줘.</p>
 
-  <div class="label">A. 파스텔 퍼플 (예시 톤)</div>
+  <div class="label">A. 파스텔 퍼플 + 실버 카드</div>
   <div class="card-hero" style="--g1:#ece6f8;--g2:#f6ebf3;--glow:rgba(255,190,225,.65);--glow2:rgba(190,195,250,.4);--blob:#e7d5f3;--ink:#3a2b63">
     <div class="ch-inner">
       <div class="ch-text">
@@ -64,46 +49,39 @@
         <p class="ch-sub">8개 카드사 · 전월실적별 청구 할인</p>
         <div class="ch-tags"><span># 월 구독료 할인</span><span># 무이자 할부</span><span># 청구 할인</span></div>
       </div>
-      <div class="ch-card-plain"><img src="./assets/brand/card.png" alt="제휴카드"></div>
-    </div>
-  </div>
-
-  <div class="label">B. SK매직 코랄</div>
-  <div class="card-hero" style="--g1:#fdecea;--g2:#fef3ec;--glow:rgba(255,170,140,.55);--glow2:rgba(255,200,160,.4);--blob:#fbd9cf;--ink:#7a3326">
-    <div class="ch-inner">
-      <div class="ch-text">
-        <span class="ch-eyebrow">SK매직 X SK인텔릭스 카드</span>
-        <h2>SK인텔릭스 제휴카드로<br>월 렌탈료 최대 2.5만원 할인</h2>
-        <p class="ch-sub">8개 카드사 · 전월실적별 청구 할인</p>
-        <div class="ch-tags"><span># 월 구독료 할인</span><span># 무이자 할부</span><span># 청구 할인</span></div>
+      <div class="ch-card-svg">
+        <svg viewBox="0 0 400 252" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SK인텔릭스 제휴 신용카드">
+          <defs>
+            <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#f6f6f9"/>
+              <stop offset=".48" stop-color="#dadae1"/>
+              <stop offset="1" stop-color="#bcbcc6"/>
+            </linearGradient>
+            <linearGradient id="gloss" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
+              <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="chip" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ecd089"/>
+              <stop offset="1" stop-color="#b8902f"/>
+            </linearGradient>
+          </defs>
+          <!-- 카드 본체 -->
+          <rect x="2" y="2" width="396" height="248" rx="22" fill="url(#cg)" stroke="#ffffff" stroke-opacity=".5"/>
+          <!-- 사선 광택 -->
+          <path d="M2 24 L210 2 L398 60 L398 150 L120 250 L2 250 Z" fill="url(#gloss)"/>
+          <!-- 칩 -->
+          <rect x="38" y="98" width="54" height="42" rx="8" fill="url(#chip)"/>
+          <path d="M65 98 v42 M38 112 h54 M38 126 h54" stroke="#9a7820" stroke-width="1.6" stroke-opacity=".55"/>
+          <!-- 브랜드 -->
+          <text x="38" y="62" font-family="Pretendard,sans-serif" font-size="26" font-weight="800" fill="#3b3b42">SK<tspan font-weight="600" fill="#86868f"> intellix</tspan></text>
+          <!-- 카드번호 -->
+          <text x="38" y="186" font-family="Pretendard,sans-serif" font-size="20" font-weight="600" letter-spacing="3" fill="#5c5c64">0000  0000  0000  0000</text>
+          <!-- 하단 -->
+          <text x="38" y="224" font-family="Pretendard,sans-serif" font-size="14" font-weight="700" letter-spacing="1" fill="#7c7c85">skintellix</text>
+          <text x="362" y="226" text-anchor="end" font-family="Pretendard,sans-serif" font-size="14" font-weight="800" fill="#7c7c85">SK<tspan font-weight="600"> magic</tspan></text>
+        </svg>
       </div>
-      <div class="ch-card-plain"><img src="./assets/brand/card.png" alt="제휴카드"></div>
-    </div>
-  </div>
-
-  <div class="label">C. 민트</div>
-  <div class="card-hero" style="--g1:#e2f3ef;--g2:#eef6f1;--glow:rgba(120,210,190,.5);--glow2:rgba(160,220,210,.4);--blob:#cfeae3;--ink:#1f5147">
-    <div class="ch-inner">
-      <div class="ch-text">
-        <span class="ch-eyebrow">SK매직 X SK인텔릭스 카드</span>
-        <h2>SK인텔릭스 제휴카드로<br>월 렌탈료 최대 2.5만원 할인</h2>
-        <p class="ch-sub">8개 카드사 · 전월실적별 청구 할인</p>
-        <div class="ch-tags"><span># 월 구독료 할인</span><span># 무이자 할부</span><span># 청구 할인</span></div>
-      </div>
-      <div class="ch-card-plain"><img src="./assets/brand/card.png" alt="제휴카드"></div>
-    </div>
-  </div>
-
-  <div class="label">D. 스카이 블루</div>
-  <div class="card-hero" style="--g1:#e6eef9;--g2:#eef4fb;--glow:rgba(150,190,255,.5);--glow2:rgba(180,205,250,.4);--blob:#d3e2f7;--ink:#243a66">
-    <div class="ch-inner">
-      <div class="ch-text">
-        <span class="ch-eyebrow">SK매직 X SK인텔릭스 카드</span>
-        <h2>SK인텔릭스 제휴카드로<br>월 렌탈료 최대 2.5만원 할인</h2>
-        <p class="ch-sub">8개 카드사 · 전월실적별 청구 할인</p>
-        <div class="ch-tags"><span># 월 구독료 할인</span><span># 무이자 할부</span><span># 청구 할인</span></div>
-      </div>
-      <div class="ch-card-plain"><img src="./assets/brand/card.png" alt="제휴카드"></div>
     </div>
   </div>
 </div>
