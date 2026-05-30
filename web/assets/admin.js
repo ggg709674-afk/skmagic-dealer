@@ -1130,7 +1130,7 @@
           const half = (mo && r.기본요금 != null) ? comFmt(Math.round(r.기본요금/2)) : '<span class="price-empty">—</span>';
           return `<td class="col-com-half">${half}</td><td class="col-com-half">${mo ? mo+'개월' : '<span class="price-empty">—</span>'}</td>`;
         })()}
-        <td class="col-com-num">${comFmt(r.타사보상)}</td>
+        <td class="col-com-num com-num-strong">${comFmt(r.타사보상)}</td>
         ${(() => {
           const mo = comCompeteHalfMonths(r);
           const half = (mo && r.타사보상 != null) ? comFmt(Math.round(r.타사보상/2)) : '<span class="price-empty">—</span>';

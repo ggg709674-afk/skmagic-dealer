@@ -777,7 +777,7 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .adm-com-table tbody td.col-com-code{text-align:left; color:var(--ink-3); font-size:12.5px; font-variant-numeric:tabular-nums; white-space:nowrap}
 .adm-com-table tbody td.col-com-num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap}
 .adm-com-table thead th.col-com-num{text-align:right}
-.adm-com-table tbody td.com-num-strong{font-weight:700; color:var(--ink-1)}
+.adm-com-table tbody td.com-num-strong{font-weight:700; color:var(--primary)}
 .adm-com-table tbody td.com-fee{font-weight:700; color:var(--primary)}
 .adm-com-table tbody tr.com-model-start td{border-top:2px solid var(--line)}
 /* 엑셀 다운로드 버튼 (필터 줄 — 셀프형 칩 우측에 붙임) */
