@@ -1035,6 +1035,15 @@
      이미지(업로드)·링크·새창·사용토글·순서 + 자동/수동·간격.
      데이터: banner_data(payload={mode,interval,items:[{image,link,newTab,enabled}]}), 이미지: Storage banner-assets. */
   const BN_MAX = 10;
+  // 기본 배너 — DB에 저장된 적 없을 때 현재 홈의 정적 배너 3장으로 시작(저장하면 DB로 들어감)
+  const DEFAULT_BANNERS = {
+    mode: 'auto', interval: 3,
+    items: [
+      { image: '/assets/hero/11.jpg', link:'', newTab:false, enabled:true },
+      { image: '/assets/hero/22.jpg', link:'', newTab:false, enabled:true },
+      { image: '/assets/hero/33.jpg', link:'', newTab:false, enabled:true },
+    ],
+  };
   let bnData = null;       // 편집 중 상태
   let bnInited = false;
 
@@ -1045,7 +1054,7 @@
       if (window.skmFetchBanners){
         try { const r = await window.skmFetchBanners(); if (r && r.payload && Array.isArray(r.payload.items)) bnData = r.payload; } catch(_){}
       }
-      if (!bnData) bnData = { mode:'auto', interval:5, items:[] };
+      if (!bnData) bnData = { mode: DEFAULT_BANNERS.mode, interval: DEFAULT_BANNERS.interval, items: DEFAULT_BANNERS.items.map(x => ({ ...x })) };
       if (!Array.isArray(bnData.items)) bnData.items = [];
       bnData.mode = (bnData.mode === 'manual') ? 'manual' : 'auto';
       if (!(bnData.interval > 0)) bnData.interval = 5;
@@ -1061,9 +1070,11 @@
       // 이미지 추가
       const file = document.getElementById('bn-file');
       if (file) file.addEventListener('change', onBannerImage);
-      // 저장
-      const saveBtn = document.getElementById('bn-save');
-      if (saveBtn) saveBtn.addEventListener('click', saveBanners);
+      // 저장 (위·아래 버튼 둘 다)
+      ['bn-save', 'bn-save-top'].forEach(id => {
+        const b = document.getElementById(id);
+        if (b) b.addEventListener('click', saveBanners);
+      });
     }
     renderBanners();
   }
@@ -1138,11 +1149,11 @@
         .map(it => ({ image: it.image, link:(it.link||'').trim(), newTab: !!it.newTab, enabled: it.enabled !== false }))
         .filter(it => it.image),
     };
-    const btn = document.getElementById('bn-save');
-    if (btn) btn.disabled = true;
+    const btns = ['bn-save', 'bn-save-top'].map(id => document.getElementById(id)).filter(Boolean);
+    btns.forEach(b => b.disabled = true);
     let error = null;
     if (window.skmSaveBanners){ const r = await window.skmSaveBanners(payload); error = r.error; }
-    if (btn) btn.disabled = false;
+    btns.forEach(b => b.disabled = false);
     if (!error){ bnData = payload; renderBanners(); admToast('저장됐어요. 홈 배너에 반영됩니다.'); }
     else alert('저장 실패: ' + (error.message || '권한 또는 네트워크 오류'));
   }
