@@ -117,6 +117,15 @@
       <div class="com-upload-status" id="com-upload-status" hidden></div>
     </div>
 
+    <!-- 카드할인 엑셀 업로드 (제휴카드 할인금액 메뉴에서만 표시) -->
+    <div class="com-upload" id="cd-upload" hidden>
+      <input type="file" id="cd-file" accept=".xlsx" hidden>
+      <div class="com-upload-inner">
+        <div class="com-upload-ic">⤓</div>
+        <div class="com-upload-text"><strong>카드할인 엑셀(.xlsx)</strong> 드래그/클릭 업로드</div>
+      </div>
+    </div>
+
     <div class="adm-header-actions">
       <span class="adm-dirty-flag" id="adm-dirty" hidden></span>
       <span class="adm-user-chip" id="adm-user-chip" hidden></span>
@@ -358,6 +367,13 @@
     <div class="adm-filter">
       <div class="adm-filter-row">
         <div class="adm-chips" id="cd-cat-chips"></div>
+        <div class="adm-form-dl">
+          <button type="button" class="adm-btn adm-btn-ghost adm-com-dl" id="cd-download">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            엑셀 다운로드
+          </button>
+          <button class="adm-btn adm-btn-primary" id="cd-save">저장</button>
+        </div>
         <div class="adm-filter-tools">
           <div class="adm-count" id="cd-count">—</div>
           <div class="adm-search">
@@ -368,7 +384,7 @@
     </div>
 
     <p class="adm-panel-hint">상품별 제휴카드 할인액을 입력하면 <strong>노출금액(현재가 − 카드할인)</strong>이 자동 계산돼요. <strong>상품 카드에는 기본요금 기준만 적용</strong>되고, 타사보상 카드할인은 상세페이지에 표시됩니다.</p>
-    <div class="adm-cd-actions">
+    <div class="adm-cd-actions" hidden style="display:none">
       <button type="button" class="adm-btn adm-btn-ghost adm-com-dl" id="cd-download">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         엑셀 다운로드

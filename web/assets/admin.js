@@ -852,6 +852,8 @@
     // 수수료표 업로드 드롭존은 수수료 메뉴에서만 헤더에 노출
     const comUp = document.getElementById('com-upload');
     if (comUp) comUp.hidden = (meta.kind !== 'commission');
+    const cdUp = document.getElementById('cd-upload');
+    if (cdUp) cdUp.hidden = (meta.kind !== 'carddiscount');
 
     document.getElementById('adm-page-title').textContent = meta.title;
     document.getElementById('adm-page-sub').textContent   = meta.sub;
@@ -1283,7 +1285,7 @@
       }
       const sv = document.getElementById('cd-save'); if (sv) sv.addEventListener('click', saveCardDiscounts);
       const dl = document.getElementById('cd-download'); if (dl) dl.addEventListener('click', downloadCardDiscountXlsx);
-      const fl = document.getElementById('cd-file'); if (fl) fl.addEventListener('change', onCardDiscountUpload);
+      bindCdUpload();
       const sr = document.getElementById('cd-search'); if (sr) sr.addEventListener('input', () => { cdFilter.q = sr.value; renderCardDiscount(); });
     }
     renderCdChips();
@@ -1406,10 +1408,22 @@
     XLSX.utils.book_append_sheet(wb, ws, '카드할인금액');
     XLSX.writeFile(wb, '카드할인금액.xlsx');
   }
-  async function onCardDiscountUpload(e){
-    const file = e.target.files && e.target.files[0];
-    e.target.value = '';
+  let cdUploadBound = false;
+  function bindCdUpload(){
+    if (cdUploadBound) return;
+    const zone = document.getElementById('cd-upload');
+    const input = document.getElementById('cd-file');
+    if (!zone || !input) return;
+    cdUploadBound = true;
+    input.addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) processCdFile(f); });
+    zone.addEventListener('click', () => input.click());
+    ['dragenter', 'dragover'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.add('drag'); }));
+    ['dragleave', 'drop'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.remove('drag'); }));
+    zone.addEventListener('drop', e => { const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) processCdFile(f); });
+  }
+  async function processCdFile(file){
     if (!file) return;
+    if (!/\.xlsx$/i.test(file.name)){ alert('xlsx 파일만 올릴 수 있어요.'); return; }
     if (typeof XLSX === 'undefined'){ alert('엑셀 파서를 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.'); return; }
     try {
       const buf = await file.arrayBuffer();
