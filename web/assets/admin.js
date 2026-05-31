@@ -2105,6 +2105,10 @@
     renderTable();
     populateStoreForm();
     updateDirtyFlag();
+    // 데이터(state.products) 로드 완료 후 현재 메뉴 재적용 —
+    // 초기 applyMenuFromHash 는 loadProducts 전이라 carddiscount 등 state.products 의존
+    // 패널이 빈 데이터로 렌더됐음. 여기서 다시 적용해 패널·데이터를 확정.
+    applyMenuFromHash();
   }
 
   /* "사이트로 돌아가기" 링크를 매장 슬러그 기준 clean URL 로.
