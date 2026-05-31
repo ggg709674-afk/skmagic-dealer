@@ -6,7 +6,9 @@
     { "source": "/category.html", "destination": "/skmagic", "permanent": false },
     { "source": "/detail.html",   "destination": "/skmagic", "permanent": false },
     { "source": "/card-benefits.html", "destination": "/card-benefits", "permanent": false },
-    { "source": "/faq.html", "destination": "/faq", "permanent": false }
+    { "source": "/faq.html", "destination": "/faq", "permanent": false },
+    { "source": "/terms.html", "destination": "/terms", "permanent": false },
+    { "source": "/privacy.html", "destination": "/privacy", "permanent": false }
   ],
   "rewrites": [
     { "source": "/",                "destination": "/web/landing.html" },
@@ -14,6 +16,8 @@
     { "source": "/admin.html",      "destination": "/web/admin.html" },
     { "source": "/card-benefits",   "destination": "/web/card-benefits.html" },
     { "source": "/faq",             "destination": "/web/faq.html" },
+    { "source": "/terms",           "destination": "/web/terms.html" },
+    { "source": "/privacy",         "destination": "/web/privacy.html" },
     { "source": "/assets/:path*",   "destination": "/web/assets/:path*" },
     { "source": "/:slug/assets/:path*", "destination": "/web/assets/:path*" },
     { "source": "/:slug/admin",     "destination": "/web/admin.html?store=:slug" },
