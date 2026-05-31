@@ -854,8 +854,6 @@
     if (comUp) comUp.hidden = (meta.kind !== 'commission');
     const cdUp = document.getElementById('cd-upload');
     if (cdUp) cdUp.hidden = (meta.kind !== 'carddiscount');
-    const cdDl = document.getElementById('cd-download');
-    if (cdDl) cdDl.hidden = (meta.kind !== 'carddiscount');
 
     document.getElementById('adm-page-title').textContent = meta.title;
     document.getElementById('adm-page-sub').textContent   = meta.sub;
