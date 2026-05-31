@@ -416,6 +416,21 @@
 
 <script src="./assets/icons.js"></script>
 <script src="./assets/db.js"></script>
+<script>
+  /* 상세 상품명 FOUC 방지 — db.js(app.js보다 먼저 로드) 직후, 첫 페인트용으로
+     URL의 id에 해당하는 상품명을 즉시 박는다. app.js가 나중에 같은 값으로 재렌더.
+     이게 없으면 app.js 로드 동안 '불러오는 중...' 정적 placeholder가 번쩍인다. */
+  (function(){
+    try{
+      var id = new URLSearchParams(location.search).get('id');
+      if (!id || !window.PRODUCTS_DB) return;
+      var ps = (window.PRODUCTS_DB.products || []);
+      var p = ps.find(function(x){ return x.goodsId === id; });
+      var el = document.getElementById('p-name');
+      if (p && el && p.name) el.textContent = p.name;
+    }catch(e){}
+  })();
+</script>
 <script src="./assets/commission.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./assets/supabase.js"></script>
