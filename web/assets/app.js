@@ -567,19 +567,26 @@ const App = (() => {
           <div class="benefits">${benefits}</div>
           ${(() => {
             const fmtN = n => Number(n).toLocaleString('ko-KR');
+            const toNum = v => Number(String(v == null ? '' : v).replace(/[^\d]/g, '')) || 0;
+            // 제휴카드 적용가 줄 — 기본요금(sale) 기준. 정책/크롤 어느 경로든 공통 사용.
+            // 할인액이 기본요금 이상이면(0원/음수) 줄 생략 — 잘못된 입력 방지.
+            const cardAppliedLine = (baseFee) => {
+              const cDisc = Number((_cardDiscounts[p.goodsId] || {}).sale) || 0;
+              const base = toNum(baseFee);
+              if (cDisc <= 0 || base <= 0 || cDisc >= base) return '';
+              return `<div class="card-applied">제휴카드 적용 월 <strong>${fmtN(base - cDisc)}</strong>원</div>`;
+            };
             if (pol && pol.기본요금 != null) {
               const del = (pol.기준가 != null && pol.기준가 !== pol.기본요금) ? `<div class="del">월 ${fmtN(pol.기준가)}원</div>` : '';
-              // 제휴카드 적용가 — 카드 표시는 기본요금(sale) 기준만 (admin '카드할인금액'과 동일)
-              const cd = _cardDiscounts[p.goodsId] || {};
-              const cDisc = Number(cd.sale) || 0;
-              const cardLine = (cDisc > 0 && pol.기본요금 > 0)
-                ? `<div class="card-applied">제휴카드 적용 월 <strong>${fmtN(Math.max(0, pol.기본요금 - cDisc))}</strong>원</div>` : '';
-              return `<div class="price-row"><div class="price-main">${del}<div class="now"><small>구독</small> 월 <strong>${fmtN(pol.기본요금)}</strong>원</div></div>${cardLine}</div>`;
+              return `<div class="price-row"><div class="price-main">${del}<div class="now"><small>구독</small> 월 <strong>${fmtN(pol.기본요금)}</strong>원</div></div>${cardAppliedLine(pol.기본요금)}</div>`;
             }
+            // 정책표에 없는 모델 — 크롤 가격(pr) fallback. 여기도 카드 적용가 줄 표시.
             return pr ? `
             <div class="price-row">
-              ${pr.del ? `<div class="del">${escape(pr.del)}</div>` : ''}
-              <div class="now"><small>${escape(pr.title || '구독')}</small> 월 <strong>${escape(pr.num || '-')}</strong>원</div>
+              <div class="price-main">
+                ${pr.del ? `<div class="del">${escape(pr.del)}</div>` : ''}
+                <div class="now"><small>${escape(pr.title || '구독')}</small> 월 <strong>${escape(pr.num || '-')}</strong>원</div>
+              </div>${cardAppliedLine(pr.num)}
             </div>` : '';
           })()}
         </div>
@@ -1057,8 +1064,9 @@ const App = (() => {
         const optParam = `${_optState.careIdx}.${_optState.contractIdx}.${_optState.priceMode}` + (_optState.sizeKey ? '.' + _optState.sizeKey : '');
         const _u = new URL(location.href); _u.searchParams.set('opt', optParam);
         const cbHref = '/card-benefits?from=' + encodeURIComponent(_u.pathname + _u.search);
-        if (disc > 0 && base > 0) {
-          const applied = Math.max(0, base - disc);
+        // 할인액이 금액 이상이면(0원/음수) 적용가 줄 생략 — 잘못된 입력 방지, 안내 링크만
+        if (disc > 0 && base > 0 && disc < base) {
+          const applied = base - disc;
           html += `
           <div class="row" style="border-top:1px solid var(--line);padding-top:14px">
             <span class="label" style="font-weight:600">제휴카드 적용시</span>
