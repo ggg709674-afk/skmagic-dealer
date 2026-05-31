@@ -814,8 +814,8 @@
   }
   /* ===== 상담/주문 신청 목록 (consultations) ===== */
   let _csData = null, _csFilter = 'all', _csBound = false;
-  const CS_STATUS = { pending:'대기', confirmed:'확인', completed:'완료', cancelled:'취소' };
-  const CS_FLOW = ['pending','confirmed','completed','cancelled'];
+  const CS_STATUS = { new:'신규접수', confirmed:'주문확인', subscribed:'청약완료', activated:'개통완료', hold:'보류', cancelled:'취소' };
+  const CS_ORDER = ['new','confirmed','subscribed','activated','hold','cancelled'];
 
   async function initConsult(){
     bindConsultUI();
@@ -833,18 +833,33 @@
     const reload = document.getElementById('cs-reload');
     if (reload) reload.addEventListener('click', loadConsult);
     const list = document.getElementById('cs-list');
-    if (list) list.addEventListener('click', async (e) => {
-      const btn = e.target.closest('[data-cs-status]'); if (!btn) return;
-      const id = btn.dataset.csId, status = btn.dataset.csStatus;
-      if (!window.skmUpdateConsultationStatus) return;
-      btn.disabled = true;
-      const { error } = await window.skmUpdateConsultationStatus(id, status);
-      btn.disabled = false;
-      if (error){ alert('상태 변경에 실패했어요.'); return; }
-      const row = (_csData || []).find(r => r.id === id);
-      if (row) row.status = status;
-      renderConsultList();
-    });
+    if (list){
+      // 상태 드롭다운 변경
+      list.addEventListener('change', async (e) => {
+        const sel = e.target.closest('.cs-status-sel'); if (!sel) return;
+        const id = sel.dataset.csId, status = sel.value;
+        if (!window.skmUpdateConsultation) return;
+        sel.disabled = true;
+        const { error } = await window.skmUpdateConsultation(id, { status });
+        sel.disabled = false;
+        if (error){ alert('상태 변경에 실패했어요.'); return; }
+        const row = (_csData || []).find(r => r.id === id);
+        if (row) row.status = status;
+        const tr = sel.closest('.cs-row'); if (tr) tr.className = 'cs-row cs-st-' + status;
+      });
+      // 메모 저장 (포커스 아웃 시)
+      list.addEventListener('blur', async (e) => {
+        const inp = e.target.closest('.cs-memo'); if (!inp) return;
+        const id = inp.dataset.csId, memo = inp.value;
+        const row = (_csData || []).find(r => r.id === id);
+        if (row && (row.memo || '') === memo) return;       // 변경 없으면 skip
+        if (!window.skmUpdateConsultation) return;
+        const { error } = await window.skmUpdateConsultation(id, { memo });
+        if (error){ alert('메모 저장에 실패했어요.'); return; }
+        if (row) row.memo = memo;
+        inp.classList.add('cs-memo-saved'); setTimeout(() => inp.classList.remove('cs-memo-saved'), 800);
+      }, true);  // blur 는 버블하지 않으므로 capture
+    }
   }
   async function loadConsult(){
     const listEl = document.getElementById('cs-list');
@@ -862,31 +877,35 @@
     let rows = _csData || [];
     if (_csFilter !== 'all') rows = rows.filter(r => (r.kind || 'consult') === _csFilter);
     if (!rows.length){ listEl.innerHTML = '<div class="adm-empty">신청 내역이 없어요.</div>'; return; }
-    listEl.innerHTML = rows.map(r => {
+    const body = rows.map(r => {
       const isOrder = (r.kind === 'order');
       const prods = Array.isArray(r.products) ? r.products : [];
       const prodLine = prods.map(p => {
         const opt = [p.careType, p.contract, p.size].filter(Boolean).join(' · ');
-        return escape(p.name || '') + (opt ? ` <span class="cs-opt">${escape(opt)}</span>` : '');
-      }).join('<br>');
+        return escape(p.name || '') + (opt ? ` (${escape(opt)})` : '');
+      }).join(', ');
       const dt = String(r.created_at || '').slice(0, 16).replace('T', ' ');
       const tel = String(r.customer_phone || '').replace(/[^0-9+]/g, '');
-      const statusBtns = CS_FLOW.map(s =>
-        `<button type="button" class="cs-st-btn ${r.status===s?'on':''}" data-cs-id="${escape(r.id)}" data-cs-status="${s}">${CS_STATUS[s]}</button>`
-      ).join('');
+      const opts = CS_ORDER.map(s => `<option value="${s}" ${r.status===s?'selected':''}>${CS_STATUS[s]}</option>`).join('');
       return `
-      <div class="cs-card cs-st-${escape(r.status || 'pending')}">
-        <div class="cs-head">
-          <span class="cs-kind cs-kind-${isOrder?'order':'consult'}">${isOrder?'주문':'상담'}</span>
-          <strong class="cs-name">${escape(r.customer_name || '')}</strong>
-          <a class="cs-phone" href="tel:${escape(tel)}">${escape(r.customer_phone || '')}</a>
-          <span class="cs-date">${escape(dt)}</span>
-        </div>
-        ${isOrder ? `<div class="cs-info">생년월일 ${escape(r.customer_birth || '-')} · 주소 ${escape(r.customer_address || '-')}</div>` : ''}
-        ${prodLine ? `<div class="cs-prod">${prodLine}</div>` : ''}
-        <div class="cs-status-row">${statusBtns}</div>
-      </div>`;
+      <tr class="cs-row cs-st-${escape(r.status || 'new')}">
+        <td><span class="cs-kind cs-kind-${isOrder?'order':'consult'}">${isOrder?'주문':'상담'}</span></td>
+        <td class="cs-c-name">${escape(r.customer_name || '')}</td>
+        <td><a class="cs-phone" href="tel:${escape(tel)}">${escape(r.customer_phone || '')}</a></td>
+        <td class="cs-c-birth">${escape(r.customer_birth || '-')}</td>
+        <td class="cs-c-addr">${escape(r.customer_address || '-')}</td>
+        <td class="cs-c-prod">${prodLine || '-'}</td>
+        <td class="cs-c-date">${escape(dt)}</td>
+        <td><select class="cs-status-sel" data-cs-id="${escape(r.id)}">${opts}</select></td>
+        <td><input type="text" class="cs-memo" data-cs-id="${escape(r.id)}" value="${escape(r.memo || '')}" placeholder="메모"></td>
+      </tr>`;
     }).join('');
+    listEl.innerHTML = `<div class="adm-cs-scroll"><table class="adm-cs-table">
+      <thead><tr>
+        <th>유형</th><th>이름</th><th>연락처</th><th>생년월일</th><th>주소</th><th>관심상품</th><th>접수일</th><th>상태</th><th>메모</th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table></div>`;
   }
 
   function bindMenu(){

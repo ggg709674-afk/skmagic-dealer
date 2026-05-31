@@ -123,16 +123,22 @@
     return data || [];
   };
 
-  /* ─── 신청 상태 변경 (pending→confirmed→completed/cancelled) ─ */
-  window.skmUpdateConsultationStatus = async function(id, status){
+  /* ─── 신청 상태·메모 변경 (매장 owner — RLS consult_visible_update) ─
+     patch = { status, memo } 중 허용 키만 update */
+  window.skmUpdateConsultation = async function(id, patch){
     if (!id) return { error: new Error('id 필요') };
+    const ALLOWED = ['status', 'memo'];
+    const row = { updated_at: new Date().toISOString() };
+    for (const k of ALLOWED){
+      if (patch && Object.prototype.hasOwnProperty.call(patch, k)) row[k] = patch[k];
+    }
     const { data, error } = await window.sb
       .from('consultations')
-      .update({ status, updated_at: new Date().toISOString() })
+      .update(row)
       .eq('id', id)
       .select()
       .maybeSingle();
-    if (error) console.warn('[skmUpdateConsultationStatus]', error);
+    if (error) console.warn('[skmUpdateConsultation]', error);
     return { data, error };
   };
 

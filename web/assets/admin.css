@@ -920,28 +920,30 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .com-upload-status.ok{color:#1a8f4c}
 .com-upload-status.err{color:var(--primary)}
 
-/* ===== 상담/주문 신청 목록 ===== */
+/* ===== 상담/주문 신청 목록 (가로 테이블) ===== */
 .adm-consult-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
-.adm-consult-list{display:flex;flex-direction:column;gap:12px}
 .adm-empty{padding:48px 0;text-align:center;color:var(--ink-3);font-size:14px}
-.cs-card{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:#fff}
-.cs-card.cs-st-completed{opacity:.62}
-.cs-card.cs-st-cancelled{opacity:.5}
-.cs-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.cs-kind{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:6px}
+.adm-cs-scroll{overflow-x:auto}
+.adm-cs-table{width:100%;min-width:1040px;border-collapse:collapse;font-size:13px}
+.adm-cs-table thead th{text-align:left;font-weight:700;font-size:12px;color:var(--ink-3);padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface)}
+.adm-cs-table tbody td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--ink-2)}
+.cs-row.cs-st-cancelled{opacity:.5}
+.cs-row.cs-st-hold{opacity:.7}
+.cs-kind{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap}
 .cs-kind-order{background:#fdecea;color:var(--primary)}
 .cs-kind-consult{background:var(--surface);color:var(--ink-3)}
-.cs-name{font-size:15px;font-weight:700;color:var(--ink-1)}
-.cs-phone{font-size:13.5px;color:var(--ink-2);text-decoration:none;font-variant-numeric:tabular-nums}
+.cs-c-name{font-weight:700;color:var(--ink-1);white-space:nowrap}
+.cs-phone{color:var(--ink-2);text-decoration:none;font-variant-numeric:tabular-nums;white-space:nowrap}
 .cs-phone:hover{color:var(--primary)}
-.cs-date{margin-left:auto;font-size:12px;color:var(--ink-4);font-variant-numeric:tabular-nums}
-.cs-info{margin-top:8px;font-size:13px;color:var(--ink-2)}
-.cs-prod{margin-top:8px;font-size:13px;color:var(--ink-2);line-height:1.6}
-.cs-prod .cs-opt{color:var(--ink-3);font-size:12px}
-.cs-status-row{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
-.cs-st-btn{font-size:12px;font-weight:600;padding:5px 12px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink-3);cursor:pointer;transition:all .12s}
-.cs-st-btn:hover{border-color:var(--ink-3)}
-.cs-st-btn.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.cs-c-birth{font-variant-numeric:tabular-nums;white-space:nowrap}
+.cs-c-addr{max-width:200px}
+.cs-c-prod{max-width:240px;color:var(--ink-3);font-size:12.5px}
+.cs-c-date{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink-4);font-size:12px}
+.cs-status-sel{font-size:12.5px;font-weight:600;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink-1);cursor:pointer;font-family:inherit}
+.cs-status-sel:focus{outline:none;border-color:var(--primary)}
+.cs-memo{width:160px;font-size:12.5px;padding:6px 9px;border:1px solid var(--line);border-radius:7px;font-family:inherit;color:var(--ink-1);transition:border-color .15s,background .15s}
+.cs-memo:focus{outline:none;border-color:var(--primary)}
+.cs-memo.cs-memo-saved{border-color:#1a8f4c;background:#f0faf3}
 
 /* 관리자는 PC 전용. 창이 min-width(1024px)보다 좁아지면 레이아웃을 줄이지 않고
    가로 스크롤로 처리해 사이드바/메뉴가 세로로 찌그러지는 문제를 막는다. */
