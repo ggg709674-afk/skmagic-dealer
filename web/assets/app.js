@@ -1064,9 +1064,9 @@ const App = (() => {
         const optParam = `${_optState.careIdx}.${_optState.contractIdx}.${_optState.priceMode}` + (_optState.sizeKey ? '.' + _optState.sizeKey : '');
         const _u = new URL(location.href); _u.searchParams.set('opt', optParam);
         const cbHref = '/card-benefits?from=' + encodeURIComponent(_u.pathname + _u.search);
-        // 할인액이 금액 이상이면(0원/음수) 적용가 줄 생략 — 잘못된 입력 방지, 안내 링크만
-        if (disc > 0 && base > 0 && disc < base) {
-          const applied = base - disc;
+        // 할인액이 월요금 이상이어도 적용가는 0원으로 표기(음수 방지). 할인 미설정(disc<=0)이면 링크만.
+        if (disc > 0 && base > 0) {
+          const applied = Math.max(0, base - disc);
           html += `
           <div class="row" style="border-top:1px solid var(--line);padding-top:14px">
             <span class="label" style="font-weight:600">제휴카드 적용시</span>
