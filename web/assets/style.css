@@ -719,6 +719,20 @@ ul,ol{margin:0;padding:0;list-style:none}
 /* 반값할인 보조표기 — 처음 N개월 반값금액(빨강 작게) + 현재 요금 가로 배치 */
 .price-card .row .val .val-half{display:inline;font-size:12.5px;font-weight:700;color:var(--primary);letter-spacing:0;margin-right:8px;white-space:nowrap}
 .price-card .row .val .val-now{display:inline;white-space:nowrap}
+/* 제휴카드 적용가(빨강 강조) + 안내 링크 */
+.price-card .val-card{color:var(--primary)}
+.card-link-row{padding:10px 0 0;text-align:right}
+.card-link-row a{font-size:13px;font-weight:700;color:var(--primary);text-decoration:none}
+.card-link-row a:hover{text-decoration:underline}
+
+/* 제휴카드 안내 팝업 */
+.card-modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(20,20,25,.5);display:grid;place-items:center;padding:20px}
+.card-modal-overlay[hidden]{display:none}
+.card-modal{background:#fff;border-radius:16px;max-width:380px;width:100%;padding:28px 26px 26px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.card-modal-x{position:absolute;top:12px;right:12px;width:30px;height:30px;border:0;background:none;font-size:22px;color:var(--ink-3);cursor:pointer;line-height:1}
+.card-modal-title{font-size:18px;font-weight:800;color:var(--ink-1);margin:0 0 10px}
+.card-modal-desc{font-size:14px;line-height:1.65;color:var(--ink-2);margin:0 0 20px}
+.card-modal-btn{display:block;text-align:center;width:100%}
 
 .detail-cta{display:flex;gap:10px;margin-top:18px}
 .detail-cta .btn{flex:1;justify-content:center;padding:16px}

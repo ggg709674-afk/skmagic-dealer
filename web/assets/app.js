@@ -256,6 +256,7 @@ const App = (() => {
      슬러그/Supabase 없으면 빈 맵 (= 본사 원본 그대로 노출). */
   const SUPER_SLUG = '_super';
   let _overrides = null;
+  let _cardDiscounts = {};   // { goodsId: {sale, compete} } — 제휴카드 할인액(card_benefits.discounts)
   async function loadOverrides() {
     if (_overrides) return _overrides;
     _overrides = new Map();
@@ -725,7 +726,7 @@ const App = (() => {
 
   /* ================== Option UI (약정/관리유형) ================== */
   // 페이지 내 상태 — 현재 선택된 care_type idx, contract idx. detail 페이지마다 reset.
-  const _optState = { careIdx: 0, contractIdx: 0, sizeKey: null, lastOpts: null, lastP: null, lastMeta: null };
+  const _optState = { careIdx: 0, contractIdx: 0, sizeKey: null, lastOpts: null, lastP: null, lastMeta: null, priceMode: 'new' };
 
   // 기본 선택: 셀프관리(없으면 방문관리) + 5년(의무 60개월). 없으면 60에 가장 가까운 약정.
   function pickDefaultSelection(opts) {
@@ -778,6 +779,7 @@ const App = (() => {
     const def = pickDefaultSelection(_optState.lastOpts);
     _optState.careIdx = def.careIdx;
     _optState.contractIdx = def.contractIdx;
+    _optState.priceMode = 'new';   // 기본 = 신규 렌탈
     renderOptionTabs();
     renderOptionInfo();
     renderPriceCard();
@@ -909,6 +911,21 @@ const App = (() => {
     } else if (contractRow) {
       contractRow.hidden = true;
     }
+    // 구분 탭 (신규 렌탈 / 타사 보상) — 정책 연동 + 현재 약정에 타사보상 있을 때만
+    const modeRow = document.getElementById('p-mode-row');
+    const modeTabs = document.getElementById('p-mode-tabs');
+    const curC2 = (opts.care_types[_optState.careIdx] || opts.care_types[0])?.contracts?.[_optState.contractIdx];
+    const hasCompete = curC2 && typeof curC2.타사보상 === 'number' && curC2.타사보상 > 0;
+    if (opts._policy && hasCompete && modeRow && modeTabs) {
+      modeRow.hidden = false;
+      const modes = [['new', '신규 렌탈'], ['compete', '타사 보상']];
+      modeTabs.innerHTML = modes.map(([m, nm]) =>
+        `<button type="button" class="op-tab ${m === _optState.priceMode ? 'on' : ''}" data-mode="${m}">${escape(nm)}</button>`
+      ).join('');
+    } else if (modeRow) {
+      modeRow.hidden = true;
+      _optState.priceMode = 'new';
+    }
     // 첫 번째로 보이는 옵션 행은 상단 구분선 제거 (사이즈 숨김 등으로 순서 바뀌어도 깔끔)
     const block = document.getElementById('p-options');
     if (block) {
@@ -992,26 +1009,37 @@ const App = (() => {
       const cur = opts.care_types[_optState.careIdx] || opts.care_types[0];
       const c = cur && cur.contracts && cur.contracts[_optState.contractIdx];
       if (c) {
-        // 반값할인 보조표기 — "처음 N개월 [반값금액]" (없으면 빈 문자열)
-        // 기본요금 반값 = 정책표(형태·의무·계열), 타사보상 반값 = 별첨 기준(의무 5년↑ 3개월)
-        const baseMo = comHalfMonths(c);
-        const compMo = (c.타사보상 != null && c.의무 >= 60) ? 3 : 0;
+        // 선택된 구분(신규 렌탈 / 타사 보상)의 금액
+        const hasCompete = (typeof c.타사보상 === 'number' && c.타사보상 > 0);
+        const isCompete = (_optState.priceMode === 'compete') && hasCompete;
+        const base = isCompete ? c.타사보상 : c.기본요금;
+        const baseLabel = isCompete
+          ? '타사 보상가<small class="label-note">(타 브랜드 이용중이신 고객)</small>'
+          : '월 렌탈료';
+        // 반값 보조표기 — 신규=정책표(형태·의무·계열), 타사보상=별첨(의무 5년↑ 3개월)
+        const halfMo = isCompete ? ((c.의무 >= 60) ? 3 : 0) : comHalfMonths(c);
         const halfLine = (months, amount) => (months && amount != null)
           ? `<span class="val-half">처음 ${months}개월 ${fmt(Math.round(amount / 2))}원</span>` : '';
         let html = `
           <div class="row">
-            <span class="label">월 렌탈료</span>
-            <span class="val">${halfLine(baseMo, c.기본요금)}<span class="val-now"><small>월</small>${fmt(c.기본요금)}<small>원</small></span></span>
+            <span class="label">${baseLabel}</span>
+            <span class="val">${halfLine(halfMo, base)}<span class="val-now"><small>월</small>${fmt(base)}<small>원</small></span></span>
           </div>`;
-        if (typeof c.타사보상 === 'number' && c.타사보상 > 0) {
+        // 약정옵션 자리 → 제휴카드 적용시 금액 (선택 금액 − 카드할인) + 안내 링크
+        const gid = (_optState.lastP && _optState.lastP.goodsId) || '';
+        const d = _cardDiscounts[gid] || {};
+        const disc = Number(isCompete ? d.compete : d.sale) || 0;
+        if (disc > 0 && base > 0) {
+          const applied = Math.max(0, base - disc);
           html += `
-          <div class="row">
-            <span class="label">타사 보상가<small class="label-note">(타 브랜드 이용중인 고객 대상)</small></span>
-            <span class="val">${halfLine(compMo, c.타사보상)}<span class="val-now"><small>월</small>${fmt(c.타사보상)}<small>원</small></span></span>
-          </div>`;
+          <div class="row" style="border-top:1px solid var(--line);padding-top:14px">
+            <span class="label" style="font-weight:600">제휴카드 적용시</span>
+            <span class="val"><span class="val-now val-card"><small>월</small>${fmt(applied)}<small>원</small></span></span>
+          </div>
+          <div class="card-link-row"><a href="#" data-card-popup>제휴카드 혜택 안내 ›</a></div>`;
+        } else {
+          html += `<div class="card-link-row" style="border-top:1px solid var(--line);padding-top:14px"><a href="#" data-card-popup>제휴카드 혜택 안내 ›</a></div>`;
         }
-        const tagText = (p && p.tag) || '상담 시 약정 옵션·할인 안내';
-        html += `<div class="row" style="border-top:1px solid var(--line);padding-top:14px"><span class="label" style="font-weight:600">약정 옵션</span><span style="font-size:13px;color:var(--ink-3);text-align:right;max-width:240px">${escape(tagText)}</span></div>`;
         priceEl.innerHTML = html;
         return;
       }
@@ -1070,6 +1098,11 @@ const App = (() => {
         _optState.contractIdx = idx;
         renderOptionTabs();
         renderOptionInfo();
+        renderPriceCard();
+      } else if (tab.dataset.mode !== undefined) {
+        if (tab.dataset.mode === _optState.priceMode) return;
+        _optState.priceMode = tab.dataset.mode;
+        renderOptionTabs();
         renderPriceCard();
       } else if (tab.dataset.size !== undefined) {
         const sz = tab.dataset.size;
@@ -1532,6 +1565,13 @@ const App = (() => {
         if (remote && remote.payload && Array.isArray(remote.payload.rows) && remote.payload.rows.length) {
           window.COMMISSION_DB = remote.payload;
         }
+      }
+    } catch (_) {}
+    // 제휴카드 할인액 로드 (상세 가격카드의 '제휴카드 적용시' 계산용)
+    try {
+      if (window.skmFetchCardBenefits) {
+        const cb = await window.skmFetchCardBenefits();
+        if (cb && cb.payload && cb.payload.discounts) _cardDiscounts = cb.payload.discounts;
       }
     } catch (_) {}
     attachClickHandler();
