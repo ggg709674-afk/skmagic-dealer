@@ -784,7 +784,7 @@
   const MENU_META = {
     products: { title: '상품 관리', sub: '노출 여부 · 추천 배지 · 표시 순서 · 매장 자체 가격/이름 수정.', kind: 'products' },
     commission: { title: '정책 테이블', sub: '홈페이지 등록 모델의 약정·관리방식별 정책 테이블입니다.', kind: 'commission' },
-    carddiscount: { title: '카드할인금액', sub: '상품별 제휴카드 할인액을 설정합니다. 상품 카드에는 기본요금 기준만 적용됩니다.', kind: 'carddiscount' },
+    carddiscount: { title: '제휴카드 할인금액 설정', sub: '상품별 제휴카드 할인액을 설정합니다. 상품 카드에는 기본요금 기준만 적용됩니다.', kind: 'carddiscount' },
     cards:    { title: '제휴카드 관리', sub: '카드 이미지와 자세히보기 링크를 등록합니다. 제휴카드 안내 페이지에 반영됩니다.', kind: 'cards' },
     iconlab:  { title: '아이콘 시안', sub: '홈 카테고리 아이콘 디자인 시안입니다. 마음에 드는 스타일을 골라 주세요.', kind: 'iconlab' },
     faq:      { title: 'FAQ 관리', sub: '자주 묻는 질문의 질문·답변을 추가·수정·삭제합니다. 자주 묻는 질문 페이지에 반영됩니다.', kind: 'faq' },
@@ -1341,13 +1341,10 @@
   async function saveCardDiscounts(){
     const clean = cdClean();
     const btn = document.getElementById('cd-save');
-    const st = document.getElementById('cd-status');
     if (btn) btn.disabled = true;
-    if (st) st.textContent = '저장 중…';
     let error = null;
     if (window.skmSaveCardDiscounts){ const r = await window.skmSaveCardDiscounts(clean); error = r.error; }
     if (btn) btn.disabled = false;
-    if (st) st.textContent = error ? '저장 실패' : '저장됨';
     if (!error){ cdDiscounts = clean; admToast('저장됐어요. 공개 사이트에 반영됩니다.'); }
     else alert('저장 실패: ' + (error.message || '권한 또는 네트워크 오류'));
   }
@@ -1397,7 +1394,6 @@
         applied++;
       }
       renderCardDiscount();
-      const st = document.getElementById('cd-status'); if (st) st.textContent = `${applied}개 적용됨 (저장 필요)`;
       admToast(`${applied}개 행 적용됐어요. 저장을 눌러 반영하세요.`);
     } catch(err){
       alert('엑셀 읽기 실패: ' + (err && err.message ? err.message : err));
