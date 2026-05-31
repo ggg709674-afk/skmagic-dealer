@@ -69,9 +69,10 @@ body.admin-body{
 }
 .adm-nav-item.on .adm-nav-ic{opacity:1}
 .adm-nav-ic{
-  display:inline-block; width:18px; text-align:center;
-  font-size:13px; opacity:.7;
+  display:inline-flex; align-items:center; justify-content:center;
+  width:18px; height:18px; opacity:.75; flex:0 0 auto; vertical-align:-4px;
 }
+.adm-nav-ic svg{width:16px; height:16px; display:block}
 .adm-nav-item.is-disabled{
   color:var(--adm-side-ink-dim);
   cursor:not-allowed;
