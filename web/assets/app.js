@@ -577,7 +577,7 @@ const App = (() => {
               const cDisc = Number((_cardDiscounts[p.goodsId] || {}).sale) || 0;
               const base = toNum(baseFee);
               if (cDisc <= 0 || base <= 0) return '';
-              return `<div class="card-applied"><small>제휴카드 적용</small> 월 <strong>${fmtN(Math.max(0, base - cDisc))}</strong>원</div>`;
+              return `<div class="card-applied"><small>제휴카드 적용시</small> 월 <strong>${fmtN(Math.max(0, base - cDisc))}</strong>원</div>`;
             };
             if (pol && pol.기본요금 != null) {
               const del = (pol.기준가 != null && pol.기준가 !== pol.기본요금) ? `<div class="del">월 ${fmtN(pol.기준가)}원</div>` : '';
