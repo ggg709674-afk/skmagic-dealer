@@ -832,7 +832,6 @@
   function applyMenuFromHash(){
     const { menu, cat } = parseHash();
     const meta = MENU_META[menu];
-    try { console.debug('[admin][nav] apply', { hash: location.hash, menu, kind: meta && meta.kind, ready: document.readyState }); } catch(e){}
 
     // 사이드바 active 표시
     document.querySelectorAll('.adm-nav-item').forEach(x => {
@@ -2068,7 +2067,6 @@
 
   /* ─── Init ──────────────────────────────────────── */
   async function init(){
-    try { console.debug('[admin][nav] init start', { hash: location.hash, ready: document.readyState }); } catch(e){}
     bindMenu();
     bindHeader();
     bindSearch();
