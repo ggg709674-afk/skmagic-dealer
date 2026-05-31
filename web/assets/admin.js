@@ -767,6 +767,7 @@
   const MENU_META = {
     products: { title: '상품 관리', sub: '노출 여부 · 추천 배지 · 표시 순서 · 매장 자체 가격/이름 수정.', kind: 'products' },
     commission: { title: '정책 테이블', sub: '홈페이지 등록 모델의 약정·관리방식별 정책 테이블입니다.', kind: 'commission' },
+    carddiscount: { title: '카드할인금액', sub: '상품별 제휴카드 할인액을 설정합니다. 상품 카드에는 기본요금 기준만 적용됩니다.', kind: 'carddiscount' },
     cards:    { title: '제휴카드 관리', sub: '카드 이미지와 자세히보기 링크를 등록합니다. 제휴카드 안내 페이지에 반영됩니다.', kind: 'cards' },
     iconlab:  { title: '아이콘 시안', sub: '홈 카테고리 아이콘 디자인 시안입니다. 마음에 드는 스타일을 골라 주세요.', kind: 'iconlab' },
     faq:      { title: 'FAQ 관리', sub: '자주 묻는 질문의 질문·답변을 추가·수정·삭제합니다. 자주 묻는 질문 페이지에 반영됩니다.', kind: 'faq' },
@@ -823,6 +824,7 @@
     // 패널 전환
     document.querySelector('[data-panel="products"]').hidden   = (meta.kind !== 'products');
     document.querySelector('[data-panel="commission"]').hidden = (meta.kind !== 'commission');
+    document.querySelector('[data-panel="carddiscount"]').hidden = (meta.kind !== 'carddiscount');
     document.querySelector('[data-panel="cards"]').hidden      = (meta.kind !== 'cards');
     document.querySelector('[data-panel="iconlab"]').hidden    = (meta.kind !== 'iconlab');
     document.querySelector('[data-panel="faq"]').hidden        = (meta.kind !== 'faq');
@@ -839,6 +841,7 @@
 
     if (meta.kind === 'store') populateStoreForm();
     if (meta.kind === 'commission') initCommission();
+    if (meta.kind === 'carddiscount') initCardDiscount();
     if (meta.kind === 'cards') initCards();
     if (meta.kind === 'faq') initFaq();
     if (meta.kind === 'banner') initBanner();
@@ -1243,6 +1246,50 @@
           ${CATS.map(c => `<div class="adm-iconlab-item"><div class="adm-iconlab-ic ${s.bg}">${s.icons[c.key]}</div><div><div class="adm-iconlab-nm">${escape(c.nm)}</div><div class="adm-iconlab-cnt">${escape(c.cnt)}</div></div></div>`).join('')}
         </div>
       </div>`).join('');
+  }
+
+  /* ─── 카드할인금액 (상품별 제휴카드 할인) ───────────
+     기본요금/타사보상에 카드할인 입력 → 노출금액(현재가-카드할인) 자동계산.
+     ※ 일단 테이블·계산만 — 저장/공개반영은 다음 단계. */
+  async function initCardDiscount(){
+    await ensureCommissionData();   // 가격(정책)이 있어야 기본요금/타사보상 표시
+    renderCardDiscount();
+  }
+  function renderCardDiscount(){
+    const tbody = document.getElementById('carddiscount-tbody');
+    if (!tbody) return;
+    const list = visibleList();
+    if (!list.length){ tbody.innerHTML = `<tr><td colspan="8" class="adm-empty">상품이 없어요.</td></tr>`; return; }
+    const cell = (v) => v ? `<strong>${escape(v)}</strong>` : '<span class="price-empty">—</span>';
+    const inputCell = (gid, type, base) => `<input type="text" class="adm-input cd-input" data-type="${type}" data-gid="${escape(gid)}" data-base="${escape(base || '')}" placeholder="0"${base ? '' : ' disabled'}>`;
+    tbody.innerHTML = list.map(rawP => {
+      const p = effective(rawP);
+      const gid = p.goodsId;
+      const prices = effectivePrices(p);
+      const cat = CATEGORY_META[primaryCat(p)]?.label || '—';
+      return `<tr data-gid="${escape(gid)}">
+        <td class="col-cat"><span class="cat-tag">${escape(cat)}</span></td>
+        <td class="col-name"><span class="nm">${escape(p.name || '')}</span></td>
+        <td class="col-price">${cell(prices.sale)}</td>
+        <td class="col-price">${inputCell(gid, 'sale', prices.sale)}</td>
+        <td class="col-price cd-result" data-type="sale" data-gid="${escape(gid)}"><span class="price-empty">—</span></td>
+        <td class="col-price col-cd-sep">${cell(prices.compete)}</td>
+        <td class="col-price">${inputCell(gid, 'compete', prices.compete)}</td>
+        <td class="col-price cd-result" data-type="compete" data-gid="${escape(gid)}"><span class="price-empty">—</span></td>
+      </tr>`;
+    }).join('');
+    tbody.querySelectorAll('.cd-input').forEach(inp => inp.addEventListener('input', onCardDiscountInput));
+  }
+  function onCardDiscountInput(e){
+    const inp = e.target;
+    const num = s => parseInt(String(s).replace(/[^\d]/g, ''), 10) || 0;
+    const base = num(inp.dataset.base);
+    const disc = num(inp.value);
+    const result = document.querySelector(`.cd-result[data-type="${inp.dataset.type}"][data-gid="${inp.dataset.gid}"]`);
+    if (!result) return;
+    result.innerHTML = (disc > 0 && base > 0)
+      ? `<strong>${Math.max(0, base - disc).toLocaleString('ko-KR')}</strong>`
+      : '<span class="price-empty">—</span>';
   }
 
   async function initCommission(){

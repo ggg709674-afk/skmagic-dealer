@@ -60,6 +60,9 @@
       <a class="adm-nav-item" href="#commission" data-menu="commission">
         <span class="adm-nav-ic">₩</span> 정책 테이블
       </a>
+      <a class="adm-nav-item" href="#carddiscount" data-menu="carddiscount">
+        <span class="adm-nav-ic">%</span> 카드할인금액
+      </a>
     </div>
     <div class="adm-nav-group">
       <div class="adm-nav-label">실적</div>
@@ -157,7 +160,7 @@
             <th class="col-model">모델</th>
             <th class="col-name">상품명</th>
             <th class="col-price">정상가</th>
-            <th class="col-price">할인가</th>
+            <th class="col-price">기본요금</th>
             <th class="col-price">타사보상</th>
             <th class="col-price">제휴카드</th>
             <th class="col-toggle">노출</th>
@@ -349,6 +352,30 @@
     <div class="adm-iconlab" id="adm-iconlab"></div>
   </section>
 
+  <!-- ===== 카드할인금액 패널 ===== -->
+  <section class="adm-panel" data-panel="carddiscount" hidden>
+    <p class="adm-panel-hint">상품별 제휴카드 할인액을 입력하면 <strong>노출금액(현재가 − 카드할인)</strong>이 자동 계산돼요. <strong>상품 카드에는 기본요금 기준만 적용</strong>되고, 타사보상 카드할인은 상세페이지에 표시됩니다.</p>
+    <div class="adm-table-wrap">
+      <table class="adm-table adm-cd-table" id="carddiscount-table">
+        <thead>
+          <tr>
+            <th class="col-cat">카테고리</th>
+            <th class="col-name">상품명</th>
+            <th class="col-price">기본요금</th>
+            <th class="col-price">카드할인</th>
+            <th class="col-price">노출금액</th>
+            <th class="col-price col-cd-sep">타사보상</th>
+            <th class="col-price">카드할인</th>
+            <th class="col-price">노출금액</th>
+          </tr>
+        </thead>
+        <tbody id="carddiscount-tbody">
+          <tr><td colspan="8" class="adm-empty">불러오는 중…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
 </main>
 
 <!-- ===== 상품 편집 모달 ===== -->
@@ -392,7 +419,7 @@
               <input type="text" id="edit-price-regular" class="adm-input" placeholder="46,900">
             </label>
             <label class="adm-edit-field">
-              <span>할인가</span>
+              <span>기본요금</span>
               <input type="text" id="edit-price-sale" class="adm-input" placeholder="13,200">
             </label>
             <label class="adm-edit-field">
