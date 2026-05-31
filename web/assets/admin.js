@@ -2461,9 +2461,18 @@
   }
 
   async function signOut(){
-    if (!window.sb) return;
-    await window.sb.auth.signOut();
-    location.reload();
+    // scope:'local' — 로컬 세션(localStorage)만 즉시 비움. 서버 토큰폐기(global)는
+    // 토큰 만료/네트워크 시 await 가 안 끝나 reload 가 막히는 경우가 있어 회피.
+    // 어떤 경우든 finally 에서 reload → 로그인 화면으로 확실히 빠져나오게.
+    try {
+      if (window.sb) await window.sb.auth.signOut({ scope: 'local' });
+    } catch(e){
+      console.warn('[admin] signOut 실패(무시하고 새로고침)', e);
+    } finally {
+      // 혹시 남은 잔여 키까지 정리(안전망)
+      try { localStorage.removeItem('skm-auth'); } catch(_){}
+      location.reload();
+    }
   }
 
   /* ─── 매장 접근 권한 판정 ──────────────────────────
