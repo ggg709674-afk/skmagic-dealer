@@ -1690,11 +1690,14 @@
       .map(p => comBaseCode(p.model).slice(0, 9)));
     const onHome = (code) => code && homeBase.has(comBaseCode(code).slice(0, 9));
 
-    // 색상 묶음: 품목|모델|형태|의무(+매트리스는 사이즈) 1행만
+    // 색상 묶음: 품목|코드base(끝 색상자리 제외)|형태|의무(+매트리스는 사이즈) 1행만.
+    //  ※ 모델명 기준으로 묶으면, 모델명이 같고 코드만 다른 변형(예: 풀스텐스파 화이트
+    //    BIDF17DR43WH ↔ 위글위글 BIDF17DR54WW)이 서로 먹혀 누락된다. → 코드 base 기준으로 분리.
+    //    진짜 색상 변형(BIDF17DR43WH ↔ …BK)은 앞 10자리가 같아 그대로 1행으로 묶인다.
     const seen = {}, out = [];
     for (const x of rows){
       if (!onHome(x.코드)) continue;
-      const key = x.품목 + '|' + x.모델 + '|' + x.형태 + '|' + x.의무 + '|' + (x.사이즈 || '');
+      const key = x.품목 + '|' + comBaseCode(x.코드).slice(0, 10) + '|' + x.형태 + '|' + x.의무 + '|' + (x.사이즈 || '');
       if (seen[key]) continue;
       seen[key] = 1;
       out.push(x);
