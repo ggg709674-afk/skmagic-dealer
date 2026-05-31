@@ -919,7 +919,9 @@ ul,ol{margin:0;padding:0;list-style:none}
   .product-card .benefits{gap:3px;margin-top:2px}
   .product-card .bft{font-size:9px;padding:2px 5px}
   .product-card .price-row{padding-top:7px}
-  .product-card .price-row .del{font-size:10px}
+  /* 모바일 2열 카드는 폭이 좁아 정가(취소선)가 줄바꿈됨 → 모바일에선 숨김.
+     할인 강조는 '반값' 배지 + 구독가 + 제휴카드 적용가로 충분. (PC는 그대로 노출) */
+  .product-card .price-row .del{display:none}
   .product-card .price-row .now{font-size:11px}
   .product-card .price-row .now strong{font-size:16px}
   .product-card .price-row .card-applied{font-size:11px;margin-top:3px}
