@@ -43,3 +43,8 @@ nohup.out
 *.bak
 *.backup
 *~
+
+# ─── tools 임시 산출물 (scan/download 도구가 만드는 일회용 파일) ───
+_missing_imgs.json
+_missing_thumbs.json
+_dl_fails.json
