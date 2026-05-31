@@ -994,7 +994,7 @@
         <td class="mg-shop" data-mg-fee="${escape(key)}">${shopFee != null ? comFmt(shopFee) : '—'}</td>
       </tr>`;
     }).join('');
-    wrap.innerHTML = `<div class="adm-cs-scroll"><table class="adm-table adm-mg-table">
+    wrap.innerHTML = `<div class="adm-table-wrap"><table class="adm-table adm-mg-table">
       <thead><tr><th>품목</th><th>모델</th><th>제품코드</th><th>형태</th><th>의무기간</th><th>관리주기</th><th>공급가액</th><th>수수료합계</th><th>마진입력 (VAT 포함)</th><th>판매점 공급가액</th><th>판매점 수수료</th></tr></thead>
       <tbody>${body}</tbody></table></div>`;
   }
