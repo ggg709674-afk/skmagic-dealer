@@ -1046,7 +1046,13 @@
     document.getElementById('adm-page-sub').textContent   = meta.sub;
 
     if (meta.kind === 'store') populateStoreForm();
-    if (meta.kind === 'commission') initCommission();
+    if (meta.kind === 'commission'){
+      // 메뉴 진입 시 필터 초기화 — 이전에 걸어둔 카테고리/검색이 남아 다운로드 범위가
+      // 엉뚱해지는(="다른 데이터") 현상 방지.
+      comState.cat = 'all'; comState.form = 'all'; comState.q = '';
+      const _cs = document.getElementById('com-search'); if (_cs) _cs.value = '';
+      initCommission();
+    }
     if (meta.kind === 'carddiscount') initCardDiscount();
     if (meta.kind === 'cards') initCards();
     if (meta.kind === 'faq') initFaq();
@@ -2030,10 +2036,11 @@
 
   /* 현재 필터된 행을 엑셀(.xlsx)로 다운로드 (SheetJS). */
   function downloadCommissionXlsx(){
+    if (typeof XLSX === 'undefined'){ alert('엑셀 기능을 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.'); return; }
     const db = comDB();
-    if (!db || typeof XLSX === 'undefined') return;
+    if (!db){ alert('수수료 데이터가 없어요. 먼저 정책표를 업로드해 주세요.'); return; }
     const list = comFiltered();
-    if (!list.length) return;
+    if (!list.length){ alert('다운로드할 행이 없어요. 카테고리·검색 필터를 확인해 주세요.'); return; }
     const aoa = [['품목','모델','제품코드','형태','의무기간','관리주기','기준가','기본요금','타사보상','수수료합계']];
     list.forEach(r => {
       const { name, code } = comDisplay(r);
