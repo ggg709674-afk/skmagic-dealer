@@ -435,18 +435,35 @@
       });
     }
 
-    // 정렬 — 카테고리별 수동 order 있으면 그 순서대로 위로 끌어올림.
-    // 단일 카테고리 선택 시만 의미가 있어서 '전체' 모드에서는 raw 순서 유지.
+    // 정렬
+    const CAT_KEYS = Object.keys(CATEGORY_META);   // 정수기→공기청정기→비데→매트리스
+    const raw = new Map(list.map((p, i) => [p.goodsId, i]));
     if (state.filterCat){
+      // 단일 카테고리 — 수동 order 순서대로 (없으면 raw)
       const orderArr = state.overrides.order[state.filterCat] || [];
       if (orderArr.length){
         const orderIdx = new Map(orderArr.map((id, i) => [id, i]));
         list.sort((a, b) => {
           const ai = orderIdx.has(a.goodsId) ? orderIdx.get(a.goodsId) : Infinity;
           const bi = orderIdx.has(b.goodsId) ? orderIdx.get(b.goodsId) : Infinity;
-          return ai - bi;
+          if (ai !== bi) return ai - bi;
+          return raw.get(a.goodsId) - raw.get(b.goodsId);
         });
       }
+    } else {
+      // 전체보기 — 카테고리 순 + 카테고리 내(수동 order 순, 순서 미조정한 신상품은 최상단)
+      const catRank = (p) => { const i = CAT_KEYS.indexOf(primaryCat(p)); return i < 0 ? 99 : i; };
+      const orderMaps = {};
+      CAT_KEYS.forEach(c => { orderMaps[c] = new Map((state.overrides.order[c] || []).map((id, i) => [id, i])); });
+      list.sort((a, b) => {
+        const ra = catRank(a), rb = catRank(b);
+        if (ra !== rb) return ra - rb;                     // 카테고리 순
+        const m = orderMaps[primaryCat(a)] || new Map();
+        const ia = m.has(a.goodsId) ? m.get(a.goodsId) : -1;   // order 없는 신상품 = 최상단
+        const ib = m.has(b.goodsId) ? m.get(b.goodsId) : -1;
+        if (ia !== ib) return ia - ib;
+        return raw.get(a.goodsId) - raw.get(b.goodsId);    // stable
+      });
     }
 
     return list;
