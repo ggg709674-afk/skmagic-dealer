@@ -745,7 +745,8 @@ ul,ol{margin:0;padding:0;list-style:none}
 .detail-tabs .tabbar button.on{color:var(--primary-dark);border-bottom-color:var(--primary)}
 .detail-tabs .tabpane{padding:40px 0}
 .detail-tabs .infoimgs{max-width:1100px;margin:0 auto}
-.detail-tabs .infoimgs img{width:100%;height:auto;margin:0 auto;display:block;border-radius:8px}
+.detail-tabs .infoimgs img,
+.detail-tabs .infoimgs video{width:100%;height:auto;margin:0 auto;display:block;border-radius:8px}
 .detail-tabs .infoimgs img + img{margin-top:0}
 
 /* ---------- 제품 사양 테이블 ---------- */

@@ -1470,7 +1470,14 @@ const App = (() => {
         info.innerHTML = filtered.map(({ u, i }) => {
           const fn = u.split('/').pop();
           const local = `../products/${id}/images/detail_${String(i).padStart(2,'0')}_${fn}`;
-          return `<img loading="lazy" decoding="async" src="${escape(local)}" alt="" onerror="this.src='${escape(u)}'">`;
+          // 상세 컷 전부 우리 서버(repo/vercel)에 저장 — 본사 핫링크 안 함.
+          // 본사가 .gif 로 주는 애니메이션 컷은 용량(개당 3MB, 최대 34MB) 때문에 mp4 로 변환해 둠.
+          // → gif 참조는 같은 경로의 .mp4 를 <video> 자동재생·루프로 렌더. 깨지면 숨김.
+          if (/\.gif(\?|$)/i.test(fn)) {
+            const mp4 = local.replace(/\.gif(\?|$)/i, '.mp4');
+            return `<video src="${escape(mp4)}" autoplay loop muted playsinline preload="metadata" onerror="this.style.display='none'"></video>`;
+          }
+          return `<img loading="lazy" decoding="async" src="${escape(local)}" alt="" onerror="this.style.display='none'">`;
         }).join('');
       } else {
         info.innerHTML = '<div class="empty">상세 정보 이미지가 준비 중입니다.</div>';
