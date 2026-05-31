@@ -610,7 +610,7 @@ ul,ol{margin:0;padding:0;list-style:none}
 }
 
 /* ---------- Detail page ---------- */
-.detail-wrap{padding:40px 0 80px}
+.detail-wrap{padding:40px 20px 80px}
 .breadcrumb{font-size:12px;color:var(--ink-4);margin-bottom:24px}
 .breadcrumb a{color:var(--ink-3)}
 .breadcrumb a:hover{color:var(--ink-1)}
