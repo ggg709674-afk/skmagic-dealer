@@ -785,6 +785,25 @@ const App = (() => {
     _optState.careIdx = def.careIdx;
     _optState.contractIdx = def.contractIdx;
     _optState.priceMode = 'new';   // 기본 = 신규 렌탈
+    // 제휴카드 안내 '보던 상품으로 돌아가기'로 진입 시 선택 복원 (?opt=care.contract.mode[.size])
+    try {
+      const opt = new URLSearchParams(location.search).get('opt');
+      if (opt) {
+        const parts = opt.split('.');
+        const ci = parseInt(parts[0], 10), ki = parseInt(parts[1], 10);
+        const mode = parts[2], sk = parts.slice(3).join('.') || null;
+        if (sk && sk !== _optState.sizeKey) {
+          _optState.sizeKey = sk;
+          const sized = optionsForSize(sk);
+          if (sized) _optState.lastOpts = sized;
+        }
+        const cts = _optState.lastOpts.care_types || [];
+        if (Number.isInteger(ci) && cts[ci]) _optState.careIdx = ci;
+        const conts = (cts[_optState.careIdx] || {}).contracts || [];
+        if (Number.isInteger(ki) && conts[ki]) _optState.contractIdx = ki;
+        if (mode === 'compete' || mode === 'new') _optState.priceMode = mode;
+      }
+    } catch (_) {}
     renderOptionTabs();
     renderOptionInfo();
     renderPriceCard();
