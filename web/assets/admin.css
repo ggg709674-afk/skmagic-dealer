@@ -886,6 +886,7 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 /* 엑셀 다운로드 버튼 (필터 줄 — 셀프형 칩 우측에 붙임) */
 .adm-form-dl{display:inline-flex; align-items:center; gap:10px}
 .adm-com-dl{display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 12px; font-size:12.5px}
+.adm-com-dl[hidden]{display:none}   /* hidden 속성이 display:inline-flex에 묻히지 않도록 — 메뉴별 노출 토글 정상화 */
 .adm-com-dl svg{flex:0 0 auto}
 /* 양끝 셀에 여백 — 수수료합계가 우측 테두리에 붙지 않도록 */
 .adm-com-table th:first-child, .adm-com-table td:first-child{padding-left:16px}
