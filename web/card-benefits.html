@@ -252,11 +252,16 @@
     el.hidden = false;
   })();
 
-  // 기본(SVG) 렌더 → admin DB에 등록된 이미지/링크 있으면 적용해 다시 렌더
-  renderCards();
-  if (window.skmFetchCardBenefits){
-    window.skmFetchCardBenefits().then(r => { if (r && r.payload && r.payload.cards) renderCards(r.payload.cards); }).catch(()=>{});
-  }
+  // admin DB 이미지/링크를 먼저 받아서 한 번만 렌더 (SVG 먼저 그렸다 이미지로
+  // 다시 그리면 깜빡임). fetch 동안 그리드는 :empty min-height 로 자리 유지 →
+  // 등록 이미지 있으면 이미지로, 없거나 실패하면 SVG fallback 으로 1회 렌더.
+  (async () => {
+    let cards = null;
+    if (window.skmFetchCardBenefits){
+      try { const r = await window.skmFetchCardBenefits(); if (r && r.payload && r.payload.cards) cards = r.payload.cards; } catch(_){}
+    }
+    renderCards(cards);
+  })();
 
   // 푸터 사업자정보 — 매장 정보 채움 (메인 사이트와 동일)
   (async () => {
