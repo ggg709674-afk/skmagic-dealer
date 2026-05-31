@@ -1623,8 +1623,8 @@
     if (!error){ cdDiscounts = clean; admToast('저장됐어요. 공개 사이트에 반영됩니다.'); }
     else alert('저장 실패: ' + (error.message || '권한 또는 네트워크 오류'));
   }
-  function downloadCardDiscountXlsx(){
-    if (typeof XLSX === 'undefined'){ alert('엑셀 기능을 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.'); return; }
+  async function downloadCardDiscountXlsx(){
+    if (!(await ensureXLSX())){ alert('엑셀 모듈 로딩에 실패했어요. 잠시 후 다시 시도해 주세요.'); return; }
     const list = cdVisibleList();
     const header = ['카테고리', '상품명', '모델코드', 'goodsId', '기본요금', '카드할인(기본요금)', '타사보상', '카드할인(타사보상)'];
     const rows = list.map(rawP => {
@@ -2071,9 +2071,25 @@
     return { name: name + sz, code: r.코드 || '' };
   }
 
+  /* XLSX(SheetJS) 로드 보장 — CDN(900KB)이 늦게 로드돼 새로고침 직후 클릭 시
+     미정의로 다운로드가 막히던 문제 방지. 없으면 동적 로드 후 대기. */
+  let _xlsxPromise = null;
+  function ensureXLSX(){
+    if (typeof XLSX !== 'undefined') return Promise.resolve(true);
+    if (!_xlsxPromise){
+      _xlsxPromise = new Promise((resolve) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+        s.onload  = () => resolve(typeof XLSX !== 'undefined');
+        s.onerror = () => { _xlsxPromise = null; resolve(false); };
+        document.head.appendChild(s);
+      });
+    }
+    return _xlsxPromise;
+  }
   /* 현재 필터된 행을 엑셀(.xlsx)로 다운로드 (SheetJS). */
-  function downloadCommissionXlsx(){
-    if (typeof XLSX === 'undefined'){ alert('엑셀 기능을 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.'); return; }
+  async function downloadCommissionXlsx(){
+    if (!(await ensureXLSX())){ alert('엑셀 모듈 로딩에 실패했어요. 잠시 후 다시 시도해 주세요.'); return; }
     const db = comDB();
     if (!db){ alert('수수료 데이터가 없어요. 먼저 정책표를 업로드해 주세요.'); return; }
     const list = comFiltered();
