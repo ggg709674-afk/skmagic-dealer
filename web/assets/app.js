@@ -569,7 +569,12 @@ const App = (() => {
             const fmtN = n => Number(n).toLocaleString('ko-KR');
             if (pol && pol.기본요금 != null) {
               const del = (pol.기준가 != null && pol.기준가 !== pol.기본요금) ? `<div class="del">월 ${fmtN(pol.기준가)}원</div>` : '';
-              return `<div class="price-row">${del}<div class="now"><small>구독</small> 월 <strong>${fmtN(pol.기본요금)}</strong>원</div></div>`;
+              // 제휴카드 적용가 — 카드 표시는 기본요금(sale) 기준만 (admin '카드할인금액'과 동일)
+              const cd = _cardDiscounts[p.goodsId] || {};
+              const cDisc = Number(cd.sale) || 0;
+              const cardLine = (cDisc > 0 && pol.기본요금 > 0)
+                ? `<div class="card-applied">제휴카드 적용 월 <strong>${fmtN(Math.max(0, pol.기본요금 - cDisc))}</strong>원</div>` : '';
+              return `<div class="price-row">${del}<div class="now"><small>구독</small> 월 <strong>${fmtN(pol.기본요금)}</strong>원</div>${cardLine}</div>`;
             }
             return pr ? `
             <div class="price-row">
@@ -1036,9 +1041,9 @@ const App = (() => {
             <span class="label" style="font-weight:600">제휴카드 적용시</span>
             <span class="val"><span class="val-now val-card"><small>월</small>${fmt(applied)}<small>원</small></span></span>
           </div>
-          <div class="card-link-row"><a href="#" data-card-popup>제휴카드 혜택 안내 ›</a></div>`;
+          <div class="card-link-row"><a href="/card-benefits?from=${encodeURIComponent(location.pathname + location.search)}">제휴카드 혜택 안내 ›</a></div>`;
         } else {
-          html += `<div class="card-link-row" style="border-top:1px solid var(--line);padding-top:14px"><a href="#" data-card-popup>제휴카드 혜택 안내 ›</a></div>`;
+          html += `<div class="card-link-row" style="border-top:1px solid var(--line);padding-top:14px"><a href="/card-benefits?from=${encodeURIComponent(location.pathname + location.search)}">제휴카드 혜택 안내 ›</a></div>`;
         }
         priceEl.innerHTML = html;
         return;

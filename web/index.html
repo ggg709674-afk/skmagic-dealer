@@ -339,16 +339,6 @@
   </a>
 </div>
 
-<!-- ===== 제휴카드 안내 팝업 ===== -->
-<div class="card-modal-overlay" id="card-modal" hidden>
-  <div class="card-modal">
-    <button class="card-modal-x" type="button" data-card-close aria-label="닫기">×</button>
-    <h3 class="card-modal-title">제휴카드 혜택</h3>
-    <p class="card-modal-desc">SK인텔릭스 제휴 신용카드로 <b>월 렌탈료를 매월 청구 할인</b> 받을 수 있어요.<br>8개 카드사 중에서 고르고, 전월 실적에 따라 할인폭이 커집니다.</p>
-    <a class="btn btn-primary card-modal-btn" href="/card-benefits">제휴카드 안내 자세히 보기</a>
-  </div>
-</div>
-
 <script src="./assets/icons.js"></script>
 <script src="./assets/db.js"></script>
 <script src="./assets/commission.js"></script>
@@ -358,17 +348,6 @@
 <script>
   // ===== 정적 아이콘 주입 (헤더 액션 제거됨 — FAB만 남음) =====
   document.getElementById('fab-phone').innerHTML = ICONS.chat();
-
-  /* ===== 제휴카드 안내 팝업 토글 (상세 가격카드의 '제휴카드 혜택 안내' 클릭) ===== */
-  (function(){
-    const modal = document.getElementById('card-modal');
-    if (!modal) return;
-    document.addEventListener('click', (e) => {
-      if (e.target.closest('[data-card-popup]')) { e.preventDefault(); modal.hidden = false; return; }
-      if (e.target.closest('[data-card-close]') || e.target === modal) { modal.hidden = true; }
-    });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') modal.hidden = true; });
-  })();
 
   /* ===== FAB popup 토글 — PC/모바일 공통 ===== */
   (function(){

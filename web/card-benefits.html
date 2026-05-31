@@ -29,6 +29,14 @@
 
   .cb-note{font-size:12.5px;color:var(--ink-3);margin:6px 0 26px}
 
+  /* ===== 보던 상품으로 돌아가기 (상세에서 진입했을 때만) ===== */
+  .cb-back{margin:4px 0 64px;text-align:center}
+  .cb-back-btn{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:#fff;
+    font-weight:800;font-size:16px;padding:16px 34px;border-radius:999px;text-decoration:none;
+    box-shadow:0 8px 22px rgba(222,79,65,.28);transition:.18s}
+  .cb-back-btn:hover{background:var(--primary-dark,#c33f33);box-shadow:0 10px 26px rgba(222,79,65,.36)}
+  @media (max-width:860px){ .cb-back-btn{width:100%;justify-content:center;font-size:15px;padding:15px} }
+
   /* ===== 카드 그리드 ===== */
   .cb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:60px}
   .cb-item{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 24px;display:flex;flex-direction:column}
@@ -60,7 +68,10 @@
 <body>
 
 <div class="util-bar">
-  <div class="container"><a href="/card-benefits">제휴카드 안내</a></div>
+  <div class="container">
+    <a href="/card-benefits">제휴카드 안내</a>
+    <a href="/faq">자주 묻는 질문</a>
+  </div>
 </div>
 
 <header class="site-header">
@@ -96,6 +107,9 @@
 
   <!-- 카드 그리드 -->
   <section class="cb-grid" id="cb-grid"></section>
+
+  <!-- 보던 상품(주문 페이지)으로 돌아가기 — ?from 있을 때만 JS로 노출 -->
+  <div class="cb-back" id="cb-back" hidden></div>
 </main>
 
 <footer class="site-footer">
@@ -115,8 +129,8 @@
         <li><a href="./index.html?cls=1000000245">매트리스</a></li>
       </ul></div>
       <div><h4>안내</h4><ul>
-        <li><a href="/card-benefits">제휴카드 혜택</a></li>
-        <li><a href="./index.html">상품 보기</a></li>
+        <li><a href="/card-benefits">제휴카드 안내</a></li>
+        <li><a href="/faq">자주 묻는 질문</a></li>
       </ul></div>
       <div><h4>고객센터</h4><ul class="ft-info"><li id="ft-center-phone" style="font-size:22px;color:#fff;font-weight:800;letter-spacing:-0.5px">상담 환영</li></ul></div>
     </div>
@@ -218,6 +232,17 @@
       </article>`;
     }).join('');
   }
+
+  // 상세(주문)페이지에서 진입했으면 하단에 '보던 상품으로 돌아가기' 칩 표시.
+  // from 은 detail 가격카드 링크가 붙인 내부 경로(/...). 오픈리다이렉트 방지 위해 내부 경로만 허용.
+  (function(){
+    const from = new URLSearchParams(location.search).get('from');
+    if (!from || !/^\/(?!\/)/.test(from)) return;   // '/'로 시작 & '//' 아님(외부 URL 차단)
+    const el = document.getElementById('cb-back');
+    if (!el) return;
+    el.innerHTML = `<a class="cb-back-btn" href="${esc(from)}">‹ 보던 상품으로 돌아가기</a>`;
+    el.hidden = false;
+  })();
 
   // 기본(SVG) 렌더 → admin DB에 등록된 이미지/링크 있으면 적용해 다시 렌더
   renderCards();
