@@ -1266,11 +1266,28 @@
   }
 
   /* ─── 카드할인금액 (상품별 제휴카드 할인) ───────────
-     기본요금/타사보상에 카드할인 입력 → 노출금액(현재가-카드할인) 자동계산.
-     ※ 일단 테이블·계산만 — 저장/공개반영은 다음 단계. */
+     기본요금/타사보상에 카드할인(빼는 금액) 입력 → 노출금액 자동계산.
+     저장: card_benefits.payload.discounts[gid]={sale,compete} (본부 공통).
+     엑셀 다운/업로드로 일괄 적용 + 페이지 개별 수정 둘 다 지원. */
+  const cdNum = s => parseInt(String(s).replace(/[^\d]/g, ''), 10) || 0;
+  let cdDiscounts = {};   // { gid: {sale, compete} } — 편집 중 상태
+  let cdInited = false;
   async function initCardDiscount(){
     await ensureCommissionData();   // 가격(정책)이 있어야 기본요금/타사보상 표시
+    if (!cdInited){
+      cdInited = true;
+      if (window.skmFetchCardBenefits){
+        try { const r = await window.skmFetchCardBenefits(); if (r && r.payload && r.payload.discounts) cdDiscounts = r.payload.discounts; } catch(_){}
+      }
+      const sv = document.getElementById('cd-save'); if (sv) sv.addEventListener('click', saveCardDiscounts);
+      const dl = document.getElementById('cd-download'); if (dl) dl.addEventListener('click', downloadCardDiscountXlsx);
+      const fl = document.getElementById('cd-file'); if (fl) fl.addEventListener('change', onCardDiscountUpload);
+    }
     renderCardDiscount();
+  }
+  function cdResultHTML(base, disc){
+    const b = cdNum(base), d = cdNum(disc);
+    return (d > 0 && b > 0) ? `<strong>${Math.max(0, b - d).toLocaleString('ko-KR')}</strong>` : '<span class="price-empty">—</span>';
   }
   function renderCardDiscount(){
     const tbody = document.getElementById('carddiscount-tbody');
@@ -1278,35 +1295,113 @@
     const list = visibleList();
     if (!list.length){ tbody.innerHTML = `<tr><td colspan="8" class="adm-empty">상품이 없어요.</td></tr>`; return; }
     const cell = (v) => v ? `<strong>${escape(v)}</strong>` : '<span class="price-empty">—</span>';
-    const inputCell = (gid, type, base) => `<input type="text" class="adm-input cd-input" data-type="${type}" data-gid="${escape(gid)}" data-base="${escape(base || '')}" placeholder="0"${base ? '' : ' disabled'}>`;
+    const inputCell = (gid, type, base, val) => `<input type="text" class="adm-input cd-input" data-type="${type}" data-gid="${escape(gid)}" data-base="${escape(base || '')}" value="${val ? escape(String(val)) : ''}" placeholder="0"${base ? '' : ' disabled'}>`;
     tbody.innerHTML = list.map(rawP => {
       const p = effective(rawP);
       const gid = p.goodsId;
       const prices = effectivePrices(p);
       const cat = CATEGORY_META[primaryCat(p)]?.label || '—';
+      const d = cdDiscounts[gid] || {};
       return `<tr data-gid="${escape(gid)}">
         <td class="col-cat"><span class="cat-tag">${escape(cat)}</span></td>
         <td class="col-name"><span class="nm">${escape(p.name || '')}</span></td>
         <td class="col-price">${cell(prices.sale)}</td>
-        <td class="col-price">${inputCell(gid, 'sale', prices.sale)}</td>
-        <td class="col-price cd-result" data-type="sale" data-gid="${escape(gid)}"><span class="price-empty">—</span></td>
+        <td class="col-price">${inputCell(gid, 'sale', prices.sale, d.sale)}</td>
+        <td class="col-price cd-result" data-type="sale" data-gid="${escape(gid)}">${cdResultHTML(prices.sale, d.sale)}</td>
         <td class="col-price col-cd-sep">${cell(prices.compete)}</td>
-        <td class="col-price">${inputCell(gid, 'compete', prices.compete)}</td>
-        <td class="col-price cd-result" data-type="compete" data-gid="${escape(gid)}"><span class="price-empty">—</span></td>
+        <td class="col-price">${inputCell(gid, 'compete', prices.compete, d.compete)}</td>
+        <td class="col-price cd-result" data-type="compete" data-gid="${escape(gid)}">${cdResultHTML(prices.compete, d.compete)}</td>
       </tr>`;
     }).join('');
     tbody.querySelectorAll('.cd-input').forEach(inp => inp.addEventListener('input', onCardDiscountInput));
   }
   function onCardDiscountInput(e){
     const inp = e.target;
-    const num = s => parseInt(String(s).replace(/[^\d]/g, ''), 10) || 0;
-    const base = num(inp.dataset.base);
-    const disc = num(inp.value);
-    const result = document.querySelector(`.cd-result[data-type="${inp.dataset.type}"][data-gid="${inp.dataset.gid}"]`);
-    if (!result) return;
-    result.innerHTML = (disc > 0 && base > 0)
-      ? `<strong>${Math.max(0, base - disc).toLocaleString('ko-KR')}</strong>`
-      : '<span class="price-empty">—</span>';
+    const gid = inp.dataset.gid, type = inp.dataset.type;
+    const disc = cdNum(inp.value);
+    // 상태 반영
+    if (!cdDiscounts[gid]) cdDiscounts[gid] = {};
+    if (disc > 0) cdDiscounts[gid][type] = disc; else delete cdDiscounts[gid][type];
+    if (!Object.keys(cdDiscounts[gid]).length) delete cdDiscounts[gid];
+    // 노출금액 갱신
+    const result = document.querySelector(`.cd-result[data-type="${type}"][data-gid="${gid}"]`);
+    if (result) result.innerHTML = cdResultHTML(inp.dataset.base, inp.value);
+  }
+  // 빈 항목 정리한 깨끗한 discounts 맵
+  function cdClean(){
+    const clean = {};
+    Object.keys(cdDiscounts).forEach(gid => {
+      const d = cdDiscounts[gid] || {}; const o = {};
+      if (cdNum(d.sale) > 0) o.sale = cdNum(d.sale);
+      if (cdNum(d.compete) > 0) o.compete = cdNum(d.compete);
+      if (Object.keys(o).length) clean[gid] = o;
+    });
+    return clean;
+  }
+  async function saveCardDiscounts(){
+    const clean = cdClean();
+    const btn = document.getElementById('cd-save');
+    const st = document.getElementById('cd-status');
+    if (btn) btn.disabled = true;
+    if (st) st.textContent = '저장 중…';
+    let error = null;
+    if (window.skmSaveCardDiscounts){ const r = await window.skmSaveCardDiscounts(clean); error = r.error; }
+    if (btn) btn.disabled = false;
+    if (st) st.textContent = error ? '저장 실패' : '저장됨';
+    if (!error){ cdDiscounts = clean; admToast('저장됐어요. 공개 사이트에 반영됩니다.'); }
+    else alert('저장 실패: ' + (error.message || '권한 또는 네트워크 오류'));
+  }
+  function downloadCardDiscountXlsx(){
+    if (typeof XLSX === 'undefined'){ alert('엑셀 기능을 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.'); return; }
+    const list = visibleList();
+    const header = ['카테고리', '상품명', '모델코드', 'goodsId', '기본요금', '카드할인(기본요금)', '타사보상', '카드할인(타사보상)'];
+    const rows = list.map(rawP => {
+      const p = effective(rawP);
+      const gid = p.goodsId;
+      const prices = effectivePrices(p);
+      const cat = CATEGORY_META[primaryCat(p)]?.label || '';
+      const d = cdDiscounts[gid] || {};
+      return [cat, p.name || '', modelCode(p), gid, cdNum(prices.sale) || '', d.sale || '', cdNum(prices.compete) || '', d.compete || ''];
+    });
+    const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '카드할인금액');
+    XLSX.writeFile(wb, '카드할인금액.xlsx');
+  }
+  async function onCardDiscountUpload(e){
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    if (typeof XLSX === 'undefined'){ alert('엑셀 파서를 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.'); return; }
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      const head = (rows[0] || []).map(h => String(h || ''));
+      const gidCol = head.findIndex(h => /goodsId/i.test(h));
+      const saleCol = head.findIndex(h => /카드할인.*기본/.test(h));
+      const compCol = head.findIndex(h => /카드할인.*타사/.test(h));
+      if (gidCol < 0 || (saleCol < 0 && compCol < 0)){
+        alert('엑셀 형식을 확인해 주세요.\n다운로드한 양식(goodsId · 카드할인 컬럼)을 채워서 올려 주세요.');
+        return;
+      }
+      let applied = 0;
+      for (let i = 1; i < rows.length; i++){
+        const row = rows[i]; if (!row) continue;
+        const gid = String(row[gidCol] || '').trim(); if (!gid) continue;
+        const o = cdDiscounts[gid] ? Object.assign({}, cdDiscounts[gid]) : {};
+        if (saleCol >= 0){ const v = cdNum(row[saleCol]); if (v > 0) o.sale = v; else delete o.sale; }
+        if (compCol >= 0){ const v = cdNum(row[compCol]); if (v > 0) o.compete = v; else delete o.compete; }
+        if (Object.keys(o).length) cdDiscounts[gid] = o; else delete cdDiscounts[gid];
+        applied++;
+      }
+      renderCardDiscount();
+      const st = document.getElementById('cd-status'); if (st) st.textContent = `${applied}개 적용됨 (저장 필요)`;
+      admToast(`${applied}개 행 적용됐어요. 저장을 눌러 반영하세요.`);
+    } catch(err){
+      alert('엑셀 읽기 실패: ' + (err && err.message ? err.message : err));
+    }
   }
 
   async function initCommission(){

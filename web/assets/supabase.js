@@ -181,6 +181,16 @@
     return { data, error };
   };
 
+  /* ─── 카드할인금액 저장 (card_benefits.payload.discounts 통합, 본부 공통) ───
+     discounts = { "<goodsId>": { sale: 13000, compete: 3000 }, ... } (할인액).
+     기존 payload(cards 등)는 보존하고 discounts 만 교체. */
+  window.skmSaveCardDiscounts = async function(discounts){
+    let cur = null;
+    try { cur = await window.skmFetchCardBenefits(); } catch(_){}
+    const payload = Object.assign({}, (cur && cur.payload) || {}, { discounts: discounts || {} });
+    return window.skmSaveCardBenefits(payload);
+  };
+
   /* ─── 카드 이미지 업로드 (Storage card-assets 버킷) → public URL 반환 ─── */
   window.skmUploadCardImage = async function(key, file){
     if (!key || !file) return { error: new Error('key/file 필요') };

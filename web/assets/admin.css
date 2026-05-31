@@ -853,6 +853,9 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .adm-iconlab-cnt{font-size:11px; color:var(--ink-4)}
 
 /* ===== 카드할인금액 테이블 ===== */
+.adm-cd-actions{display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-bottom:14px; max-width:1282px}
+.adm-cd-upload{cursor:pointer}
+.adm-cd-status{font-size:12.5px; color:var(--ink-3)}
 .adm-cd-table th.col-price, .adm-cd-table td.col-price{text-align:right; white-space:nowrap}
 .adm-cd-table .cd-input{width:88px; height:32px; text-align:right; font-size:13px; padding:0 10px}
 .adm-cd-table .cd-result strong{color:var(--primary); font-weight:800}

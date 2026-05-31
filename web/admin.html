@@ -355,6 +355,12 @@
   <!-- ===== 카드할인금액 패널 ===== -->
   <section class="adm-panel" data-panel="carddiscount" hidden>
     <p class="adm-panel-hint">상품별 제휴카드 할인액을 입력하면 <strong>노출금액(현재가 − 카드할인)</strong>이 자동 계산돼요. <strong>상품 카드에는 기본요금 기준만 적용</strong>되고, 타사보상 카드할인은 상세페이지에 표시됩니다.</p>
+    <div class="adm-cd-actions">
+      <label class="adm-btn adm-btn-ghost adm-cd-upload" title="엑셀(.xlsx)로 일괄 적용">엑셀 업로드<input type="file" accept=".xlsx" id="cd-file" hidden></label>
+      <button class="adm-btn adm-btn-ghost" id="cd-download">엑셀 다운로드</button>
+      <button class="adm-btn adm-btn-primary" id="cd-save">저장</button>
+      <span class="adm-cd-status" id="cd-status"></span>
+    </div>
     <div class="adm-table-wrap">
       <table class="adm-table adm-cd-table" id="carddiscount-table">
         <thead>
