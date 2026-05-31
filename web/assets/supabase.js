@@ -137,7 +137,7 @@
     if (!parentId) return [];
     const { data, error } = await window.sb
       .from('stores')
-      .select('id, slug, name, type, biz_owner, phone, created_at')
+      .select('id, slug, name, type, email, biz_owner, phone, created_at')
       .eq('parent_store_id', parentId)
       .order('created_at', { ascending: true });
     if (error){ console.warn('[skmFetchChildStores]', error); return []; }

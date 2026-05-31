@@ -1129,6 +1129,7 @@
 
   /* ===== 사이트분양 (분양관리) ===== */
   const DEPLOY_DEFAULT_PW = 'sk1234';   // 분양 시 판매점 초기 비밀번호 (6자 — Supabase 최소길이 충족)
+  const DEPLOY_SITE_ORIGIN = 'https://sk-magic.kr';   // 분양 목록의 전체 주소 표기용
   let _dpBound = false;
   async function initDeploy(){
     bindDeployUI();
@@ -1148,20 +1149,24 @@
   function renderDeployList(kids){
     const listEl = document.getElementById('dp-list'); if (!listEl) return;
     if (!kids.length){ listEl.innerHTML = '<div class="adm-empty">아직 분양한 판매점이 없어요. 위에서 추가하세요.</div>'; return; }
+    const urlCell = (url) =>
+      `<a class="dp-url" href="${escape(url)}" target="_blank" rel="noopener">${escape(url)}</a>` +
+      `<button type="button" class="dp-copy" data-copy="${escape(url)}">복사</button>`;
     const body = kids.map(s => {
       const isDealer = s.type === 'dealer';
+      const siteUrl  = `${DEPLOY_SITE_ORIGIN}/${s.slug}`;
+      const adminUrl = `${DEPLOY_SITE_ORIGIN}/${s.slug}/admin`;
       return `<tr>
         <td><span class="cs-kind cs-kind-${isDealer?'order':'consult'}">${isDealer?'분양형':'단독형'}</span></td>
         <td class="mg-left">${escape(s.name || '')}</td>
         <td class="mg-left">${escape(s.slug || '')}</td>
-        <td>${escape(s.biz_owner || '—')}</td>
-        <td>${escape(s.phone || '—')}</td>
-        <td><a href="/${escape(s.slug)}" target="_blank" rel="noopener">/${escape(s.slug)}</a></td>
-        <td><a href="/${escape(s.slug)}/admin" target="_blank" rel="noopener">admin</a></td>
+        <td class="mg-left">${escape(s.email || '—')}</td>
+        <td class="mg-left dp-url-cell">${urlCell(siteUrl)}</td>
+        <td class="mg-left dp-url-cell">${urlCell(adminUrl)}</td>
       </tr>`;
     }).join('');
     listEl.innerHTML = `<div class="adm-table-wrap"><table class="adm-table adm-deploy-tbl">
-      <thead><tr><th>유형</th><th>상호</th><th>슬러그</th><th>대표</th><th>연락처</th><th>사이트</th><th>관리자</th></tr></thead>
+      <thead><tr><th>유형</th><th>상호</th><th>슬러그</th><th>이메일</th><th>사이트 주소</th><th>관리자 주소</th></tr></thead>
       <tbody>${body}</tbody></table></div>`;
   }
   function bindDeployUI(){
@@ -1207,6 +1212,23 @@
     // 초기 비밀번호 안내 라벨
     const pwLabel = document.getElementById('dp-pw-label');
     if (pwLabel) pwLabel.textContent = DEPLOY_DEFAULT_PW;
+
+    // 주소 복사 버튼 (이벤트 위임 — 목록을 매번 다시 그려도 동작)
+    const list = document.getElementById('dp-list');
+    if (list) list.addEventListener('click', (e) => {
+      const cbtn = e.target.closest('.dp-copy');
+      if (!cbtn) return;
+      const text = cbtn.dataset.copy || '';
+      const done = () => { const o = cbtn.textContent; cbtn.textContent = '복사됨'; setTimeout(() => { cbtn.textContent = o; }, 1200); };
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done).catch(() => {});
+      } else {
+        const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); done(); } catch(_){}
+        document.body.removeChild(ta);
+      }
+    });
   }
 
   function bindMenu(){

@@ -992,6 +992,10 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .adm-deploy-tbl .mg-left{text-align:left}
 .adm-deploy-tbl a{color:var(--primary);text-decoration:none;font-weight:600}
 .adm-deploy-tbl a:hover{text-decoration:underline}
+.dp-url-cell{white-space:nowrap}
+.dp-url{font-size:12.5px}
+.dp-copy{margin-left:8px;padding:3px 10px;font-size:12px;font-weight:600;border:1px solid var(--line-strong);border-radius:6px;background:#fff;color:var(--ink-2);cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s,color .12s}
+.dp-copy:hover{border-color:var(--primary);color:var(--primary)}
 .adm-cs-table .cs-c-store{white-space:nowrap;color:var(--ink-2);font-weight:600}
 
 /* 관리자는 PC 전용. 창이 min-width(1024px)보다 좁아지면 레이아웃을 줄이지 않고
