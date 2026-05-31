@@ -272,6 +272,9 @@ body.admin-body{
 [data-panel="carddiscount"] .adm-filter,
 [data-panel="carddiscount"] .adm-table-wrap,
 [data-panel="carddiscount"] .adm-panel-hint{max-width:1282px}
+[data-panel="margin"] .adm-filter,
+[data-panel="margin"] .adm-margin-bar,
+[data-panel="margin"] .adm-table-wrap{max-width:1180px}
 [data-panel="banner"] .adm-panel-hint{max-width:820px}   /* 배너 콘텐츠(설정·목록) 폭에 맞춤 */
 
 /* ===== Table ===== */
