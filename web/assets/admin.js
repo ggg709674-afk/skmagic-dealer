@@ -784,6 +784,7 @@
   const MENU_META = {
     products: { title: '상품 관리', sub: '노출 여부 · 추천 배지 · 표시 순서 · 매장 자체 가격/이름 수정.', kind: 'products' },
     commission: { title: '정책 테이블', sub: '홈페이지 등록 모델의 약정·관리방식별 정책 테이블입니다.', kind: 'commission' },
+    margin:     { title: '판매점마진설정', sub: '정책 수수료에서 행별 마진을 차감해 판매점 공급가액·수수료를 산출합니다.', kind: 'margin' },
     carddiscount: { title: '제휴카드 할인금액 설정', sub: '상품별 제휴카드 할인액을 설정합니다. 상품 카드에는 기본요금 기준만 적용됩니다.', kind: 'carddiscount' },
     cards:    { title: '제휴카드 관리', sub: '카드 이미지와 자세히보기 링크를 등록합니다. 제휴카드 안내 페이지에 반영됩니다.', kind: 'cards' },
     iconlab:  { title: '아이콘 시안', sub: '홈 카테고리 아이콘 디자인 시안입니다. 마음에 드는 스타일을 골라 주세요.', kind: 'iconlab' },
@@ -911,6 +912,89 @@
     </table></div>`;
   }
 
+  /* ===== 판매점 마진 설정 =====
+     정책테이블(comDB) 행별로 마진(원)을 입력 → 판매점 수수료 = 수수료합계 − 마진,
+     판매점 공급가액 = 판매점수수료 ÷ 1.1. 매장(stores.margins)에 저장. */
+  let _mgBound = false, _mgMargins = {};
+  const mgKey = r => r.코드 + '|' + r.형태 + '|' + r.의무;
+
+  async function initMargin(){
+    if (typeof ensureCommissionData === 'function') await ensureCommissionData();
+    // 매장 margins 로드 (skmFetchStore가 margins 포함)
+    if (state.store?.slug && window.skmFetchStore){
+      try { const full = await window.skmFetchStore(state.store.slug); if (full) state.store.margins = full.margins || {}; } catch(_){}
+    }
+    _mgMargins = Object.assign({}, (state.store && state.store.margins) || {});
+    bindMarginUI();
+    renderMarginTable();
+  }
+  function recalcMarginRow(tr, fee, margin){
+    const shopFee = (fee != null) ? Math.max(0, fee - margin) : null;
+    const shopSupply = (shopFee != null) ? Math.round(shopFee / 1.1) : null;
+    const s = tr.querySelector('[data-mg-supply]'); if (s) s.textContent = shopSupply != null ? comFmt(shopSupply) : '—';
+    const f = tr.querySelector('[data-mg-fee]');    if (f) f.textContent    = shopFee    != null ? comFmt(shopFee)    : '—';
+  }
+  function renderMarginTable(){
+    const wrap = document.getElementById('mg-wrap'); if (!wrap) return;
+    const db = (typeof comDB === 'function') ? comDB() : null;
+    if (!db || !db.rows || !db.rows.length){ wrap.innerHTML = '<div class="adm-empty">정책 테이블이 없습니다. 먼저 정책 테이블을 업로드하세요.</div>'; return; }
+    const body = db.rows.map(r => {
+      const key = mgKey(r);
+      const fee = (r.수수료합계 != null) ? r.수수료합계 : null;
+      const supply = (fee != null) ? Math.round(fee / 1.1) : null;
+      const margin = Number(_mgMargins[key]) || 0;
+      const shopFee = (fee != null) ? Math.max(0, fee - margin) : null;
+      const shopSupply = (shopFee != null) ? Math.round(shopFee / 1.1) : null;
+      return `<tr class="mg-row">
+        <td>${escape(r.품목 || '')}</td>
+        <td class="cs-c-name">${escape(r.모델 || '')}</td>
+        <td class="cs-c-birth">${escape(r.코드 || '')}</td>
+        <td>${escape(r.형태 || '')}</td>
+        <td class="mg-num">${r.의무 != null ? escape(r.의무) + '개월' : '—'}</td>
+        <td>${escape(r.관리주기 || '—')}</td>
+        <td class="mg-num">${supply != null ? comFmt(supply) : '—'}</td>
+        <td class="mg-num mg-fee-col">${fee != null ? comFmt(fee) : '—'}</td>
+        <td><input type="number" class="mg-margin-input" data-mg-key="${escape(key)}" data-mg-fee-val="${fee != null ? fee : ''}" value="${margin || ''}" placeholder="0" min="0" step="1000"></td>
+        <td class="mg-num mg-shop" data-mg-supply="${escape(key)}">${shopSupply != null ? comFmt(shopSupply) : '—'}</td>
+        <td class="mg-num mg-shop" data-mg-fee="${escape(key)}">${shopFee != null ? comFmt(shopFee) : '—'}</td>
+      </tr>`;
+    }).join('');
+    wrap.innerHTML = `<div class="adm-cs-scroll"><table class="adm-cs-table adm-mg-table">
+      <thead><tr><th>품목</th><th>모델</th><th>제품코드</th><th>형태</th><th>의무기간</th><th>관리주기</th><th>공급가액</th><th>수수료합계</th><th>마진입력</th><th>판매점 공급가액</th><th>판매점 수수료</th></tr></thead>
+      <tbody>${body}</tbody></table></div>`;
+  }
+  function bindMarginUI(){
+    if (_mgBound) return; _mgBound = true;
+    const wrap = document.getElementById('mg-wrap');
+    if (wrap) wrap.addEventListener('input', (e) => {
+      const inp = e.target.closest('.mg-margin-input'); if (!inp) return;
+      const key = inp.dataset.mgKey;
+      const margin = Number(inp.value) || 0;
+      _mgMargins[key] = margin;
+      const fee = inp.dataset.mgFeeVal !== '' ? Number(inp.dataset.mgFeeVal) : null;
+      recalcMarginRow(inp.closest('tr'), fee, margin);
+    });
+    const bulkBtn = document.getElementById('mg-bulk-apply');
+    if (bulkBtn) bulkBtn.addEventListener('click', () => {
+      const v = Number(document.getElementById('mg-bulk-input').value) || 0;
+      const db = (typeof comDB === 'function') ? comDB() : null; if (!db) return;
+      db.rows.forEach(r => { _mgMargins[mgKey(r)] = v; });
+      renderMarginTable();
+    });
+    const saveBtn = document.getElementById('mg-save');
+    if (saveBtn) saveBtn.addEventListener('click', async () => {
+      if (!state.store?.id || !window.skmSaveMargins){ alert('매장 정보를 불러오지 못했어요.'); return; }
+      const clean = {};
+      Object.keys(_mgMargins).forEach(k => { if (Number(_mgMargins[k]) > 0) clean[k] = Number(_mgMargins[k]); });
+      saveBtn.disabled = true;
+      const { error } = await window.skmSaveMargins(state.store.id, clean);
+      saveBtn.disabled = false;
+      const st = document.getElementById('mg-status');
+      if (st){ st.textContent = error ? '저장 실패' : '저장됨'; st.className = 'adm-margin-status ' + (error ? 'err' : 'ok'); st.hidden = false; setTimeout(() => { st.hidden = true; }, 2000); }
+      if (!error){ _mgMargins = clean; if (state.store) state.store.margins = clean; }
+    });
+  }
+
   function bindMenu(){
     document.querySelectorAll('.adm-nav-item').forEach(el => {
       el.addEventListener('click', (e) => {
@@ -948,6 +1032,7 @@
     document.querySelector('[data-panel="store"]').hidden      = (meta.kind !== 'store');
     document.querySelector('[data-panel="soon"]').hidden       = (meta.kind !== 'soon');
     document.querySelector('[data-panel="consult"]').hidden    = (meta.kind !== 'consult');
+    document.querySelector('[data-panel="margin"]').hidden     = (meta.kind !== 'margin');
 
     // 수수료표 업로드 드롭존은 수수료 메뉴에서만 헤더에 노출
     const comUp = document.getElementById('com-upload');
@@ -968,6 +1053,7 @@
     if (meta.kind === 'banner') initBanner();
     if (meta.kind === 'iconlab') initIconLab();
     if (meta.kind === 'consult') initConsult();
+    if (meta.kind === 'margin') initMargin();
 
     // 상품관리 패널의 카테고리 필터도 hash 와 동기화
     if (meta.kind === 'products' && state.filterCat !== cat){
