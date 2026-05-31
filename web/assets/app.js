@@ -1649,7 +1649,7 @@ const App = (() => {
         const care = opts.care_types[_optState.careIdx];
         const c = care && care.contracts && care.contracts[_optState.contractIdx];
         if (care) item.careType = care.name;
-        if (c){ item.contract = c.label; item.기본요금 = c.기본요금; }
+        if (c){ item.contract = c.label; item.기본요금 = c.기본요금; if (c.타사보상 != null) item.타사보상 = c.타사보상; }
         if (_optState.sizeKey) item.size = _optState.sizeKey;
         item.priceMode = _optState.priceMode;
       }
@@ -1659,7 +1659,9 @@ const App = (() => {
       const items = buildProducts();
       if (!items.length){ productBox.hidden = true; return; }
       const it = items[0];
-      const opt = [it.careType, it.contract, it.size].filter(Boolean).join(' · ');
+      const parts = [it.careType, it.contract, it.size].filter(Boolean);
+      if (it.priceMode === 'compete') parts.push('타사보상');
+      const opt = parts.join(' · ');
       productBox.innerHTML = `<strong>${escape(it.name)}</strong>` + (opt ? `<span class="cm-product-opt">${escape(opt)}</span>` : '');
       productBox.hidden = false;
     }

@@ -881,7 +881,9 @@
       const isOrder = (r.kind === 'order');
       const prods = Array.isArray(r.products) ? r.products : [];
       const prodLine = prods.map(p => {
-        const opt = [p.careType, p.contract, p.size].filter(Boolean).join(' · ');
+        const ps = [p.careType, p.contract, p.size].filter(Boolean);
+        if (p.priceMode === 'compete') ps.push('타사보상');
+        const opt = ps.join(' · ');
         return escape(p.name || '') + (opt ? ` (${escape(opt)})` : '');
       }).join(', ');
       const dt = String(r.created_at || '').slice(0, 16).replace('T', ' ');
