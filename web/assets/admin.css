@@ -920,28 +920,36 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .com-upload-status.ok{color:#1a8f4c}
 .com-upload-status.err{color:var(--primary)}
 
-/* ===== 상담/주문 신청 목록 (가로 테이블) ===== */
+/* ===== 상담/주문 신청 목록 (정책 테이블 톤 + 상태별 파스텔 행) ===== */
 .adm-consult-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
 .adm-empty{padding:48px 0;text-align:center;color:var(--ink-3);font-size:14px}
-.adm-cs-scroll{overflow-x:auto}
-.adm-cs-table{width:100%;min-width:1040px;border-collapse:collapse;font-size:13px}
-.adm-cs-table thead th{text-align:left;font-weight:700;font-size:12px;color:var(--ink-3);padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface)}
-.adm-cs-table tbody td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--ink-2)}
-.cs-row.cs-st-cancelled{opacity:.5}
-.cs-row.cs-st-hold{opacity:.7}
-.cs-kind{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.adm-cs-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+.adm-cs-table{width:100%;min-width:960px;border-collapse:collapse;font-size:13px}
+.adm-cs-table thead th{text-align:left;font-weight:700;font-size:12px;color:var(--ink-3);padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface)}
+.adm-cs-table tbody td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--ink-1)}
+.adm-cs-table tbody tr:last-child td{border-bottom:0}
+/* 상태별 파스텔 행 색상 */
+.cs-row.cs-st-new td{background:#ffffff}
+.cs-row.cs-st-confirmed td{background:#eaf2ff}
+.cs-row.cs-st-subscribed td{background:#f1ecfd}
+.cs-row.cs-st-activated td{background:#e7f7ee}
+.cs-row.cs-st-hold td{background:#fff4e3}
+.cs-row.cs-st-cancelled td{background:#f4f4f6;color:var(--ink-4)}
+.cs-row:hover td{filter:brightness(.985)}
+/* 셀 */
+.cs-kind{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap}
 .cs-kind-order{background:#fdecea;color:var(--primary)}
-.cs-kind-consult{background:var(--surface);color:var(--ink-3)}
-.cs-c-name{font-weight:700;color:var(--ink-1);white-space:nowrap}
+.cs-kind-consult{background:#e9ebf0;color:var(--ink-3)}
+.adm-cs-table td.cs-c-name{font-weight:700;white-space:nowrap}
 .cs-phone{color:var(--ink-2);text-decoration:none;font-variant-numeric:tabular-nums;white-space:nowrap}
 .cs-phone:hover{color:var(--primary)}
-.cs-c-birth{font-variant-numeric:tabular-nums;white-space:nowrap}
-.cs-c-addr{max-width:200px}
-.cs-c-prod{max-width:240px;color:var(--ink-3);font-size:12.5px}
-.cs-c-date{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink-4);font-size:12px}
-.cs-status-sel{font-size:12.5px;font-weight:600;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink-1);cursor:pointer;font-family:inherit}
+.cs-c-birth{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink-2)}
+.cs-c-addr{min-width:220px;color:var(--ink-2)}
+.cs-c-prod{max-width:180px;color:var(--ink-3);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cs-c-date{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink-3);font-size:12px}
+.cs-status-sel{font-size:12.5px;font-weight:600;padding:6px 10px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink-1);cursor:pointer;font-family:inherit}
 .cs-status-sel:focus{outline:none;border-color:var(--primary)}
-.cs-memo{width:160px;font-size:12.5px;padding:6px 9px;border:1px solid var(--line);border-radius:7px;font-family:inherit;color:var(--ink-1);transition:border-color .15s,background .15s}
+.cs-memo{width:150px;font-size:12.5px;padding:7px 10px;border:1px solid var(--line);border-radius:7px;font-family:inherit;color:var(--ink-1);background:#fff;transition:border-color .15s,background .15s}
 .cs-memo:focus{outline:none;border-color:var(--primary)}
 .cs-memo.cs-memo-saved{border-color:#1a8f4c;background:#f0faf3}
 
