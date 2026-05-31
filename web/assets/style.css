@@ -548,6 +548,8 @@ ul,ol{margin:0;padding:0;list-style:none}
 /* ---------- Category section (home) ---------- */
 .cat-section{padding:36px 0;border-bottom:1px solid var(--line)}
 .cat-section:last-child{border-bottom:none}
+/* 홈: 첫 카테고리 섹션 위 패딩 제거 → 아이콘 그리드와의 간격을 위(배너↔아이콘)와 대칭으로 */
+#cat-sections .cat-section:first-child{padding-top:0}
 .cat-section .section-head{margin-bottom:22px;align-items:center}
 .cat-section .section-head h2{font-size:24px;letter-spacing:-0.4px;font-weight:800}
 .cat-section .section-head .sub{font-size:13px;color:var(--ink-4);margin-top:3px}
