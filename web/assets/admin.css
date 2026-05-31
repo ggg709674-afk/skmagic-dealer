@@ -996,6 +996,14 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .dp-url{font-size:12.5px}
 .dp-copy{margin-left:8px;padding:3px 10px;font-size:12px;font-weight:600;border:1px solid var(--line-strong);border-radius:6px;background:#fff;color:var(--ink-2);cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s,color .12s}
 .dp-copy:hover{border-color:var(--primary);color:var(--primary)}
+
+/* 마진 그룹 탭 (본부 전용) */
+.adm-mg-tabs{display:flex;align-items:center;gap:6px;margin-bottom:14px}
+.adm-mg-tabs-label{font-size:13px;font-weight:600;color:var(--ink-2);margin-right:4px}
+.adm-mg-tab{min-width:38px;height:34px;padding:0 10px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;color:var(--ink-2);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s,color .12s}
+.adm-mg-tab:hover{border-color:var(--primary);color:var(--primary)}
+.adm-mg-tab.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.adm-mg-tab-hint{margin-left:10px;font-size:12.5px;color:var(--ink-3)}
 .adm-cs-table .cs-c-store{white-space:nowrap;color:var(--ink-2);font-weight:600}
 
 /* 관리자는 PC 전용. 창이 min-width(1024px)보다 좁아지면 레이아웃을 줄이지 않고

@@ -380,6 +380,15 @@
 
   <!-- ===== 판매점 마진 설정 패널 ===== -->
   <section class="adm-panel" data-panel="margin" hidden>
+    <!-- 마진 그룹 탭 (본부 전용) — 그룹별로 다른 단가를 운영 -->
+    <div class="adm-mg-tabs" id="mg-group-tabs" hidden>
+      <span class="adm-mg-tabs-label">마진 그룹</span>
+      <button type="button" class="adm-mg-tab on" data-mg-group="A">A</button>
+      <button type="button" class="adm-mg-tab" data-mg-group="B">B</button>
+      <button type="button" class="adm-mg-tab" data-mg-group="C">C</button>
+      <button type="button" class="adm-mg-tab" data-mg-group="D">D</button>
+      <span class="adm-mg-tab-hint" id="mg-group-hint"></span>
+    </div>
     <div class="adm-filter">
       <div class="adm-filter-row">
         <div class="adm-chips" id="mg-cat-chips"></div>

@@ -933,15 +933,44 @@
      판매점 공급가액 = 판매점수수료 ÷ 1.1. 매장(stores.margins)에 저장.
      ※ 표시명은 comDisplay(정책 테이블과 동일: 홈 등록 상품명 우선). */
   let _mgBound = false, _mgMargins = {};
+  let _mgGroup = 'A', _mgGroups = null;   // 본부 전용: 마진그룹(A~D) 중첩. 그룹/판매점이면 null(평면)
   const mgState = { cat: 'all', form: 'all', q: '' };
   const mgKey = r => r.코드 + '|' + r.형태 + '|' + r.의무;
+
+  // 본부 margins 를 그룹(A/B/C/D) 중첩으로 정규화 (레거시 평면이면 빈 그룹들로 시작)
+  function mgAsGroups(m){
+    m = m || {};
+    const out = {};
+    ['A','B','C','D'].forEach(g => {
+      out[g] = (m[g] && typeof m[g] === 'object' && !Array.isArray(m[g])) ? Object.assign({}, m[g]) : {};
+    });
+    return out;
+  }
+  function renderMgGroupTabs(){
+    document.querySelectorAll('.adm-mg-tab').forEach(b => b.classList.toggle('on', b.dataset.mgGroup === _mgGroup));
+    const hint = document.getElementById('mg-group-hint');
+    if (hint) hint.textContent = `${_mgGroup} 그룹 마진 입력 중 — 저장하면 ${_mgGroup} 그룹 매장에 적용`;
+  }
 
   async function initMargin(){
     if (typeof ensureCommissionData === 'function') await ensureCommissionData();
     if (state.store?.slug && window.skmFetchStore){
       try { const full = await window.skmFetchStore(state.store.slug); if (full) state.store.margins = full.margins || {}; } catch(_){}
     }
-    _mgMargins = Object.assign({}, (state.store && state.store.margins) || {});
+    const raw = (state.store && state.store.margins) || {};
+    const tabs = document.getElementById('mg-group-tabs');
+    if (_isSuper){
+      // 본부: 마진그룹(A/B/C/D) 중첩 구조 — 탭으로 그룹 전환하며 입력
+      _mgGroups = mgAsGroups(raw);
+      if (!['A','B','C','D'].includes(_mgGroup)) _mgGroup = 'A';
+      _mgMargins = _mgGroups[_mgGroup];          // 참조 공유 → 입력이 곧 해당 그룹에 반영
+      if (tabs){ tabs.hidden = false; renderMgGroupTabs(); }
+    } else {
+      // 그룹/판매점: 기존 평면 구조 그대로 유지
+      _mgGroups = null;
+      _mgMargins = Object.assign({}, raw);
+      if (tabs) tabs.hidden = true;
+    }
     // 메뉴 진입 시 필터 초기화 (누수 방지)
     mgState.cat = 'all'; mgState.form = 'all'; mgState.q = '';
     const s = document.getElementById('mg-search'); if (s) s.value = '';
@@ -1016,6 +1045,16 @@
   }
   function bindMarginUI(){
     if (_mgBound) return; _mgBound = true;
+    // 마진 그룹 탭 (본부) — 클릭 시 그 그룹 마진으로 전환
+    document.querySelectorAll('.adm-mg-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!_mgGroups) return;
+        _mgGroup = btn.dataset.mgGroup;
+        _mgMargins = _mgGroups[_mgGroup];
+        renderMgGroupTabs();
+        renderMarginTable();
+      });
+    });
     const search = document.getElementById('mg-search');
     if (search) search.addEventListener('input', () => { mgState.q = search.value.trim(); renderMarginTable(); });
     const wrap = document.getElementById('mg-wrap');
@@ -1037,14 +1076,30 @@
     const saveBtn = document.getElementById('mg-save');
     if (saveBtn) saveBtn.addEventListener('click', async () => {
       if (!state.store?.id || !window.skmSaveMargins){ alert('매장 정보를 불러오지 못했어요.'); return; }
-      const clean = {};
-      Object.keys(_mgMargins).forEach(k => { if (Number(_mgMargins[k]) > 0) clean[k] = Number(_mgMargins[k]); });
+      let payload;
+      if (_mgGroups){
+        // 본부: 그룹별로 0 초과 마진만 정리 → { A:{key:금액}, ... }
+        payload = {};
+        ['A','B','C','D'].forEach(g => {
+          const gc = {};
+          Object.keys(_mgGroups[g] || {}).forEach(k => { if (Number(_mgGroups[g][k]) > 0) gc[k] = Number(_mgGroups[g][k]); });
+          if (Object.keys(gc).length) payload[g] = gc;
+        });
+      } else {
+        // 그룹/판매점: 평면
+        payload = {};
+        Object.keys(_mgMargins).forEach(k => { if (Number(_mgMargins[k]) > 0) payload[k] = Number(_mgMargins[k]); });
+      }
       saveBtn.disabled = true;
-      const { error } = await window.skmSaveMargins(state.store.id, clean);
+      const { error } = await window.skmSaveMargins(state.store.id, payload);
       saveBtn.disabled = false;
       const st = document.getElementById('mg-status');
       if (st){ st.textContent = error ? '저장 실패' : '저장됨'; st.className = 'adm-margin-status ' + (error ? 'err' : 'ok'); st.hidden = false; setTimeout(() => { st.hidden = true; }, 2000); }
-      if (!error){ _mgMargins = clean; if (state.store) state.store.margins = clean; }
+      if (!error){
+        if (state.store) state.store.margins = payload;
+        if (_mgGroups){ _mgGroups = mgAsGroups(payload); _mgMargins = _mgGroups[_mgGroup]; }
+        else { _mgMargins = payload; }
+      }
     });
   }
   /* 판매점 마진 엑셀 다운로드 — 현재 필터된 행 + 마진·판매점가 포함 */
