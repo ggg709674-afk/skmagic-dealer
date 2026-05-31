@@ -2510,8 +2510,10 @@
     const btnOut = document.getElementById('btn-signout');
     if (!chip) return;
     if (authCtx?.user){
-      const roleLbl = authCtx.isSuperAdmin ? '본부' : (authCtx.store?.type === 'dealer' ? '딜러' : authCtx.store?.type === 'shop' ? '판매점' : '게스트');
-      chip.innerHTML = `<strong>${escape(roleLbl)}</strong> · ${escape(authCtx.user.email)}`;
+      const roleLbl = authCtx.isSuperAdmin ? '본부' : (authCtx.store?.type === 'dealer' ? '분양형' : authCtx.store?.type === 'shop' ? '판매점' : '게스트');
+      // 매장 상호명을 우선 표시(없을 때만 역할명 fallback)
+      const chipLabel = authCtx.store?.name || roleLbl;
+      chip.innerHTML = `<strong>${escape(chipLabel)}</strong> · ${escape(authCtx.user.email)}`;
       chip.hidden = false;
       btnOut.hidden = false;
     }
