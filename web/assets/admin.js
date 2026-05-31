@@ -984,7 +984,7 @@
         <td>${escape(r.품목 || '')}</td>
         <td class="mg-left">${escape(d.name)}</td>
         <td class="mg-left">${escape(d.code)}</td>
-        <td>${escape(r.형태 || '')}</td>
+        <td>${r.형태 ? `<span class="com-form com-form-${r.형태==='셀프형'?'self':'visit'}">${escape(r.형태)}</span>` : '—'}</td>
         <td>${r.의무 != null ? escape(r.의무) + '개월' : '—'}</td>
         <td>${escape(r.관리주기 || '—')}</td>
         <td>${supply != null ? comFmt(supply) : '—'}</td>
