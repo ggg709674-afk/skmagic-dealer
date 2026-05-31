@@ -1034,6 +1034,10 @@ const App = (() => {
         const gid = (_optState.lastP && _optState.lastP.goodsId) || '';
         const d = _cardDiscounts[gid] || {};
         const disc = Number(isCompete ? d.compete : d.sale) || 0;
+        // 카드 안내로 갈 때 현재 선택(약정·관리유형·구분·사이즈)을 from URL에 실어 보냄 → 돌아오면 복원
+        const optParam = `${_optState.careIdx}.${_optState.contractIdx}.${_optState.priceMode}` + (_optState.sizeKey ? '.' + _optState.sizeKey : '');
+        const _u = new URL(location.href); _u.searchParams.set('opt', optParam);
+        const cbHref = '/card-benefits?from=' + encodeURIComponent(_u.pathname + _u.search);
         if (disc > 0 && base > 0) {
           const applied = Math.max(0, base - disc);
           html += `
@@ -1041,9 +1045,9 @@ const App = (() => {
             <span class="label" style="font-weight:600">제휴카드 적용시</span>
             <span class="val"><span class="val-now val-card"><small>월</small>${fmt(applied)}<small>원</small></span></span>
           </div>
-          <div class="card-link-row"><a href="/card-benefits?from=${encodeURIComponent(location.pathname + location.search)}">제휴카드 혜택 안내 ›</a></div>`;
+          <div class="card-link-row"><a href="${cbHref}">제휴카드 혜택 안내 ›</a></div>`;
         } else {
-          html += `<div class="card-link-row" style="border-top:1px solid var(--line);padding-top:14px"><a href="/card-benefits?from=${encodeURIComponent(location.pathname + location.search)}">제휴카드 혜택 안내 ›</a></div>`;
+          html += `<div class="card-link-row" style="border-top:1px solid var(--line);padding-top:14px"><a href="${cbHref}">제휴카드 혜택 안내 ›</a></div>`;
         }
         priceEl.innerHTML = html;
         return;
