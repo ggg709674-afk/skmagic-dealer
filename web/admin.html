@@ -132,7 +132,16 @@
       </div>
     </div>
 
-    <button type="button" class="adm-btn adm-btn-ghost adm-com-dl" id="cd-download" hidden>
+    <!-- 마진 엑셀 업로드 (판매점마진설정 메뉴) -->
+    <div class="com-upload" id="mg-upload" hidden>
+      <input type="file" id="mg-file" accept=".xlsx" hidden>
+      <div class="com-upload-inner">
+        <div class="com-upload-ic">⤓</div>
+        <div class="com-upload-text"><strong>마진 엑셀(.xlsx)</strong> 드래그/클릭 업로드</div>
+      </div>
+    </div>
+    <!-- 범용 엑셀 다운로드 — 정책표/카드할인/판매점마진 메뉴에서 현재 메뉴 데이터를 받음 -->
+    <button type="button" class="adm-btn adm-btn-ghost adm-com-dl" id="hdr-download" hidden>
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       엑셀 다운로드
     </button>
@@ -236,13 +245,7 @@
       <div class="adm-filter-row">
         <div class="adm-chips" id="com-cat-chips"></div>
         <span class="adm-filter-div"></span>
-        <div class="adm-form-dl">
-          <div class="adm-chips" id="com-form-chips"></div>
-          <button type="button" class="adm-btn adm-btn-ghost adm-com-dl" id="com-download">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            엑셀 다운로드
-          </button>
-        </div>
+        <div class="adm-chips" id="com-form-chips"></div>
         <div class="adm-filter-tools">
           <div class="adm-count" id="com-count">—</div>
           <div class="adm-search">

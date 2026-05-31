@@ -931,6 +931,7 @@
     mgState.cat = 'all'; mgState.form = 'all'; mgState.q = '';
     const s = document.getElementById('mg-search'); if (s) s.value = '';
     bindMarginUI();
+    bindMgUpload();
     renderMgCatChips();
     renderMgFormChips();
     renderMarginTable();
@@ -1031,6 +1032,61 @@
       if (!error){ _mgMargins = clean; if (state.store) state.store.margins = clean; }
     });
   }
+  /* 판매점 마진 엑셀 다운로드 — 현재 필터된 행 + 마진·판매점가 포함 */
+  async function downloadMarginXlsx(){
+    if (!(await ensureXLSX())){ alert('엑셀 모듈 로딩에 실패했어요. 잠시 후 다시 시도해 주세요.'); return; }
+    const list = mgFiltered();
+    if (!list.length){ alert('다운로드할 행이 없어요. 필터를 확인해 주세요.'); return; }
+    const aoa = [['품목','모델','제품코드','형태','의무기간','관리주기','공급가액','수수료합계','마진(VAT포함)','판매점공급가액','판매점수수료']];
+    list.forEach(r => {
+      const d = comDisplay(r); const fee = (r.수수료합계 != null) ? r.수수료합계 : null;
+      const margin = Number(_mgMargins[mgKey(r)]) || 0;
+      const shopFee = (fee != null) ? Math.max(0, fee - margin) : null;
+      aoa.push([ r.품목, d.name, d.code, r.형태, r.의무 != null ? r.의무 + '개월' : '', r.관리주기 || '',
+        fee != null ? Math.round(fee / 1.1) : '', fee != null ? fee : '', margin,
+        shopFee != null ? Math.round(shopFee / 1.1) : '', shopFee != null ? shopFee : '' ]);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [{wch:8},{wch:22},{wch:16},{wch:8},{wch:9},{wch:9},{wch:11},{wch:12},{wch:12},{wch:13},{wch:12}];
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '판매점마진');
+    XLSX.writeFile(wb, '판매점마진.xlsx');
+  }
+  /* 마진 엑셀 업로드 — 다운로드 양식(제품코드·형태·의무기간·마진)에서 마진을 읽어 적용. */
+  let _mgUploadBound = false;
+  function bindMgUpload(){
+    if (_mgUploadBound) return;
+    const zone = document.getElementById('mg-upload'); const input = document.getElementById('mg-file');
+    if (!zone || !input) return; _mgUploadBound = true;
+    zone.addEventListener('click', () => input.click());
+    input.addEventListener('change', () => { if (input.files && input.files[0]) handleMarginFile(input.files[0]); input.value = ''; });
+    ['dragenter','dragover'].forEach(ev => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add('drag'); }));
+    ['dragleave','dragend','drop'].forEach(ev => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.remove('drag'); }));
+    zone.addEventListener('drop', (e) => { e.preventDefault(); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if (f) handleMarginFile(f); });
+  }
+  async function handleMarginFile(file){
+    if (!(await ensureXLSX())){ alert('엑셀 모듈 로딩에 실패했어요. 잠시 후 다시 시도해 주세요.'); return; }
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      let applied = 0;
+      rows.slice(1).forEach(row => {
+        const code = String(row[2] || '').trim();
+        const form = String(row[3] || '').trim();
+        const duty = parseInt(String(row[4] || '').replace(/[^\d]/g, ''), 10);
+        const margin = Math.round(Number(String(row[8] || '').replace(/[^\d.-]/g, '')) || 0);
+        if (code && form && duty){
+          const key = code + '|' + form + '|' + duty;
+          if (margin > 0) _mgMargins[key] = margin; else delete _mgMargins[key];
+          applied++;
+        }
+      });
+      renderMarginTable();
+      if (typeof admToast === 'function') admToast(`${applied}개 행에 마진을 적용했어요. 저장을 눌러 반영하세요.`);
+      else alert(`${applied}개 행에 마진을 적용했어요. 저장을 눌러 반영하세요.`);
+    } catch (e){ alert('엑셀 읽기 실패: ' + (e && e.message ? e.message : e)); }
+  }
 
   function bindMenu(){
     document.querySelectorAll('.adm-nav-item').forEach(el => {
@@ -1048,6 +1104,14 @@
       });
     });
     window.addEventListener('hashchange', applyMenuFromHash);
+    // 헤더 공용 다운로드 — 현재 메뉴 데이터를 받음
+    const hdrDl = document.getElementById('hdr-download');
+    if (hdrDl) hdrDl.addEventListener('click', () => {
+      const kind = MENU_META[parseHash().menu]?.kind;
+      if (kind === 'commission') downloadCommissionXlsx();
+      else if (kind === 'carddiscount') downloadCardDiscountXlsx();
+      else if (kind === 'margin') downloadMarginXlsx();
+    });
   }
   function applyMenuFromHash(){
     const { menu, cat } = parseHash();
@@ -1076,8 +1140,10 @@
     if (comUp) comUp.hidden = (meta.kind !== 'commission');
     const cdUp = document.getElementById('cd-upload');
     if (cdUp) cdUp.hidden = (meta.kind !== 'carddiscount');
-    const cdDl = document.getElementById('cd-download');
-    if (cdDl) cdDl.hidden = (meta.kind !== 'carddiscount');
+    const hdrDl = document.getElementById('hdr-download');
+    if (hdrDl) hdrDl.hidden = !['commission','carddiscount','margin'].includes(meta.kind);
+    const mgUp = document.getElementById('mg-upload');
+    if (mgUp) mgUp.hidden = (meta.kind !== 'margin');
 
     document.getElementById('adm-page-title').textContent = meta.title;
     document.getElementById('adm-page-sub').textContent   = meta.sub;
@@ -1516,7 +1582,7 @@
         try { const r = await window.skmFetchCardBenefits(); if (r && r.payload && r.payload.discounts) cdDiscounts = r.payload.discounts; } catch(_){}
       }
       const sv = document.getElementById('cd-save'); if (sv) sv.addEventListener('click', saveCardDiscounts);
-      const dl = document.getElementById('cd-download'); if (dl) dl.addEventListener('click', downloadCardDiscountXlsx);
+      // 다운로드는 헤더 공용 버튼(hdr-download)이 현재 메뉴에 맞춰 처리
       bindCdUpload();
       const sr = document.getElementById('cd-search'); if (sr) sr.addEventListener('input', () => { cdFilter.q = sr.value; renderCardDiscount(); });
     }
@@ -1694,8 +1760,7 @@
       comInited = true;
       const search = document.getElementById('com-search');
       if (search) search.addEventListener('input', () => { comState.q = search.value.trim(); renderComTable(); });
-      const dl = document.getElementById('com-download');
-      if (dl) dl.addEventListener('click', downloadCommissionXlsx);
+      // 다운로드는 헤더 공용 버튼(hdr-download)이 현재 메뉴에 맞춰 처리
       // Supabase 에 저장된 최신 수수료표 (init 에서 이미 로드됐으면 재사용)
       await ensureCommissionData();
     }
