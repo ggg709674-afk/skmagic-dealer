@@ -161,6 +161,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./assets/supabase.js"></script>
 <script>
+  // 헤더/푸터/본문 내부 링크에 매장 슬러그 주입 → 매장 컨텍스트(슬러그) 유지
+  if (window.skmLocalizeLinks) window.skmLocalizeLinks({ catalog: true });
+
   // ===== SVG 카드 생성 (svg-card 스킬 기반) =====
   const TONES = {
     silver: { cg:['#f6f6f9','#dadae1','#bcbcc6'], ink:'#3b3b42', sub:'#86868f' },
@@ -264,7 +267,7 @@
   (async () => {
     if (!window.skmFetchStore) return;
     let slug = (window.skmGetSlug && window.skmGetSlug()) || '';
-    if (!slug || slug === 'card-benefits') slug = 'skmagic';
+    if (!slug) slug = 'skmagic';
     let store = await window.skmFetchStore(slug);
     if (!store && slug !== 'skmagic') store = await window.skmFetchStore('skmagic');
     if (!store) return;

@@ -195,12 +195,15 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./assets/supabase.js"></script>
 <script>
+  // 헤더/푸터/본문 내부 링크에 매장 슬러그 주입 → 매장 컨텍스트(슬러그) 유지
+  if (window.skmLocalizeLinks) window.skmLocalizeLinks({ catalog: true });
+
   // 매장 정보 → 푸터 사업자정보 + 본문 내 사업자 정보(.v-*) 동적 바인딩
   // (faq.html / card-benefits.html 과 동일한 방식. 값이 없으면 해당 항목은 숨기거나 '—' 유지)
   (async () => {
     if (!window.skmFetchStore) return;
     let slug = (window.skmGetSlug && window.skmGetSlug()) || '';
-    if (!slug || slug === 'terms') slug = 'skmagic';
+    if (!slug) slug = 'skmagic';
     let store = await window.skmFetchStore(slug);
     if (!store && slug !== 'skmagic') store = await window.skmFetchStore('skmagic');
     if (!store) return;

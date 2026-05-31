@@ -1066,7 +1066,8 @@ const App = (() => {
         // 카드 안내로 갈 때 현재 선택(약정·관리유형·구분·사이즈)을 from URL에 실어 보냄 → 돌아오면 복원
         const optParam = `${_optState.careIdx}.${_optState.contractIdx}.${_optState.priceMode}` + (_optState.sizeKey ? '.' + _optState.sizeKey : '');
         const _u = new URL(location.href); _u.searchParams.set('opt', optParam);
-        const cbHref = '/card-benefits?from=' + encodeURIComponent(_u.pathname + _u.search);
+        const cbBase = (window.skmStorePath ? window.skmStorePath('/card-benefits') : '/card-benefits');
+        const cbHref = cbBase + '?from=' + encodeURIComponent(_u.pathname + _u.search);
         // 할인액이 월요금 이상이어도 적용가는 0원으로 표기(음수 방지). 할인 미설정(disc<=0)이면 링크만.
         if (disc > 0 && base > 0) {
           const applied = Math.max(0, base - disc);
@@ -1642,6 +1643,9 @@ const App = (() => {
       }
     } catch (_) {}
     attachClickHandler();
+    // 헤더/푸터의 정적 정보페이지 링크(/card-benefits·/faq·/terms·/privacy)에 매장 슬러그 주입.
+    // (카탈로그 링크는 SPA 클릭핸들러가 처리하므로 catalog 옵션은 끈다.)
+    if (window.skmLocalizeLinks) window.skmLocalizeLinks();
     window.addEventListener('popstate', () => {
       if (document.startViewTransition) {
         document.startViewTransition(() => route());

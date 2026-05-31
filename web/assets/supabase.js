@@ -29,7 +29,7 @@
        3) null        (루트 또는 매장 슬러그 없음)
      예약 슬러그: _super (본부), admin (단일 매장 admin 직진입)
   ─────────────────────────────────────────────────── */
-  const RESERVED = new Set(['admin', '_super', 'assets', 'products', 'data', 'web']);
+  const RESERVED = new Set(['admin', '_super', 'assets', 'products', 'data', 'web', 'card-benefits', 'faq', 'terms', 'privacy']);
 
   window.skmGetSlug = function(){
     try {
@@ -45,6 +45,43 @@
     if (RESERVED.has(seg)) return null;
     if (/\.html?$/i.test(seg)) return null;
     return seg;
+  };
+
+  /* ─── 매장 경로 헬퍼 ───────────────────────────────
+     매장 컨텍스트(슬러그)가 있으면 path 앞에 /{slug} 를 붙이고,
+     없으면(본부/루트) 그대로 둔다. 멀티테넌트 정적페이지 링크 생성용.
+     예) skmStorePath('/card-benefits') → '/sample/card-benefits' (매장) | '/card-benefits' (본부)
+  ─────────────────────────────────────────────────── */
+  window.skmStorePath = function(p){
+    const s = window.skmGetSlug();
+    if (!s) return p;                       // 본부/매장없음 → 전역 경로 그대로
+    return '/' + s + (p.charAt(0) === '/' ? p : '/' + p);
+  };
+
+  /* ─── 페이지 내 링크에 매장 슬러그 주입 ─────────────
+     정적 정보페이지(card-benefits/faq/terms/privacy)와 SPA 헤더에서,
+     매장 슬러그가 있을 때 내부 링크가 슬러그를 잃지 않게 보정한다.
+       - 정적페이지 링크  /card-benefits 등        → /{slug}/card-benefits
+       - (opts.catalog) 카탈로그 링크 ./index.html?… → /{slug}?…  (정적페이지에서만)
+     본부/매장없음이면 아무것도 안 함(전역 링크 유지). 외부·앵커·tel/mailto 링크는 건드리지 않음.
+  ─────────────────────────────────────────────────── */
+  window.skmLocalizeLinks = function(opts){
+    opts = opts || {};
+    const s = window.skmGetSlug();
+    if (!s) return;                         // 본부 → 전역 링크 그대로 둔다
+    const prefix = '/' + s;
+    const STATIC = /^\/(?:card-benefits|faq|terms|privacy)(?=$|[/?#])/;
+    const CATALOG = /^\.?\/?(?:index|category|detail)\.html(\?[^#]*)?(#.*)?$/i;
+    document.querySelectorAll('a[href]').forEach(function(a){
+      const raw = a.getAttribute('href');
+      if (!raw || /^(?:#|mailto:|tel:|javascript:|https?:|\/\/)/i.test(raw)) return;
+      if (a.dataset.skmLocalized) return;   // 중복 보정 방지(재렌더 대비)
+      if (STATIC.test(raw)) { a.setAttribute('href', prefix + raw); a.dataset.skmLocalized = '1'; return; }
+      if (opts.catalog) {
+        const m = raw.match(CATALOG);
+        if (m) { a.setAttribute('href', prefix + (m[1] || '') + (m[2] || '')); a.dataset.skmLocalized = '1'; return; }
+      }
+    });
   };
 
   /* ─── 매장 정보 조회 ───────────────────────────── */

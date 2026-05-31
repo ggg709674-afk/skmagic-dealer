@@ -126,6 +126,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./assets/supabase.js"></script>
 <script>
+  // 헤더/푸터 내부 링크에 매장 슬러그 주입 → 매장 컨텍스트(슬러그) 유지
+  // (답변 본문 링크는 JS 렌더 후라 renderFaq 끝에서 한 번 더 호출)
+  if (window.skmLocalizeLinks) window.skmLocalizeLinks({ catalog: true });
+
   // ===== 기본 FAQ (DB 비었을 때 사용 / admin 첫 편집 기준값) =====
   // ※ admin(FAQ 관리)의 DEFAULT_FAQ 와 동일하게 유지할 것.
   const DEFAULT_FAQ = [
@@ -171,6 +175,8 @@
         ans.style.maxHeight = open ? ans.scrollHeight + 'px' : '0';
       });
     });
+    // 답변 본문에 들어간 내부 링크(/card-benefits 등)에도 슬러그 주입
+    if (window.skmLocalizeLinks) window.skmLocalizeLinks({ catalog: true });
   }
 
   // 기본 FAQ 먼저 렌더 → DB에 등록된 게 있으면 교체
@@ -185,7 +191,7 @@
   (async () => {
     if (!window.skmFetchStore) return;
     let slug = (window.skmGetSlug && window.skmGetSlug()) || '';
-    if (!slug || slug === 'faq') slug = 'skmagic';
+    if (!slug) slug = 'skmagic';
     let store = await window.skmFetchStore(slug);
     if (!store && slug !== 'skmagic') store = await window.skmFetchStore('skmagic');
     if (!store) return;

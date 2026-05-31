@@ -21,6 +21,10 @@
     { "source": "/assets/:path*",   "destination": "/web/assets/:path*" },
     { "source": "/:slug/assets/:path*", "destination": "/web/assets/:path*" },
     { "source": "/:slug/admin",     "destination": "/web/admin.html?store=:slug" },
+    { "source": "/:slug/card-benefits", "destination": "/web/card-benefits.html?store=:slug" },
+    { "source": "/:slug/faq",       "destination": "/web/faq.html?store=:slug" },
+    { "source": "/:slug/terms",     "destination": "/web/terms.html?store=:slug" },
+    { "source": "/:slug/privacy",   "destination": "/web/privacy.html?store=:slug" },
     { "source": "/:slug",           "destination": "/web/index.html?store=:slug" }
   ],
   "headers": [
