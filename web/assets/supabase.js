@@ -144,6 +144,18 @@
     return data || [];
   };
 
+  /* ─── 전체 매장 조회 (본부 사이트분양 목록 — 모든 계층) ─
+     RLS stores_read_all(USING true) 라 전체 조회 가능. 본부가 산하·손자까지
+     다 보고 소속 그룹(부모 dealer) 표시하는 데 사용. */
+  window.skmFetchAllStores = async function(){
+    const { data, error } = await window.sb
+      .from('stores')
+      .select('id, slug, name, type, email, parent_store_id, biz_owner, phone, created_at')
+      .order('created_at', { ascending: true });
+    if (error){ console.warn('[skmFetchAllStores]', error); return []; }
+    return data || [];
+  };
+
   /* ─── 판매점 로그인 계정 생성 (분양 시) ──────────────────
      본부/분양형이 분양할 때 산하 매장 운영자 계정(이메일/비번)을 만든다.
      ★ 별도 client(persistSession:false)로 signUp → 분양하는 본인(본부/분양형) 로그인 세션은 유지됨.

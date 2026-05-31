@@ -1138,13 +1138,29 @@
   async function loadDeploy(){
     const listEl = document.getElementById('dp-list');
     const pid = state.store && state.store.id;
-    if (!pid || !window.skmFetchChildStores){
+    if (!pid){
       if (listEl) listEl.innerHTML = '<div class="adm-empty">매장 정보를 불러오지 못했어요.</div>';
       return;
     }
     if (listEl) listEl.innerHTML = '<div class="adm-empty">불러오는 중…</div>';
-    const kids = await window.skmFetchChildStores(pid);
-    renderDeployList(kids);
+    let rows = [];
+    if (_isSuper && window.skmFetchAllStores){
+      // 본부: 모든 분양 매장(본부 제외) + 소속 그룹(부모 dealer)명. 본부 직속은 그룹 공란.
+      const all = await window.skmFetchAllStores();
+      const byId = {}; all.forEach(s => { byId[s.id] = s; });
+      rows = all.filter(s => s.type !== 'super_admin').map(s => {
+        const parent = s.parent_store_id ? byId[s.parent_store_id] : null;
+        s._groupName = (parent && parent.type === 'dealer') ? (parent.name || '') : '';
+        return s;
+      });
+    } else if (window.skmFetchChildStores){
+      // 분양형: 자기 산하 판매점만 (그룹명 표시 안 함)
+      rows = await window.skmFetchChildStores(pid);
+      rows.forEach(s => { s._groupName = ''; });
+    }
+    // 그룹별로 묶어 보기 좋게(공란=본부직속 먼저), 그 안에서 상호순
+    rows.sort((a, b) => (a._groupName || '').localeCompare(b._groupName || '') || (a.name || '').localeCompare(b.name || ''));
+    renderDeployList(rows);
   }
   function renderDeployList(kids){
     const listEl = document.getElementById('dp-list'); if (!listEl) return;
@@ -1158,6 +1174,7 @@
       const adminUrl = `${DEPLOY_SITE_ORIGIN}/${s.slug}/admin`;
       return `<tr>
         <td><span class="cs-kind cs-kind-${isDealer?'order':'consult'}">${isDealer?'분양형':'단독형'}</span></td>
+        <td class="mg-left">${escape(s._groupName || '')}</td>
         <td class="mg-left">${escape(s.name || '')}</td>
         <td class="mg-left">${escape(s.slug || '')}</td>
         <td class="mg-left">${escape(s.email || '—')}</td>
@@ -1166,7 +1183,7 @@
       </tr>`;
     }).join('');
     listEl.innerHTML = `<div class="adm-table-wrap"><table class="adm-table adm-deploy-tbl">
-      <thead><tr><th>유형</th><th>상호</th><th>슬러그</th><th>이메일</th><th>사이트 주소</th><th>관리자 주소</th></tr></thead>
+      <thead><tr><th>유형</th><th>그룹</th><th>상호</th><th>슬러그</th><th>이메일</th><th>사이트 주소</th><th>관리자 주소</th></tr></thead>
       <tbody>${body}</tbody></table></div>`;
   }
   function bindDeployUI(){
