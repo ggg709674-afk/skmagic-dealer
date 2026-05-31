@@ -1071,16 +1071,19 @@
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
       let applied = 0;
+      const db = comDB(); const rows2 = (db && db.rows) || [];
       rows.slice(1).forEach(row => {
         const code = String(row[2] || '').trim();
         const form = String(row[3] || '').trim();
         const duty = parseInt(String(row[4] || '').replace(/[^\d]/g, ''), 10);
         const margin = Math.round(Number(String(row[8] || '').replace(/[^\d.-]/g, '')) || 0);
-        if (code && form && duty){
-          const key = code + '|' + form + '|' + duty;
-          if (margin > 0) _mgMargins[key] = margin; else delete _mgMargins[key];
-          applied++;
-        }
+        if (!code || !form || !duty) return;
+        // 엑셀 제품코드는 표시용(comDisplay.code)일 수 있어, 정책 원본 행을 역매칭해 mgKey 산출
+        const r = rows2.find(x => x.형태 === form && x.의무 === duty && (comDisplay(x).code === code || x.코드 === code));
+        if (!r) return;
+        const key = mgKey(r);
+        if (margin > 0) _mgMargins[key] = margin; else delete _mgMargins[key];
+        applied++;
       });
       renderMarginTable();
       if (typeof admToast === 'function') admToast(`${applied}개 행에 마진을 적용했어요. 저장을 눌러 반영하세요.`);
