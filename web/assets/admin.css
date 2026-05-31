@@ -854,14 +854,6 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 /* 양끝 셀에 여백 — 수수료합계가 우측 테두리에 붙지 않도록 */
 .adm-com-table th:first-child, .adm-com-table td:first-child{padding-left:16px}
 .adm-com-table th:last-child,  .adm-com-table td:last-child{padding-right:20px}
-/* 2단 헤더 — 기본요금 / 타사보상 그룹 묶음 */
-.adm-com-table thead th[rowspan="2"]{vertical-align:middle}
-.adm-com-table thead th.col-com-group{text-align:center; font-weight:700; color:var(--ink-1); background:var(--surface); border-bottom:1px solid var(--line)}
-.adm-com-table thead th.col-com-sub{font-weight:600; font-size:11px; color:var(--ink-4)}
-/* 타사보상 그룹 시작에 세로 구분선 (헤더+본문) */
-.adm-com-table thead th.col-com-group-alt,
-.adm-com-table thead th.col-com-sub-alt,
-.adm-com-table tbody td:nth-child(11){border-left:2px solid var(--line)}
 .com-form{
   display:inline-block; padding:2px 8px; border-radius:6px;
   font-size:11.5px; font-weight:600; white-space:nowrap;
