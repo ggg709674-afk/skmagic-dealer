@@ -81,6 +81,61 @@
     return { data, error };
   };
 
+  /* ─── 상담/주문 신청 INSERT (방문자 누구나 — RLS consult_insert_public) ─
+     payload = { storeId, kind:'consult'|'order', name, phone, birth, address, email, products, memo }
+       - consult: 이름·연락처만 / order: 생년월일·주소까지
+       - products: [{goodsId, name, careType, contract, ...}] 선택 상품·옵션 스냅샷 */
+  window.skmInsertConsultation = async function(payload){
+    const storeId = payload && payload.storeId;
+    if (!storeId) return { error: new Error('storeId 필요') };
+    const kind = payload.kind === 'order' ? 'order' : 'consult';
+    const trim = v => (v == null ? '' : String(v)).trim();
+    const row = {
+      store_id: storeId,
+      kind,
+      customer_name:  trim(payload.name),
+      customer_phone: trim(payload.phone),
+      customer_email: trim(payload.email) || null,
+      // 주문일 때만 생년월일·주소 저장
+      customer_birth:   kind === 'order' ? (trim(payload.birth)   || null) : null,
+      customer_address: kind === 'order' ? (trim(payload.address) || null) : null,
+      products: Array.isArray(payload.products) ? payload.products : [],
+      memo: trim(payload.memo) || null,
+    };
+    const { data, error } = await window.sb
+      .from('consultations')
+      .insert(row)
+      .select()
+      .maybeSingle();
+    if (error) console.warn('[skmInsertConsultation]', error);
+    return { data, error };
+  };
+
+  /* ─── 매장의 상담/주문 신청 목록 조회 (매장 owner — RLS consult_visible_view) ─ */
+  window.skmFetchConsultations = async function(storeId){
+    if (!storeId) return [];
+    const { data, error } = await window.sb
+      .from('consultations')
+      .select('*')
+      .eq('store_id', storeId)
+      .order('created_at', { ascending: false });
+    if (error){ console.warn('[skmFetchConsultations]', error); return []; }
+    return data || [];
+  };
+
+  /* ─── 신청 상태 변경 (pending→confirmed→completed/cancelled) ─ */
+  window.skmUpdateConsultationStatus = async function(id, status){
+    if (!id) return { error: new Error('id 필요') };
+    const { data, error } = await window.sb
+      .from('consultations')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .maybeSingle();
+    if (error) console.warn('[skmUpdateConsultationStatus]', error);
+    return { data, error };
+  };
+
   /* ─── 매장의 admin_overrides 일괄 조회 ───────── */
   window.skmFetchOverrides = async function(storeId){
     if (!storeId) return [];

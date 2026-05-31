@@ -257,6 +257,7 @@ const App = (() => {
   const SUPER_SLUG = '_super';
   let _overrides = null;
   let _cardDiscounts = {};   // { goodsId: {sale, compete} } — 제휴카드 할인액(card_benefits.discounts)
+  let _store = null;         // 현재 매장(상담/주문 신청 INSERT 시 store_id 사용)
   async function loadOverrides() {
     if (_overrides) return _overrides;
     _overrides = new Map();
@@ -266,6 +267,7 @@ const App = (() => {
       if (!slug) return _overrides;
       const store = await window.skmFetchStore(slug);
       if (!store) return _overrides;
+      _store = store;
       renderStoreInfo(store);
 
       // 1) 본부(_super) base: 내용(가격·상품명·혜택·태그·메모)만 상속.
@@ -1620,6 +1622,114 @@ const App = (() => {
     });
     await route();
   }
+
+  /* ================== 상담/주문 신청 모달 ==================
+     상세 "상담 신청" 버튼 → 유형 선택(상담만/주문) → 폼 → consultations INSERT.
+       - consult: 이름·연락처   / order: + 생년월일·주소
+       - 현재 선택 상품·약정·관리유형을 products 스냅샷으로 첨부 */
+  (function setupConsultModal(){
+    const modal = document.getElementById('consult-modal');
+    if (!modal) return;
+    const stepChoice = document.getElementById('cm-step-choice');
+    const stepForm   = document.getElementById('cm-step-form');
+    const stepDone   = document.getElementById('cm-step-done');
+    const orderOnly  = stepForm.querySelector('.cm-order-only');
+    const formTitle  = document.getElementById('cm-form-title');
+    const errEl      = document.getElementById('cm-err');
+    const submitBtn  = document.getElementById('cm-submit');
+    const productBox = document.getElementById('cm-product');
+    let curKind = 'consult';
+
+    function buildProducts(){
+      const p = _optState.lastP;
+      if (!p) return [];
+      const item = { goodsId: p.goodsId, name: p.name || '', model: ((p.model||'').split('\n')[0]||'').trim() };
+      const opts = _optState.lastOpts;
+      if (opts && opts._policy){
+        const care = opts.care_types[_optState.careIdx];
+        const c = care && care.contracts && care.contracts[_optState.contractIdx];
+        if (care) item.careType = care.name;
+        if (c){ item.contract = c.label; item.기본요금 = c.기본요금; }
+        if (_optState.sizeKey) item.size = _optState.sizeKey;
+        item.priceMode = _optState.priceMode;
+      }
+      return [item];
+    }
+    function renderProductBox(){
+      const items = buildProducts();
+      if (!items.length){ productBox.hidden = true; return; }
+      const it = items[0];
+      const opt = [it.careType, it.contract, it.size].filter(Boolean).join(' · ');
+      productBox.innerHTML = `<strong>${escape(it.name)}</strong>` + (opt ? `<span class="cm-product-opt">${escape(opt)}</span>` : '');
+      productBox.hidden = false;
+    }
+    function openModal(){
+      stepForm.hidden = true; stepDone.hidden = true; stepChoice.hidden = false;
+      stepForm.reset(); errEl.hidden = true; submitBtn.disabled = false; submitBtn.textContent = '신청하기';
+      renderProductBox();
+      modal.hidden = false; modal.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(){
+      modal.hidden = true; modal.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+
+    // 상세 "상담 신청" 버튼 → 모달 (위임)
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('#p-consult-btn');
+      if (btn){ e.preventDefault(); openModal(); }
+    });
+
+    // 모달 내부 (위임)
+    modal.addEventListener('click', (e) => {
+      if (e.target.closest('[data-cm-close]')){ closeModal(); return; }
+      const choice = e.target.closest('[data-cm-kind]');
+      if (choice){
+        curKind = choice.dataset.cmKind === 'order' ? 'order' : 'consult';
+        formTitle.textContent = curKind === 'order' ? '주문(가입) 신청' : '상담 신청';
+        orderOnly.hidden = (curKind !== 'order');
+        orderOnly.querySelectorAll('input').forEach(inp => {
+          if (curKind === 'order') inp.setAttribute('required',''); else inp.removeAttribute('required');
+        });
+        stepChoice.hidden = true; stepForm.hidden = false; errEl.hidden = true;
+        return;
+      }
+      if (e.target.closest('[data-cm-back]')){
+        stepForm.hidden = true; stepChoice.hidden = false; errEl.hidden = true;
+      }
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+
+    // 제출
+    stepForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fail = msg => { errEl.textContent = msg; errEl.hidden = false; };
+      errEl.hidden = true;
+      const fd = new FormData(stepForm);
+      const name = (fd.get('name')||'').trim(), phone = (fd.get('phone')||'').trim();
+      if (!name || !phone) return fail('이름과 연락처를 입력해 주세요.');
+      if (curKind === 'order'){
+        if (!(fd.get('birth')||'').trim() || !(fd.get('address')||'').trim())
+          return fail('주문은 생년월일·주소가 필요해요.');
+      }
+      if (!fd.get('agree')) return fail('개인정보 수집·제공 동의가 필요해요.');
+      if (!_store || !_store.id) return fail('매장 정보를 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.');
+      if (!window.skmInsertConsultation) return fail('신청 기능을 사용할 수 없어요.');
+
+      submitBtn.disabled = true; submitBtn.textContent = '접수 중…';
+      const { error } = await window.skmInsertConsultation({
+        storeId: _store.id, kind: curKind, name, phone,
+        birth: fd.get('birth'), address: fd.get('address'),
+        products: buildProducts(),
+      });
+      if (error){ submitBtn.disabled = false; submitBtn.textContent = '신청하기'; return fail('접수 중 오류가 났어요. 잠시 후 다시 시도해 주세요.'); }
+      document.getElementById('cm-done-msg').textContent = curKind === 'order'
+        ? '주문 신청이 접수됐어요. 매장에서 가입 절차를 안내드릴게요.'
+        : '상담 신청이 접수됐어요. 매장에서 곧 연락드릴게요.';
+      stepForm.hidden = true; stepDone.hidden = false;
+    });
+  })();
 
   return {
     renderHome, renderCategory, renderDetail,

@@ -223,7 +223,7 @@
         <div class="price-card" id="p-price"></div>
 
         <div class="detail-cta">
-          <a class="btn btn-primary" href="#"><span id="ic-arr"></span>상담 신청</a>
+          <a class="btn btn-primary" href="#" id="p-consult-btn"><span id="ic-arr"></span>상담 신청</a>
         </div>
 
         <div class="benefit-box" id="p-benefit" hidden></div>
@@ -354,6 +354,64 @@
   <a class="pop-kakao" href="#" target="_blank" rel="noopener" id="pop-kakao" hidden>
     카카오톡 상담
   </a>
+</div>
+
+<!-- ===== 상담/주문 신청 모달 ===== -->
+<div class="consult-modal" id="consult-modal" hidden aria-hidden="true">
+  <div class="cm-backdrop" data-cm-close></div>
+  <div class="cm-panel" role="dialog" aria-modal="true" aria-labelledby="cm-title">
+    <button type="button" class="cm-x" data-cm-close aria-label="닫기">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+
+    <!-- 선택 상품 요약 (열 때 채움) -->
+    <div class="cm-product" id="cm-product" hidden></div>
+
+    <!-- 1단계: 유형 선택 -->
+    <div class="cm-step" id="cm-step-choice">
+      <h3 class="cm-title" id="cm-title">무엇을 도와드릴까요?</h3>
+      <p class="cm-sub">편하게 골라주세요. 매장에서 친절히 안내해 드려요.</p>
+      <button type="button" class="cm-choice" data-cm-kind="consult">
+        <strong>상담만 할래요</strong>
+        <span>이름·연락처만 남기면 매장에서 연락드려요</span>
+      </button>
+      <button type="button" class="cm-choice" data-cm-kind="order">
+        <strong>주문할께요</strong>
+        <span>가입 신청 — 설치를 위해 생년월일·주소가 필요해요</span>
+      </button>
+    </div>
+
+    <!-- 2단계: 폼 -->
+    <form class="cm-step" id="cm-step-form" hidden novalidate>
+      <h3 class="cm-title" id="cm-form-title">상담 신청</h3>
+      <label class="cm-field"><span>이름</span><input type="text" name="name" autocomplete="name" required></label>
+      <label class="cm-field"><span>연락처</span><input type="tel" name="phone" inputmode="tel" autocomplete="tel" placeholder="010-0000-0000" required></label>
+      <div class="cm-order-only" hidden>
+        <label class="cm-field"><span>생년월일</span><input type="text" name="birth" inputmode="numeric" placeholder="예: 1988-03-15"></label>
+        <label class="cm-field"><span>주소</span><input type="text" name="address" autocomplete="street-address" placeholder="설치 주소"></label>
+      </div>
+      <label class="cm-agree">
+        <input type="checkbox" name="agree" required>
+        <span>개인정보 수집·이용 및 제3자(SK매직㈜) 제공에 동의합니다.
+          (<a href="/terms" target="_blank" rel="noopener">이용약관</a> · <a href="/privacy" target="_blank" rel="noopener">개인정보처리방침</a>)</span>
+      </label>
+      <p class="cm-err" id="cm-err" hidden></p>
+      <div class="cm-actions">
+        <button type="button" class="cm-back" data-cm-back>이전</button>
+        <button type="submit" class="cm-submit" id="cm-submit">신청하기</button>
+      </div>
+    </form>
+
+    <!-- 완료 -->
+    <div class="cm-step" id="cm-step-done" hidden>
+      <div class="cm-done-ic">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <h3 class="cm-title">신청이 접수됐어요</h3>
+      <p class="cm-sub" id="cm-done-msg">매장에서 곧 연락드릴게요. 감사합니다.</p>
+      <button type="button" class="cm-submit" data-cm-close>확인</button>
+    </div>
+  </div>
 </div>
 
 <script src="./assets/icons.js"></script>

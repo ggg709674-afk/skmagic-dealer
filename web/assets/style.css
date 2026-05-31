@@ -959,3 +959,53 @@ ul,ol{margin:0;padding:0;list-style:none}
   /* 매우 좁은 폭에선 partner-label 숨겨 로고만 보이게 */
   .partner-label{display:none}
 }
+
+/* ===== 상담/주문 신청 모달 ===== */
+.consult-modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+.consult-modal[hidden]{display:none}
+.cm-backdrop{position:absolute;inset:0;background:rgba(20,20,30,.5)}
+.cm-panel{position:relative;background:#fff;border-radius:20px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;
+  padding:32px 28px;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:cmIn .22s ease}
+@keyframes cmIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.cm-x{position:absolute;top:16px;right:16px;width:36px;height:36px;border:0;background:var(--surface);border-radius:50%;
+  display:grid;place-items:center;color:var(--ink-3);cursor:pointer;transition:background .15s}
+.cm-x:hover{background:var(--line)}
+.cm-title{font-size:21px;font-weight:800;color:var(--ink-1);letter-spacing:-.5px;padding-right:30px}
+.cm-sub{margin-top:8px;font-size:14px;color:var(--ink-3);line-height:1.6}
+.cm-product{background:var(--surface);border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:13.5px;color:var(--ink-2)}
+.cm-product strong{color:var(--ink-1);font-weight:700}
+.cm-product .cm-product-opt{display:block;margin-top:4px;font-size:12.5px;color:var(--ink-3)}
+/* 유형 선택 버튼 */
+.cm-choice{display:block;width:100%;text-align:left;margin-top:14px;padding:18px 20px;border:1.5px solid var(--line);
+  border-radius:14px;background:#fff;cursor:pointer;transition:border-color .15s,background .15s;font-family:inherit}
+.cm-choice:hover{border-color:var(--primary);background:var(--surface)}
+.cm-choice strong{display:block;font-size:16px;font-weight:700;color:var(--ink-1)}
+.cm-choice span{display:block;margin-top:4px;font-size:13px;color:var(--ink-3);line-height:1.5}
+/* 폼 */
+.cm-field{display:block;margin-top:14px}
+.cm-field span{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+.cm-field input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;font-size:15px;
+  font-family:inherit;color:var(--ink-1);transition:border-color .15s;box-sizing:border-box}
+.cm-field input:focus{outline:none;border-color:var(--primary)}
+.cm-agree{display:flex;align-items:flex-start;gap:9px;margin-top:18px;font-size:12.5px;color:var(--ink-3);line-height:1.55;cursor:pointer}
+.cm-agree input{margin-top:2px;flex:0 0 auto;width:16px;height:16px;accent-color:var(--primary)}
+.cm-agree a{color:var(--primary);font-weight:700;text-decoration:none}
+.cm-agree a:hover{text-decoration:underline}
+.cm-err{margin-top:12px;font-size:13px;color:var(--primary);font-weight:600}
+.cm-actions{display:flex;gap:10px;margin-top:22px}
+.cm-back{flex:0 0 auto;padding:13px 20px;border:1.5px solid var(--line);border-radius:10px;background:#fff;
+  font-size:14px;font-weight:600;color:var(--ink-2);cursor:pointer;font-family:inherit}
+.cm-back:hover{background:var(--surface)}
+.cm-submit{flex:1;padding:14px;border:0;border-radius:10px;background:var(--primary);color:#fff;
+  font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s}
+.cm-submit:hover{background:var(--primary-dark,#c33f33)}
+.cm-submit:disabled{opacity:.6;cursor:default}
+/* 완료 */
+#cm-step-done{text-align:center;padding:10px 0}
+.cm-done-ic{width:72px;height:72px;margin:6px auto 18px;border-radius:50%;background:var(--surface);
+  display:grid;place-items:center;color:var(--primary)}
+#cm-step-done .cm-submit{margin-top:22px}
+@media (max-width:480px){
+  .cm-panel{padding:26px 20px;border-radius:16px}
+  .cm-title{font-size:19px}
+}
