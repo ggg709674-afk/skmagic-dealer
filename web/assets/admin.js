@@ -788,7 +788,7 @@
     cards:    { title: '제휴카드 관리', sub: '카드 이미지와 자세히보기 링크를 등록합니다. 제휴카드 안내 페이지에 반영됩니다.', kind: 'cards' },
     iconlab:  { title: '아이콘 시안', sub: '홈 카테고리 아이콘 디자인 시안입니다. 마음에 드는 스타일을 골라 주세요.', kind: 'iconlab' },
     faq:      { title: 'FAQ 관리', sub: '자주 묻는 질문의 질문·답변을 추가·수정·삭제합니다. 자주 묻는 질문 페이지에 반영됩니다.', kind: 'faq' },
-    consult:  { title: '상담 신청',     sub: '준비 중인 메뉴예요.', kind: 'soon' },
+    consult:  { title: '상담 신청',     sub: '홈페이지에서 들어온 상담·주문 신청을 확인하고 상태를 관리합니다.', kind: 'consult' },
     banner:   { title: '배너/슬라이드', sub: '홈 화면 상단 배너 이미지와 슬라이드 동작을 관리합니다. 홈 페이지에 반영됩니다.', kind: 'banner' },
     store:    { title: '기본 정보',     sub: '사업자정보 · 연락처를 관리합니다. 사이트 하단에 표시됩니다.', kind: 'store' },
   };
@@ -812,6 +812,83 @@
     if (menu === 'products' && cat) h += '/cat-' + cat;
     return h;
   }
+  /* ===== 상담/주문 신청 목록 (consultations) ===== */
+  let _csData = null, _csFilter = 'all', _csBound = false;
+  const CS_STATUS = { pending:'대기', confirmed:'확인', completed:'완료', cancelled:'취소' };
+  const CS_FLOW = ['pending','confirmed','completed','cancelled'];
+
+  async function initConsult(){
+    bindConsultUI();
+    await loadConsult();
+  }
+  function bindConsultUI(){
+    if (_csBound) return; _csBound = true;
+    const filters = document.getElementById('cs-filters');
+    if (filters) filters.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-cs-filter]'); if (!b) return;
+      _csFilter = b.dataset.csFilter;
+      filters.querySelectorAll('.adm-chip').forEach(x => x.classList.toggle('on', x === b));
+      renderConsultList();
+    });
+    const reload = document.getElementById('cs-reload');
+    if (reload) reload.addEventListener('click', loadConsult);
+    const list = document.getElementById('cs-list');
+    if (list) list.addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-cs-status]'); if (!btn) return;
+      const id = btn.dataset.csId, status = btn.dataset.csStatus;
+      if (!window.skmUpdateConsultationStatus) return;
+      btn.disabled = true;
+      const { error } = await window.skmUpdateConsultationStatus(id, status);
+      btn.disabled = false;
+      if (error){ alert('상태 변경에 실패했어요.'); return; }
+      const row = (_csData || []).find(r => r.id === id);
+      if (row) row.status = status;
+      renderConsultList();
+    });
+  }
+  async function loadConsult(){
+    const listEl = document.getElementById('cs-list');
+    if (!state.store?.id || !window.skmFetchConsultations){
+      if (listEl) listEl.innerHTML = '<div class="adm-empty">매장 정보를 불러오지 못했어요.</div>';
+      return;
+    }
+    if (listEl) listEl.innerHTML = '<div class="adm-empty">불러오는 중…</div>';
+    _csData = await window.skmFetchConsultations(state.store.id);
+    renderConsultList();
+  }
+  function renderConsultList(){
+    const listEl = document.getElementById('cs-list');
+    if (!listEl) return;
+    let rows = _csData || [];
+    if (_csFilter !== 'all') rows = rows.filter(r => (r.kind || 'consult') === _csFilter);
+    if (!rows.length){ listEl.innerHTML = '<div class="adm-empty">신청 내역이 없어요.</div>'; return; }
+    listEl.innerHTML = rows.map(r => {
+      const isOrder = (r.kind === 'order');
+      const prods = Array.isArray(r.products) ? r.products : [];
+      const prodLine = prods.map(p => {
+        const opt = [p.careType, p.contract, p.size].filter(Boolean).join(' · ');
+        return escape(p.name || '') + (opt ? ` <span class="cs-opt">${escape(opt)}</span>` : '');
+      }).join('<br>');
+      const dt = String(r.created_at || '').slice(0, 16).replace('T', ' ');
+      const tel = String(r.customer_phone || '').replace(/[^0-9+]/g, '');
+      const statusBtns = CS_FLOW.map(s =>
+        `<button type="button" class="cs-st-btn ${r.status===s?'on':''}" data-cs-id="${escape(r.id)}" data-cs-status="${s}">${CS_STATUS[s]}</button>`
+      ).join('');
+      return `
+      <div class="cs-card cs-st-${escape(r.status || 'pending')}">
+        <div class="cs-head">
+          <span class="cs-kind cs-kind-${isOrder?'order':'consult'}">${isOrder?'주문':'상담'}</span>
+          <strong class="cs-name">${escape(r.customer_name || '')}</strong>
+          <a class="cs-phone" href="tel:${escape(tel)}">${escape(r.customer_phone || '')}</a>
+          <span class="cs-date">${escape(dt)}</span>
+        </div>
+        ${isOrder ? `<div class="cs-info">생년월일 ${escape(r.customer_birth || '-')} · 주소 ${escape(r.customer_address || '-')}</div>` : ''}
+        ${prodLine ? `<div class="cs-prod">${prodLine}</div>` : ''}
+        <div class="cs-status-row">${statusBtns}</div>
+      </div>`;
+    }).join('');
+  }
+
   function bindMenu(){
     document.querySelectorAll('.adm-nav-item').forEach(el => {
       el.addEventListener('click', (e) => {
@@ -848,6 +925,7 @@
     document.querySelector('[data-panel="banner"]').hidden     = (meta.kind !== 'banner');
     document.querySelector('[data-panel="store"]').hidden      = (meta.kind !== 'store');
     document.querySelector('[data-panel="soon"]').hidden       = (meta.kind !== 'soon');
+    document.querySelector('[data-panel="consult"]').hidden    = (meta.kind !== 'consult');
 
     // 수수료표 업로드 드롭존은 수수료 메뉴에서만 헤더에 노출
     const comUp = document.getElementById('com-upload');
@@ -867,6 +945,7 @@
     if (meta.kind === 'faq') initFaq();
     if (meta.kind === 'banner') initBanner();
     if (meta.kind === 'iconlab') initIconLab();
+    if (meta.kind === 'consult') initConsult();
 
     // 상품관리 패널의 카테고리 필터도 hash 와 동기화
     if (meta.kind === 'products' && state.filterCat !== cat){

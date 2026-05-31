@@ -66,8 +66,8 @@
     </div>
     <div class="adm-nav-group">
       <div class="adm-nav-label">실적</div>
-      <a class="adm-nav-item is-disabled" href="#consult" data-menu="consult" title="준비 중">
-        <span class="adm-nav-ic">✉</span> 상담 신청 <em class="adm-soon">soon</em>
+      <a class="adm-nav-item" href="#consult" data-menu="consult">
+        <span class="adm-nav-ic">✉</span> 상담 신청
       </a>
     </div>
     <div class="adm-nav-group">
@@ -152,7 +152,7 @@
         cards:['제휴카드 관리','카드 이미지와 자세히보기 링크를 등록합니다. 제휴카드 안내 페이지에 반영됩니다.'],
         iconlab:['아이콘 시안','홈 카테고리 아이콘 디자인 시안입니다. 마음에 드는 스타일을 골라 주세요.'],
         faq:['FAQ 관리','자주 묻는 질문의 질문·답변을 추가·수정·삭제합니다. 자주 묻는 질문 페이지에 반영됩니다.'],
-        consult:['상담 신청','준비 중인 메뉴예요.'],
+        consult:['상담 신청','홈페이지에서 들어온 상담·주문 신청을 확인하고 상태를 관리합니다.'],
         banner:['배너/슬라이드','홈 화면 상단 배너 이미지와 슬라이드 동작을 관리합니다. 홈 페이지에 반영됩니다.'],
         store:['기본 정보','사업자정보 · 연락처를 관리합니다. 사이트 하단에 표시됩니다.']
       };
@@ -342,6 +342,21 @@
       <h2>준비 중인 메뉴예요</h2>
       <p>이 메뉴는 곧 열려요. 우선 상품 관리부터 사용해주세요.</p>
       <a class="adm-btn adm-btn-primary" href="#products">상품 관리로 가기</a>
+    </div>
+  </section>
+
+  <!-- ===== 상담/주문 신청 패널 ===== -->
+  <section class="adm-panel" data-panel="consult" hidden>
+    <div class="adm-consult-bar">
+      <div class="adm-chips" id="cs-filters">
+        <button type="button" class="adm-chip on" data-cs-filter="all">전체</button>
+        <button type="button" class="adm-chip" data-cs-filter="consult">상담</button>
+        <button type="button" class="adm-chip" data-cs-filter="order">주문</button>
+      </div>
+      <button type="button" class="adm-btn adm-btn-ghost" id="cs-reload">새로고침</button>
+    </div>
+    <div class="adm-consult-list" id="cs-list">
+      <div class="adm-empty">불러오는 중…</div>
     </div>
   </section>
 
