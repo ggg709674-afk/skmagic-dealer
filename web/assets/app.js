@@ -1714,12 +1714,23 @@ const App = (() => {
           return fail('주문은 생년월일·주소가 필요해요.');
       }
       if (!fd.get('agree')) return fail('개인정보 수집·제공 동의가 필요해요.');
-      if (!_store || !_store.id) return fail('매장 정보를 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.');
       if (!window.skmInsertConsultation) return fail('신청 기능을 사용할 수 없어요.');
+
+      // 매장 확보 — loadOverrides 전이거나 _store 미설정 시 즉석 조회
+      let store = _store;
+      if (!store || !store.id){
+        try {
+          const slug = (window.skmGetSlug && window.skmGetSlug()) || 'skmagic';
+          store = await window.skmFetchStore(slug);
+          if (!store && slug !== 'skmagic') store = await window.skmFetchStore('skmagic');
+          if (store) _store = store;
+        } catch(_){}
+      }
+      if (!store || !store.id) return fail('매장 정보를 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.');
 
       submitBtn.disabled = true; submitBtn.textContent = '접수 중…';
       const { error } = await window.skmInsertConsultation({
-        storeId: _store.id, kind: curKind, name, phone,
+        storeId: store.id, kind: curKind, name, phone,
         birth: fd.get('birth'), address: fd.get('address'),
         products: buildProducts(),
       });
