@@ -871,7 +871,20 @@
       return;
     }
     if (listEl) listEl.innerHTML = '<div class="adm-empty">불러오는 중…</div>';
-    _csData = await window.skmFetchConsultations();  // storeId 생략 → RLS 계층(본부=전체/분양형=자기+산하/판매점=자기)
+    // 본부(super)가 특정 매장 URL(/{slug}/admin)로 들어온 경우: 그 매장(딜러면 산하 판매점 포함)으로 스코프.
+    //   → "분양 URL 인데 본부 전체 데이터가 다 보임" 방지. 그 매장 기준으로만 상담/주문 노출.
+    // 본부 자기 admin(super_admin 매장)이거나 슬러그 없을 땐 스코프 안 함 → 전체(전역 뷰 유지).
+    // 비-super(딜러/판매점)는 RLS(my_visible_stores)가 이미 계층 필터하므로 클라 스코프 불필요.
+    let scope = null;
+    if (_isSuper && state.store.type && state.store.type !== 'super_admin'){
+      let ids = [state.store.id];
+      if (state.store.type === 'dealer' && window.skmFetchChildStores){
+        try { const kids = await window.skmFetchChildStores(state.store.id); ids = ids.concat((kids || []).map(k => k.id)); }
+        catch(e){ console.warn('[admin] 산하 매장 조회 실패', e); }
+      }
+      scope = ids;
+    }
+    _csData = await window.skmFetchConsultations(scope);  // null=전체(RLS) / [ids]=본부의 매장 스코프
     renderConsultList();
   }
   function renderConsultList(){

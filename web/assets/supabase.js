@@ -192,14 +192,19 @@
   };
 
   /* ─── 상담/주문 신청 목록 조회 (계층 — RLS consult_visible_view = my_visible_stores) ─
-     storeId 주면 그 매장만, 생략하면 RLS 가 보이는 매장 전체(본부=전체 / 분양형=자기+산하 / 판매점=자기).
-     매장명 표시용으로 stores 조인. */
+     storeId: 문자열=그 매장만 / 배열=그 매장들만(.in) / 생략=RLS 가 보이는 매장 전체
+     (본부=전체 / 분양형=자기+산하 / 판매점=자기). 매장명 표시용으로 stores 조인. */
   window.skmFetchConsultations = async function(storeId){
     let q = window.sb
       .from('consultations')
       .select('*, store:stores(name, slug, type)')
       .order('created_at', { ascending: false });
-    if (storeId) q = q.eq('store_id', storeId);
+    if (Array.isArray(storeId)){
+      if (!storeId.length) return [];
+      q = q.in('store_id', storeId);
+    } else if (storeId){
+      q = q.eq('store_id', storeId);
+    }
     const { data, error } = await q;
     if (error){ console.warn('[skmFetchConsultations]', error); return []; }
     return data || [];
