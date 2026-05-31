@@ -67,6 +67,12 @@
         <span class="adm-nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span> 카드할인금액
       </a>
     </div>
+    <div class="adm-nav-group" data-group="deploy">
+      <div class="adm-nav-label">분양관리</div>
+      <a class="adm-nav-item" href="#deploy" data-menu="deploy">
+        <span class="adm-nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> 사이트분양
+      </a>
+    </div>
     <div class="adm-nav-group">
       <div class="adm-nav-label">실적</div>
       <a class="adm-nav-item" href="#consult" data-menu="consult">
@@ -88,7 +94,7 @@
         <span class="adm-nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> FAQ 관리
       </a>
     </div>
-    <div class="adm-nav-group">
+    <div class="adm-nav-group" data-group="super">
       <div class="adm-nav-label">본부 전용</div>
       <a class="adm-nav-item" href="#cards" data-menu="cards">
         <span class="adm-nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span> 제휴카드 관리
@@ -170,6 +176,7 @@
         faq:['FAQ 관리','자주 묻는 질문의 질문·답변을 추가·수정·삭제합니다. 자주 묻는 질문 페이지에 반영됩니다.'],
         consult:['상담 및 주문','홈페이지에서 들어온 상담·주문 신청을 확인하고 상태를 관리합니다.'],
         settlement:['정산관리','준비 중인 메뉴예요.'],
+        deploy:['사이트분양','산하 판매점을 분양·관리합니다.'],
         banner:['배너/슬라이드','홈 화면 상단 배너 이미지와 슬라이드 동작을 관리합니다. 홈 페이지에 반영됩니다.'],
         store:['기본 정보','사업자정보 · 연락처를 관리합니다. 사이트 하단에 표시됩니다.']
       };
@@ -400,6 +407,22 @@
     <div class="adm-margin-wrap" id="mg-wrap">
       <div class="adm-empty">불러오는 중…</div>
     </div>
+  </section>
+
+  <!-- ===== 사이트분양 패널 ===== -->
+  <section class="adm-panel" data-panel="deploy" hidden>
+    <p class="adm-panel-hint">산하 판매점을 분양·관리합니다. 새 판매점을 추가하면 <code>/슬러그</code> 주소로 그 매장 카탈로그가 열려요. 판매점 운영자 계정 연결은 본부에서 처리합니다.</p>
+    <div class="adm-deploy-form">
+      <input type="text" id="dp-slug" class="adm-input adm-deploy-slug" placeholder="슬러그 (영문/숫자, 예: gangnam1)" autocomplete="off">
+      <input type="text" id="dp-name" class="adm-input adm-deploy-name" placeholder="판매점 상호명">
+      <select id="dp-type" class="adm-input adm-deploy-type" hidden>
+        <option value="shop">단독형 (분양 기능 없음)</option>
+        <option value="dealer">분양형 (산하 판매점 분양 가능)</option>
+      </select>
+      <button type="button" class="adm-btn adm-btn-primary" id="dp-add">판매점 추가(분양)</button>
+      <span class="adm-deploy-status" id="dp-status" hidden></span>
+    </div>
+    <div class="adm-deploy-list" id="dp-list"><div class="adm-empty">불러오는 중…</div></div>
   </section>
 
   <!-- ===== 제휴카드 관리 패널 ===== -->

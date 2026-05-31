@@ -791,6 +791,7 @@
     faq:      { title: 'FAQ 관리', sub: '자주 묻는 질문의 질문·답변을 추가·수정·삭제합니다. 자주 묻는 질문 페이지에 반영됩니다.', kind: 'faq' },
     consult:  { title: '상담 및 주문',  sub: '홈페이지에서 들어온 상담·주문 신청을 확인하고 상태를 관리합니다.', kind: 'consult' },
     settlement: { title: '정산관리', sub: '준비 중인 메뉴예요.', kind: 'soon' },
+    deploy:     { title: '사이트분양', sub: '산하 판매점을 분양·관리합니다.', kind: 'deploy' },
     banner:   { title: '배너/슬라이드', sub: '홈 화면 상단 배너 이미지와 슬라이드 동작을 관리합니다. 홈 페이지에 반영됩니다.', kind: 'banner' },
     store:    { title: '기본 정보',     sub: '사업자정보 · 연락처를 관리합니다. 사이트 하단에 표시됩니다.', kind: 'store' },
   };
@@ -870,7 +871,7 @@
       return;
     }
     if (listEl) listEl.innerHTML = '<div class="adm-empty">불러오는 중…</div>';
-    _csData = await window.skmFetchConsultations(state.store.id);
+    _csData = await window.skmFetchConsultations();  // storeId 생략 → RLS 계층(본부=전체/분양형=자기+산하/판매점=자기)
     renderConsultList();
   }
   function renderConsultList(){
@@ -894,6 +895,7 @@
       return `
       <tr class="cs-row cs-st-${escape(r.status || 'new')}">
         <td><span class="cs-kind cs-kind-${isOrder?'order':'consult'}">${isOrder?'주문':'상담'}</span></td>
+        <td class="cs-c-store">${escape((r.store && r.store.name) || '—')}</td>
         <td class="cs-c-name">${escape(r.customer_name || '')}</td>
         <td><a class="cs-phone" href="tel:${escape(tel)}">${escape(r.customer_phone || '')}</a></td>
         <td class="cs-c-birth">${escape(r.customer_birth || '-')}</td>
@@ -906,7 +908,7 @@
     }).join('');
     listEl.innerHTML = `<div class="adm-cs-scroll"><table class="adm-cs-table">
       <thead><tr>
-        <th>유형</th><th>이름</th><th>연락처</th><th>생년월일</th><th>주소</th><th>관심상품</th><th>접수일</th><th>상태</th><th>메모</th>
+        <th>유형</th><th>매장</th><th>이름</th><th>연락처</th><th>생년월일</th><th>주소</th><th>관심상품</th><th>접수일</th><th>상태</th><th>메모</th>
       </tr></thead>
       <tbody>${body}</tbody>
     </table></div>`;
@@ -1091,6 +1093,86 @@
     } catch (e){ alert('엑셀 읽기 실패: ' + (e && e.message ? e.message : e)); }
   }
 
+  /* ===== 권한별 메뉴 가시성 (super_admin / dealer=분양형 / shop=단독형) ===== */
+  let _isSuper = false, _myType = null;
+  function applyRoleVisibility(authCtx){
+    _isSuper = !!(authCtx && authCtx.isSuperAdmin);
+    _myType  = (authCtx && authCtx.store && authCtx.store.type) || null;   // 'dealer' | 'shop' | null
+    const isDealer = _myType === 'dealer';
+    // 본부 전용 그룹(제휴카드·아이콘) — 본부만
+    document.querySelectorAll('[data-group="super"]').forEach(el => { el.hidden = !_isSuper; });
+    // 분양관리(사이트분양) — 본부 또는 분양형만. 단독형(shop)은 숨김
+    document.querySelectorAll('[data-group="deploy"]').forEach(el => { el.hidden = !(_isSuper || isDealer); });
+    // 사이트분양 폼의 유형 select — 본부만(분양형 생성 가능). 분양형은 단독형(shop) 고정
+    const dpType = document.getElementById('dp-type');
+    if (dpType) dpType.hidden = !_isSuper;
+    // 가시성 바뀐 메뉴가 현재 선택돼 있으면 상품관리로 보정
+    const cur = currentMenuFromHash();
+    if ((cur === 'deploy' && !(_isSuper || isDealer)) ||
+        ((cur === 'cards' || cur === 'iconlab') && !_isSuper)) {
+      location.hash = '#products';
+    }
+  }
+
+  /* ===== 사이트분양 (분양관리) ===== */
+  let _dpBound = false;
+  async function initDeploy(){
+    bindDeployUI();
+    await loadDeploy();
+  }
+  async function loadDeploy(){
+    const listEl = document.getElementById('dp-list');
+    const pid = state.store && state.store.id;
+    if (!pid || !window.skmFetchChildStores){
+      if (listEl) listEl.innerHTML = '<div class="adm-empty">매장 정보를 불러오지 못했어요.</div>';
+      return;
+    }
+    if (listEl) listEl.innerHTML = '<div class="adm-empty">불러오는 중…</div>';
+    const kids = await window.skmFetchChildStores(pid);
+    renderDeployList(kids);
+  }
+  function renderDeployList(kids){
+    const listEl = document.getElementById('dp-list'); if (!listEl) return;
+    if (!kids.length){ listEl.innerHTML = '<div class="adm-empty">아직 분양한 판매점이 없어요. 위에서 추가하세요.</div>'; return; }
+    const body = kids.map(s => {
+      const isDealer = s.type === 'dealer';
+      return `<tr>
+        <td><span class="cs-kind cs-kind-${isDealer?'order':'consult'}">${isDealer?'분양형':'단독형'}</span></td>
+        <td class="mg-left">${escape(s.name || '')}</td>
+        <td class="mg-left">${escape(s.slug || '')}</td>
+        <td>${escape(s.biz_owner || '—')}</td>
+        <td>${escape(s.phone || '—')}</td>
+        <td><a href="/${escape(s.slug)}" target="_blank" rel="noopener">/${escape(s.slug)}</a></td>
+        <td><a href="/${escape(s.slug)}/admin" target="_blank" rel="noopener">admin</a></td>
+      </tr>`;
+    }).join('');
+    listEl.innerHTML = `<div class="adm-table-wrap"><table class="adm-table adm-deploy-tbl">
+      <thead><tr><th>유형</th><th>상호</th><th>슬러그</th><th>대표</th><th>연락처</th><th>사이트</th><th>관리자</th></tr></thead>
+      <tbody>${body}</tbody></table></div>`;
+  }
+  function bindDeployUI(){
+    if (_dpBound) return; _dpBound = true;
+    const btn = document.getElementById('dp-add');
+    if (btn) btn.addEventListener('click', async () => {
+      const slug = (document.getElementById('dp-slug').value || '').trim();
+      const name = (document.getElementById('dp-name').value || '').trim();
+      const typeSel = document.getElementById('dp-type');
+      const type = (typeSel && !typeSel.hidden) ? typeSel.value : 'shop';
+      const st = document.getElementById('dp-status');
+      const fail = m => { if (st){ st.textContent = m; st.className = 'adm-deploy-status err'; st.hidden = false; } };
+      if (!slug) return fail('슬러그를 입력하세요.');
+      if (!state.store?.id || !window.skmCreateChildStore) return fail('매장 정보를 불러오지 못했어요.');
+      btn.disabled = true;
+      const { error } = await window.skmCreateChildStore(state.store.id, { slug, name, type });
+      btn.disabled = false;
+      if (error){ fail('분양 실패: ' + (error.message || error)); return; }
+      if (st){ st.textContent = '분양 완료'; st.className = 'adm-deploy-status ok'; st.hidden = false; setTimeout(() => { st.hidden = true; }, 2500); }
+      document.getElementById('dp-slug').value = '';
+      document.getElementById('dp-name').value = '';
+      loadDeploy();
+    });
+  }
+
   function bindMenu(){
     document.querySelectorAll('.adm-nav-item').forEach(el => {
       el.addEventListener('click', (e) => {
@@ -1137,10 +1219,11 @@
     document.querySelector('[data-panel="soon"]').hidden       = (meta.kind !== 'soon');
     document.querySelector('[data-panel="consult"]').hidden    = (meta.kind !== 'consult');
     document.querySelector('[data-panel="margin"]').hidden     = (meta.kind !== 'margin');
+    document.querySelector('[data-panel="deploy"]').hidden     = (meta.kind !== 'deploy');
 
     // 수수료표 업로드 드롭존은 수수료 메뉴에서만 헤더에 노출
     const comUp = document.getElementById('com-upload');
-    if (comUp) comUp.hidden = (meta.kind !== 'commission');
+    if (comUp) comUp.hidden = (meta.kind !== 'commission') || !_isSuper;  // 정책 엑셀 업로드는 본부만
     const cdUp = document.getElementById('cd-upload');
     if (cdUp) cdUp.hidden = (meta.kind !== 'carddiscount');
     const hdrDl = document.getElementById('hdr-download');
@@ -1166,6 +1249,7 @@
     if (meta.kind === 'iconlab') initIconLab();
     if (meta.kind === 'consult') initConsult();
     if (meta.kind === 'margin') initMargin();
+    if (meta.kind === 'deploy') initDeploy();
 
     // 상품관리 패널의 카테고리 필터도 hash 와 동기화
     if (meta.kind === 'products' && state.filterCat !== cat){
@@ -2426,6 +2510,7 @@
     }
 
     renderAuthChip(authCtx);
+    applyRoleVisibility(authCtx);
 
     if (slug && window.skmFetchStore){
       try {

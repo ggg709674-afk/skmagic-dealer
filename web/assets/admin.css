@@ -975,5 +975,16 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .mg-margin-input{width:96px;font-size:12.5px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;font-family:inherit;text-align:right;color:var(--ink-1);font-variant-numeric:tabular-nums;background:#fff}
 .mg-margin-input:focus{outline:none;border-color:var(--primary)}
 
+/* ===== 사이트분양 ===== */
+.adm-deploy-form{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.adm-deploy-slug,.adm-deploy-name{width:200px}
+.adm-deploy-status{font-size:13px;font-weight:600;margin-left:4px}
+.adm-deploy-status.ok{color:#1a8f4c}
+.adm-deploy-status.err{color:var(--primary)}
+.adm-deploy-tbl .mg-left{text-align:left}
+.adm-deploy-tbl a{color:var(--primary);text-decoration:none;font-weight:600}
+.adm-deploy-tbl a:hover{text-decoration:underline}
+.adm-cs-table .cs-c-store{white-space:nowrap;color:var(--ink-2);font-weight:600}
+
 /* 관리자는 PC 전용. 창이 min-width(1024px)보다 좁아지면 레이아웃을 줄이지 않고
    가로 스크롤로 처리해 사이드바/메뉴가 세로로 찌그러지는 문제를 막는다. */

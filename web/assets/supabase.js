@@ -95,6 +95,35 @@
     return { data, error };
   };
 
+  /* ─── 산하 매장(판매점) 목록 조회 (분양관리 — RLS stores_read_all) ─ */
+  window.skmFetchChildStores = async function(parentId){
+    if (!parentId) return [];
+    const { data, error } = await window.sb
+      .from('stores')
+      .select('id, slug, name, type, biz_owner, phone, created_at')
+      .eq('parent_store_id', parentId)
+      .order('created_at', { ascending: true });
+    if (error){ console.warn('[skmFetchChildStores]', error); return []; }
+    return data || [];
+  };
+
+  /* ─── 새 매장 분양 (super=dealer/shop, dealer=shop만 — RLS stores write) ─
+     opts = { slug, name, type:'shop'|'dealer' } */
+  window.skmCreateChildStore = async function(parentId, opts){
+    if (!parentId) return { error: new Error('parentId 필요') };
+    const slug = ((opts && opts.slug) || '').trim();
+    if (!slug) return { error: new Error('슬러그가 필요해요.') };
+    if (!/^[a-z0-9][a-z0-9-]*$/i.test(slug)) return { error: new Error('슬러그는 영문/숫자/하이픈만 가능해요.') };
+    const type = (opts && opts.type === 'dealer') ? 'dealer' : 'shop';
+    const { data, error } = await window.sb
+      .from('stores')
+      .insert({ slug, name: ((opts.name) || '').trim() || slug, type, parent_store_id: parentId })
+      .select()
+      .maybeSingle();
+    if (error) console.warn('[skmCreateChildStore]', error);
+    return { data, error };
+  };
+
   /* ─── 상담/주문 신청 INSERT (방문자 누구나 — RLS consult_insert_public) ─
      payload = { storeId, kind:'consult'|'order', name, phone, birth, address, email, products, memo }
        - consult: 이름·연락처만 / order: 생년월일·주소까지
@@ -125,14 +154,16 @@
     return { data, error };
   };
 
-  /* ─── 매장의 상담/주문 신청 목록 조회 (매장 owner — RLS consult_visible_view) ─ */
+  /* ─── 상담/주문 신청 목록 조회 (계층 — RLS consult_visible_view = my_visible_stores) ─
+     storeId 주면 그 매장만, 생략하면 RLS 가 보이는 매장 전체(본부=전체 / 분양형=자기+산하 / 판매점=자기).
+     매장명 표시용으로 stores 조인. */
   window.skmFetchConsultations = async function(storeId){
-    if (!storeId) return [];
-    const { data, error } = await window.sb
+    let q = window.sb
       .from('consultations')
-      .select('*')
-      .eq('store_id', storeId)
+      .select('*, store:stores(name, slug, type)')
       .order('created_at', { ascending: false });
+    if (storeId) q = q.eq('store_id', storeId);
+    const { data, error } = await q;
     if (error){ console.warn('[skmFetchConsultations]', error); return []; }
     return data || [];
   };
