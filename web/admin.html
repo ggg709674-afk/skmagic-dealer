@@ -354,6 +354,19 @@
 
   <!-- ===== 카드할인금액 패널 ===== -->
   <section class="adm-panel" data-panel="carddiscount" hidden>
+
+    <div class="adm-filter">
+      <div class="adm-filter-row">
+        <div class="adm-chips" id="cd-cat-chips"></div>
+        <div class="adm-filter-tools">
+          <div class="adm-count" id="cd-count">—</div>
+          <div class="adm-search">
+            <input type="text" id="cd-search" placeholder="모델명 / 상품명 / 코드 검색…" autocomplete="off">
+          </div>
+        </div>
+      </div>
+    </div>
+
     <p class="adm-panel-hint">상품별 제휴카드 할인액을 입력하면 <strong>노출금액(현재가 − 카드할인)</strong>이 자동 계산돼요. <strong>상품 카드에는 기본요금 기준만 적용</strong>되고, 타사보상 카드할인은 상세페이지에 표시됩니다.</p>
     <div class="adm-cd-actions">
       <button type="button" class="adm-btn adm-btn-ghost adm-com-dl" id="cd-download">

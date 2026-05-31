@@ -1272,6 +1272,8 @@
   const cdNum = s => parseInt(String(s).replace(/[^\d]/g, ''), 10) || 0;
   let cdDiscounts = {};   // { gid: {sale, compete} } — 편집 중 상태
   let cdInited = false;
+  const cdFilter = { cat: '', q: '' };   // 카드할인 전용 필터(상품관리와 별개)
+  function cdBaseList(){ return state.products.filter(p => !state.overrides.hidden[p.goodsId]); }
   async function initCardDiscount(){
     await ensureCommissionData();   // 가격(정책)이 있어야 기본요금/타사보상 표시
     if (!cdInited){
@@ -1282,8 +1284,45 @@
       const sv = document.getElementById('cd-save'); if (sv) sv.addEventListener('click', saveCardDiscounts);
       const dl = document.getElementById('cd-download'); if (dl) dl.addEventListener('click', downloadCardDiscountXlsx);
       const fl = document.getElementById('cd-file'); if (fl) fl.addEventListener('change', onCardDiscountUpload);
+      const sr = document.getElementById('cd-search'); if (sr) sr.addEventListener('input', () => { cdFilter.q = sr.value; renderCardDiscount(); });
     }
+    renderCdChips();
     renderCardDiscount();
+  }
+  function renderCdChips(){
+    const wrap = document.getElementById('cd-cat-chips');
+    if (!wrap) return;
+    const base = cdBaseList();
+    const counts = {};
+    base.forEach(p => { const c = primaryCat(p); counts[c] = (counts[c] || 0) + 1; });
+    const cats = [['', '전체', base.length], ...Object.entries(CATEGORY_META).map(([k, v]) => [k, v.label, counts[k] || 0])];
+    wrap.innerHTML = cats.map(([k, label, cnt]) =>
+      `<button class="adm-chip ${cdFilter.cat === k ? 'on' : ''}" data-cd-cat="${escape(k)}">${escape(label)} <span class="chip-cnt">${cnt}</span></button>`
+    ).join('');
+    wrap.querySelectorAll('[data-cd-cat]').forEach(b => b.addEventListener('click', () => {
+      cdFilter.cat = b.dataset.cdCat; renderCdChips(); renderCardDiscount();
+    }));
+  }
+  function cdVisibleList(){
+    let list = cdBaseList();
+    if (cdFilter.cat) list = list.filter(p => (p.categories || []).includes(cdFilter.cat));
+    const q = (cdFilter.q || '').trim().toLowerCase();
+    if (q) list = list.filter(p => (p.name || '').toLowerCase().includes(q) || modelCode(p).toLowerCase().includes(q) || (p.goodsId || '').toLowerCase().includes(q));
+    // 카테고리 순 정렬 (상품관리 전체보기와 동일: 정수기→공청→비데→매트리스, 신상품 최상단)
+    const CAT_KEYS = Object.keys(CATEGORY_META);
+    const raw = new Map(list.map((p, i) => [p.goodsId, i]));
+    const catRank = p => { const i = CAT_KEYS.indexOf(primaryCat(p)); return i < 0 ? 99 : i; };
+    const orderMaps = {};
+    CAT_KEYS.forEach(c => { orderMaps[c] = new Map((state.overrides.order[c] || []).map((id, i) => [id, i])); });
+    list.sort((a, b) => {
+      const ra = catRank(a), rb = catRank(b);
+      if (ra !== rb) return ra - rb;
+      const m = orderMaps[primaryCat(a)] || new Map();
+      const ia = m.has(a.goodsId) ? m.get(a.goodsId) : -1, ib = m.has(b.goodsId) ? m.get(b.goodsId) : -1;
+      if (ia !== ib) return ia - ib;
+      return raw.get(a.goodsId) - raw.get(b.goodsId);
+    });
+    return list;
   }
   function cdResultHTML(base, disc){
     const b = cdNum(base), d = cdNum(disc);
@@ -1292,8 +1331,10 @@
   function renderCardDiscount(){
     const tbody = document.getElementById('carddiscount-tbody');
     if (!tbody) return;
-    const list = visibleList();
-    if (!list.length){ tbody.innerHTML = `<tr><td colspan="8" class="adm-empty">상품이 없어요.</td></tr>`; return; }
+    const list = cdVisibleList();
+    const cntEl = document.getElementById('cd-count');
+    if (cntEl) cntEl.innerHTML = `<strong>${list.length}</strong>개 표시 / 전체 ${cdBaseList().length}개`;
+    if (!list.length){ tbody.innerHTML = `<tr><td colspan="8" class="adm-empty">조건에 맞는 상품이 없어요.</td></tr>`; return; }
     const cell = (v) => v ? `<strong>${escape(v)}</strong>` : '<span class="price-empty">—</span>';
     const inputCell = (gid, type, base, val) => `<input type="text" class="adm-input cd-input" data-type="${type}" data-gid="${escape(gid)}" data-base="${escape(base || '')}" value="${val ? escape(String(val)) : ''}" placeholder="0"${base ? '' : ' disabled'}>`;
     tbody.innerHTML = list.map(rawP => {
@@ -1350,7 +1391,7 @@
   }
   function downloadCardDiscountXlsx(){
     if (typeof XLSX === 'undefined'){ alert('엑셀 기능을 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.'); return; }
-    const list = visibleList();
+    const list = cdVisibleList();
     const header = ['카테고리', '상품명', '모델코드', 'goodsId', '기본요금', '카드할인(기본요금)', '타사보상', '카드할인(타사보상)'];
     const rows = list.map(rawP => {
       const p = effective(rawP);
