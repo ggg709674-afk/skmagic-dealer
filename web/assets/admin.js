@@ -1636,7 +1636,20 @@
 
     const g = (r, c) => { const v = grid[r] && grid[r][c]; return v === undefined ? '' : String(v); };
     const num = (s) => { s = String(s).replace(/[, ]/g, ''); return /^-?\d+(\.\d+)?$/.test(s) ? Number(s) : null; };
-    const form = (e) => /셀프형/.test(e) ? '셀프형' : '방문형';
+    // 형태(셀프/방문) 판정:
+    //  - 정수기/공청 등: E열 텍스트에 '셀프형' 있으면 셀프, 없으면 방문
+    //  - 비데: E열엔 색상(화이트/위글위글)만 있고 셀프/방문 글자 없음.
+    //    대신 방문주기(H열)로 구분 — 4개월=방문관리, 12개월=셀프관리('* Lite *').
+    const form = (e, 품목, 관리주기) => {
+      if (/비데/.test(품목 || '')) {
+        const mo = parseInt(String(관리주기).replace(/[^\d]/g, ''), 10) || 0;
+        if (mo >= 12) return '셀프형';   // 12개월 = Lite = 셀프관리
+        if (mo > 0)   return '방문형';   // 4개월 = 방문관리
+        // 주기 못 읽으면 E열 'Lite' 표기로 보조 판정
+        return /lite/i.test(e) ? '셀프형' : '방문형';
+      }
+      return /셀프형/.test(e) ? '셀프형' : '방문형';
+    };
 
     // 컬럼(0-index): B=1 품목, C=2 모델, D=3 코드, E=4 컬러/형태, F=5 의무,
     //   H=7 관리주기, I=8 기준가, J=9 운영가/기본할인, K=10 전사할인, L=11 타사보상, R=17 수수료합계
@@ -1653,12 +1666,13 @@
       const 전사 = num(k), 운영 = num(j);
       // 전사할인이 양수면 그 값, 없거나 0("-" 회계서식)이면 운영가(기본할인) 사용
       const 기본요금 = (전사 !== null && 전사 > 0) ? 전사 : 운영;
+      const 품목명 = 품목.replace('메트리스', '매트리스');
       rows.push({
-        품목: 품목.replace('메트리스', '매트리스'),
+        품목: 품목명,
         모델: c.replace(/\s+/g, ' ').trim(),
         코드: d,
         사이즈: comSize(d),
-        형태: form(e),
+        형태: form(e, 품목명, h),
         의무: 의무,
         관리주기: h,
         기준가: 기준가,
