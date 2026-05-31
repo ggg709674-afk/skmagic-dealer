@@ -913,20 +913,51 @@
   }
 
   /* ===== 판매점 마진 설정 =====
-     정책테이블(comDB) 행별로 마진(원)을 입력 → 판매점 수수료 = 수수료합계 − 마진,
-     판매점 공급가액 = 판매점수수료 ÷ 1.1. 매장(stores.margins)에 저장. */
+     정책테이블(comDB)을 정책 테이블과 동일한 칩/검색 UI로 불러오고,
+     행별 마진(원, VAT 포함)을 입력 → 판매점 수수료 = 수수료합계 − 마진,
+     판매점 공급가액 = 판매점수수료 ÷ 1.1. 매장(stores.margins)에 저장.
+     ※ 표시명은 comDisplay(정책 테이블과 동일: 홈 등록 상품명 우선). */
   let _mgBound = false, _mgMargins = {};
+  const mgState = { cat: 'all', form: 'all', q: '' };
   const mgKey = r => r.코드 + '|' + r.형태 + '|' + r.의무;
 
   async function initMargin(){
     if (typeof ensureCommissionData === 'function') await ensureCommissionData();
-    // 매장 margins 로드 (skmFetchStore가 margins 포함)
     if (state.store?.slug && window.skmFetchStore){
       try { const full = await window.skmFetchStore(state.store.slug); if (full) state.store.margins = full.margins || {}; } catch(_){}
     }
     _mgMargins = Object.assign({}, (state.store && state.store.margins) || {});
+    // 메뉴 진입 시 필터 초기화 (누수 방지)
+    mgState.cat = 'all'; mgState.form = 'all'; mgState.q = '';
+    const s = document.getElementById('mg-search'); if (s) s.value = '';
     bindMarginUI();
+    renderMgCatChips();
+    renderMgFormChips();
     renderMarginTable();
+  }
+  function mgFiltered(){
+    const db = (typeof comDB === 'function') ? comDB() : null; if (!db) return [];
+    const q = mgState.q.toLowerCase();
+    return db.rows.filter(r => {
+      if (mgState.cat !== 'all' && r.품목 !== mgState.cat) return false;
+      if (mgState.form !== 'all' && r.형태 !== mgState.form) return false;
+      if (q){ const d = comDisplay(r); if (!(`${d.name} ${d.code} ${r.모델} ${r.코드||''}`.toLowerCase().includes(q))) return false; }
+      return true;
+    });
+  }
+  function renderMgCatChips(){
+    const wrap = document.getElementById('mg-cat-chips'); const db = (typeof comDB==='function')?comDB():null; if (!wrap || !db) return;
+    const counts = {}; db.rows.forEach(r => { counts[r.품목] = (counts[r.품목]||0)+1; });
+    const chips = [comChipHTML('all','전체',db.rows.length,mgState.cat==='all','mgcat')];
+    db.품목순.filter(c=>counts[c]).forEach(c => chips.push(comChipHTML(c,c,counts[c],mgState.cat===c,'mgcat')));
+    wrap.innerHTML = chips.join('');
+    wrap.querySelectorAll('.adm-chip').forEach(el => el.addEventListener('click', () => { mgState.cat = el.dataset.mgcat; renderMgCatChips(); renderMarginTable(); }));
+  }
+  function renderMgFormChips(){
+    const wrap = document.getElementById('mg-form-chips'); if (!wrap) return;
+    const forms = [['all','전체'],['방문형','방문형'],['셀프형','셀프형']];
+    wrap.innerHTML = forms.map(([v,l]) => comChipHTML(v,l,null,mgState.form===v,'mgform')).join('');
+    wrap.querySelectorAll('.adm-chip').forEach(el => el.addEventListener('click', () => { mgState.form = el.dataset.mgform; renderMgFormChips(); renderMarginTable(); }));
   }
   function recalcMarginRow(tr, fee, margin){
     const shopFee = (fee != null) ? Math.max(0, fee - margin) : null;
@@ -938,8 +969,12 @@
     const wrap = document.getElementById('mg-wrap'); if (!wrap) return;
     const db = (typeof comDB === 'function') ? comDB() : null;
     if (!db || !db.rows || !db.rows.length){ wrap.innerHTML = '<div class="adm-empty">정책 테이블이 없습니다. 먼저 정책 테이블을 업로드하세요.</div>'; return; }
-    const body = db.rows.map(r => {
+    const list = mgFiltered();
+    const cntEl = document.getElementById('mg-count'); if (cntEl) cntEl.textContent = list.length + '개';
+    if (!list.length){ wrap.innerHTML = '<div class="adm-empty">조건에 맞는 행이 없어요.</div>'; return; }
+    const body = list.map(r => {
       const key = mgKey(r);
+      const d = comDisplay(r);
       const fee = (r.수수료합계 != null) ? r.수수료합계 : null;
       const supply = (fee != null) ? Math.round(fee / 1.1) : null;
       const margin = Number(_mgMargins[key]) || 0;
@@ -947,8 +982,8 @@
       const shopSupply = (shopFee != null) ? Math.round(shopFee / 1.1) : null;
       return `<tr class="mg-row">
         <td>${escape(r.품목 || '')}</td>
-        <td class="mg-left">${escape(r.모델 || '')}</td>
-        <td class="mg-left">${escape(r.코드 || '')}</td>
+        <td class="mg-left">${escape(d.name)}</td>
+        <td class="mg-left">${escape(d.code)}</td>
         <td>${escape(r.형태 || '')}</td>
         <td>${r.의무 != null ? escape(r.의무) + '개월' : '—'}</td>
         <td>${escape(r.관리주기 || '—')}</td>
@@ -965,6 +1000,8 @@
   }
   function bindMarginUI(){
     if (_mgBound) return; _mgBound = true;
+    const search = document.getElementById('mg-search');
+    if (search) search.addEventListener('input', () => { mgState.q = search.value.trim(); renderMarginTable(); });
     const wrap = document.getElementById('mg-wrap');
     if (wrap) wrap.addEventListener('input', (e) => {
       const inp = e.target.closest('.mg-margin-input'); if (!inp) return;
@@ -977,8 +1014,8 @@
     const bulkBtn = document.getElementById('mg-bulk-apply');
     if (bulkBtn) bulkBtn.addEventListener('click', () => {
       const v = Number(document.getElementById('mg-bulk-input').value) || 0;
-      const db = (typeof comDB === 'function') ? comDB() : null; if (!db) return;
-      db.rows.forEach(r => { _mgMargins[mgKey(r)] = v; });
+      // 현재 필터된(화면에 보이는) 행에만 일괄 적용
+      mgFiltered().forEach(r => { _mgMargins[mgKey(r)] = v; });
       renderMarginTable();
     });
     const saveBtn = document.getElementById('mg-save');
