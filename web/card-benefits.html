@@ -43,6 +43,10 @@
 
   /* ===== 카드 그리드 ===== */
   .cb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:60px}
+  /* CLS 방지 — JS로 카드 채우기 전 높이 선점(:empty는 innerHTML 채우면 자동 해제).
+     안 잡으면 새로고침/카드페이지 복귀 시 푸터가 위로 붙었다 내려오며 깜빡임. */
+  .cb-grid:empty{min-height:1320px}                /* 데스크탑 2열 4행 */
+  @media (max-width:860px){ .cb-grid:empty{min-height:3000px} }  /* 모바일 1열 8행 */
   .cb-item{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 24px;display:flex;flex-direction:column}
   .cb-item-top{display:flex;gap:18px;align-items:center}
   .cb-mini{flex:0 0 auto;width:150px;filter:drop-shadow(0 8px 16px rgba(40,30,60,.16))}
