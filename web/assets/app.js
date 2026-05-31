@@ -574,7 +574,7 @@ const App = (() => {
               const cDisc = Number(cd.sale) || 0;
               const cardLine = (cDisc > 0 && pol.기본요금 > 0)
                 ? `<div class="card-applied">제휴카드 적용 월 <strong>${fmtN(Math.max(0, pol.기본요금 - cDisc))}</strong>원</div>` : '';
-              return `<div class="price-row">${del}<div class="now"><small>구독</small> 월 <strong>${fmtN(pol.기본요금)}</strong>원</div>${cardLine}</div>`;
+              return `<div class="price-row"><div class="price-main">${del}<div class="now"><small>구독</small> 월 <strong>${fmtN(pol.기본요금)}</strong>원</div></div>${cardLine}</div>`;
             }
             return pr ? `
             <div class="price-row">
