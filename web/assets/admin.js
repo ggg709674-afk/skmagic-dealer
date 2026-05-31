@@ -768,6 +768,7 @@
     products: { title: '상품 관리', sub: '노출 여부 · 추천 배지 · 표시 순서 · 매장 자체 가격/이름 수정.', kind: 'products' },
     commission: { title: '정책 테이블', sub: '홈페이지 등록 모델의 약정·관리방식별 정책 테이블입니다.', kind: 'commission' },
     cards:    { title: '제휴카드 관리', sub: '카드 이미지와 자세히보기 링크를 등록합니다. 제휴카드 안내 페이지에 반영됩니다.', kind: 'cards' },
+    iconlab:  { title: '아이콘 시안', sub: '홈 카테고리 아이콘 디자인 시안입니다. 마음에 드는 스타일을 골라 주세요.', kind: 'iconlab' },
     faq:      { title: 'FAQ 관리', sub: '자주 묻는 질문의 질문·답변을 추가·수정·삭제합니다. 자주 묻는 질문 페이지에 반영됩니다.', kind: 'faq' },
     consult:  { title: '상담 신청',     sub: '준비 중인 메뉴예요.', kind: 'soon' },
     banner:   { title: '배너/슬라이드', sub: '홈 화면 상단 배너 이미지와 슬라이드 동작을 관리합니다. 홈 페이지에 반영됩니다.', kind: 'banner' },
@@ -823,6 +824,7 @@
     document.querySelector('[data-panel="products"]').hidden   = (meta.kind !== 'products');
     document.querySelector('[data-panel="commission"]').hidden = (meta.kind !== 'commission');
     document.querySelector('[data-panel="cards"]').hidden      = (meta.kind !== 'cards');
+    document.querySelector('[data-panel="iconlab"]').hidden    = (meta.kind !== 'iconlab');
     document.querySelector('[data-panel="faq"]').hidden        = (meta.kind !== 'faq');
     document.querySelector('[data-panel="banner"]').hidden     = (meta.kind !== 'banner');
     document.querySelector('[data-panel="store"]').hidden      = (meta.kind !== 'store');
@@ -840,6 +842,7 @@
     if (meta.kind === 'cards') initCards();
     if (meta.kind === 'faq') initFaq();
     if (meta.kind === 'banner') initBanner();
+    if (meta.kind === 'iconlab') initIconLab();
 
     // 상품관리 패널의 카테고리 필터도 hash 와 동기화
     if (meta.kind === 'products' && state.filterCat !== cat){
@@ -1184,6 +1187,62 @@
     btns.forEach(b => b.disabled = false);
     if (!error){ bnData = payload; renderBanners(); admToast('저장됐어요. 홈 배너에 반영됩니다.'); }
     else alert('저장 실패: ' + (error.message || '권한 또는 네트워크 오류'));
+  }
+
+  /* ─── 카테고리 아이콘 시안 갤러리 (본부 전용) ───────── */
+  let iconLabInited = false;
+  function initIconLab(){
+    const wrap = document.getElementById('adm-iconlab');
+    if (!wrap || iconLabInited) return;
+    iconLabInited = true;
+    const CATS = [
+      { key:'water', nm:'정수기', cnt:'9개 상품' },
+      { key:'air', nm:'공기청정기', cnt:'9개 상품' },
+      { key:'bidet', nm:'비데', cnt:'5개 상품' },
+      { key:'mattress', nm:'매트리스', cnt:'3개 상품' },
+    ];
+    // A — 그라데이션 글래스
+    const A = {
+      water:`<svg viewBox="0 0 48 48"><defs><linearGradient id="la_awg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#62bdff"/><stop offset="1" stop-color="#2a7dff"/></linearGradient></defs><circle cx="24" cy="24" r="22" fill="url(#la_awg)"/><path d="M24 11.5C19.8 19 15.5 23.2 15.5 28a8.5 8.5 0 0 0 17 0C32.5 23.2 28.2 19 24 11.5Z" fill="#fff"/><path d="M20 29a4.2 4.2 0 0 1 2.2-3.7" stroke="#2a7dff" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".55"/><ellipse cx="28" cy="20" rx="2.4" ry="3.4" fill="#fff" opacity=".45" transform="rotate(28 28 20)"/></svg>`,
+      air:`<svg viewBox="0 0 48 48"><defs><linearGradient id="la_aag" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#67e0c0"/><stop offset="1" stop-color="#22b58e"/></linearGradient></defs><circle cx="24" cy="24" r="22" fill="url(#la_aag)"/><rect x="16" y="11" width="16" height="26" rx="4" fill="#fff"/><circle cx="24" cy="19" r="3.4" fill="none" stroke="#22b58e" stroke-width="1.5"/><path d="M19 27h10M19 30h10M19 33h10" stroke="#22b58e" stroke-width="1.4" stroke-linecap="round" opacity=".5"/></svg>`,
+      bidet:`<svg viewBox="0 0 48 48"><defs><linearGradient id="la_abg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b69bff"/><stop offset="1" stop-color="#7c5cf0"/></linearGradient></defs><circle cx="24" cy="24" r="22" fill="url(#la_abg)"/><path d="M14 24q0-4.5 4.5-4.5H29q4.5 0 4.5 4.5v1.5q0 4-4 4H18q-4 0-4-4Z" fill="#fff"/><path d="M31 19.5V16q0-2.5-2.5-2.5H19Q16.5 13.5 16.5 16v3.5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><rect x="28.5" y="14.5" width="4.6" height="2.6" rx=".9" fill="#fff" opacity=".7"/></svg>`,
+      mattress:`<svg viewBox="0 0 48 48"><defs><linearGradient id="la_amg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffce6e"/><stop offset="1" stop-color="#f0a528"/></linearGradient></defs><circle cx="24" cy="24" r="22" fill="url(#la_amg)"/><rect x="11" y="18.5" width="26" height="12" rx="3.5" fill="#fff"/><path d="M11 24.5h26" stroke="#f0a528" stroke-width="1.4" opacity=".5"/><path d="M17 25l1.6 2.6M24 25l1.6 2.6M31 25l1.6 2.6" stroke="#f0a528" stroke-width="1.3" stroke-linecap="round" opacity=".45"/><path d="M14 30.5v2.5M34 30.5v2.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+    };
+    // B — 컬러 듀오톤
+    const B = {
+      water:`<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#e9f3ff"/><path d="M24 12.5C20 19.5 16.2 23.4 16.2 28a7.8 7.8 0 0 0 15.6 0C31.8 23.4 28 19.5 24 12.5Z" fill="#bcdcff"/><path d="M24 12.5C20 19.5 16.2 23.4 16.2 28a7.8 7.8 0 0 0 15.6 0C31.8 23.4 28 19.5 24 12.5Z" fill="none" stroke="#2a7dff" stroke-width="1.8" stroke-linejoin="round"/><path d="M20.5 28.5a3.6 3.6 0 0 1 2-3.2" stroke="#2a7dff" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`,
+      air:`<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#e6faf3"/><rect x="16.5" y="12" width="15" height="24" rx="3.6" fill="#c5f0e1"/><rect x="16.5" y="12" width="15" height="24" rx="3.6" fill="none" stroke="#1faa83" stroke-width="1.8"/><circle cx="24" cy="19" r="3.2" fill="#fff" stroke="#1faa83" stroke-width="1.6"/><path d="M20 27.5h8M20 30.5h8" stroke="#1faa83" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+      bidet:`<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#f0ebff"/><path d="M14.5 24.5q0-4 4-4H29q4 0 4 4v1.4q0 3.7-3.7 3.7H18.2q-3.7 0-3.7-3.7Z" fill="#ddd2ff"/><path d="M14.5 24.5q0-4 4-4H29q4 0 4 4v1.4q0 3.7-3.7 3.7H18.2q-3.7 0-3.7-3.7Z" fill="none" stroke="#6c4bd8" stroke-width="1.8" stroke-linejoin="round"/><path d="M30.5 20.5V16.5q0-2.4-2.4-2.4h-8.2q-2.4 0-2.4 2.4v4" fill="none" stroke="#6c4bd8" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+      mattress:`<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#fff3df"/><rect x="11.5" y="19" width="25" height="11.5" rx="3.2" fill="#ffe3b0"/><rect x="11.5" y="19" width="25" height="11.5" rx="3.2" fill="none" stroke="#e09422" stroke-width="1.8"/><path d="M11.5 24.5h25" stroke="#e09422" stroke-width="1.5"/><path d="M18 25l1.4 2.4M24 25l1.4 2.4M30 25l1.4 2.4" stroke="#e09422" stroke-width="1.3" stroke-linecap="round"/></svg>`,
+    };
+    // C — 모노 고급
+    const C = {
+      water:`<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#f4f5f7"/><path d="M24 12.5C20 19.5 16.2 23.4 16.2 28a7.8 7.8 0 0 0 15.6 0C31.8 23.4 28 19.5 24 12.5Z" fill="#2c2f36"/><path d="M20.5 28a3.4 3.4 0 0 1 1.9-3" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".6"/></svg>`,
+      air:`<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#f4f5f7"/><rect x="16.5" y="12" width="15" height="24" rx="3.6" fill="#2c2f36"/><circle cx="24" cy="19" r="3.2" fill="none" stroke="#fff" stroke-width="1.5" opacity=".85"/><path d="M20 27.5h8M20 30.5h8" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity=".5"/></svg>`,
+      bidet:`<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#f4f5f7"/><path d="M14.5 24.5q0-4 4-4H29q4 0 4 4v1.4q0 3.7-3.7 3.7H18.2q-3.7 0-3.7-3.7Z" fill="#2c2f36"/><path d="M30.5 20.3V16.5q0-2.4-2.4-2.4h-8.2q-2.4 0-2.4 2.4v3.8" fill="none" stroke="#2c2f36" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+      mattress:`<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#f4f5f7"/><rect x="11.5" y="19" width="25" height="11.5" rx="3.2" fill="#2c2f36"/><path d="M11.5 24.5h25" stroke="#fff" stroke-width="1.3" opacity=".4"/><path d="M18 25l1.4 2.4M24 25l1.4 2.4M30 25l1.4 2.4" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".35"/></svg>`,
+    };
+    // D — 정교 라인 (배경 회색 원)
+    const D = {
+      water:`<svg viewBox="0 0 48 48" fill="none" stroke="#3a3d44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 11C19 19 14.5 23.5 14.5 28.5a9.5 9.5 0 0 0 19 0C33.5 23.5 29 19 24 11Z"/><path d="M19.5 29a4.6 4.6 0 0 1 2.5-4.1" opacity=".5"/></svg>`,
+      air:`<svg viewBox="0 0 48 48" fill="none" stroke="#3a3d44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="15" y="9" width="18" height="30" rx="4.5"/><circle cx="24" cy="18" r="4"/><path d="M24 16.2v3.6M22.2 18h3.6" opacity=".55"/><path d="M18.5 27h11M18.5 30.5h11M18.5 34h11" opacity=".4"/></svg>`,
+      bidet:`<svg viewBox="0 0 48 48" fill="none" stroke="#3a3d44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 25q0-5 5-5h12q5 0 5 5v2q0 4.5-4.5 4.5h-13Q13 31.5 13 27Z"/><path d="M31 20v-4q0-3-3-3H20q-3 0-3 3v4"/><rect x="29" y="13.5" width="5" height="3" rx="1" opacity=".55"/></svg>`,
+      mattress:`<svg viewBox="0 0 48 48" fill="none" stroke="#3a3d44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="17" width="30" height="14" rx="4"/><path d="M9 23h30" opacity=".5"/><path d="M16 24l2 3M24 24l2 3M32 24l2 3" opacity=".4"/><path d="M13 31v3.5M35 31v3.5" opacity=".6"/></svg>`,
+    };
+    const STYLES = [
+      { name:'A · 그라데이션 글래스', desc:'카테고리별 컬러 원 + 화이트 실루엣 + 광택. 화사하고 모던.', bg:'bg-none', icons:A },
+      { name:'B · 컬러 듀오톤', desc:'연한 배경 원 + 카테고리 컬러 제품(면+라인). 정돈되고 깔끔.', bg:'bg-none', icons:B },
+      { name:'C · 모노 고급', desc:'톤온톤 단색 실루엣. 차분하고 고급스러운 무채색.', bg:'bg-none', icons:C },
+      { name:'D · 정교 라인', desc:'가는 모노라인 + 디테일. 현재 톤 유지하며 정밀하게.', bg:'bg-plain', icons:D },
+    ];
+    wrap.innerHTML = STYLES.map(s => `
+      <div class="adm-iconlab-style">
+        <h3>${escape(s.name)}</h3>
+        <div class="desc">${escape(s.desc)}</div>
+        <div class="adm-iconlab-row">
+          ${CATS.map(c => `<div class="adm-iconlab-item"><div class="adm-iconlab-ic ${s.bg}">${s.icons[c.key]}</div><div><div class="adm-iconlab-nm">${escape(c.nm)}</div><div class="adm-iconlab-cnt">${escape(c.cnt)}</div></div></div>`).join('')}
+        </div>
+      </div>`).join('');
   }
 
   async function initCommission(){
