@@ -144,17 +144,44 @@
     return data || [];
   };
 
+  /* ─── 판매점 로그인 계정 생성 (분양 시) ──────────────────
+     본부/분양형이 분양할 때 산하 매장 운영자 계정(이메일/비번)을 만든다.
+     ★ 별도 client(persistSession:false)로 signUp → 분양하는 본인(본부/분양형) 로그인 세션은 유지됨.
+     ★ 새 계정이 즉시 로그인되려면 Supabase 대시보드의 Email 'Confirm email' 이 OFF 여야 함.
+     반환: { userId } 또는 { error } */
+  let _signupClient = null;
+  window.skmCreateStoreAccount = async function(email, password){
+    email = (email || '').trim();
+    if (!email) return { error: new Error('ID(이메일)가 필요해요.') };
+    if (!password || password.length < 6) return { error: new Error('초기 비밀번호는 6자 이상이어야 해요.') };
+    if (!_signupClient){
+      _signupClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+        auth: { persistSession: false, autoRefreshToken: false, storageKey: 'skm-signup-tmp' }
+      });
+    }
+    const { data, error } = await _signupClient.auth.signUp({ email, password });
+    if (error){ console.warn('[skmCreateStoreAccount]', error); return { error }; }
+    const userId = data && data.user && data.user.id;
+    if (!userId) return { error: new Error('계정 생성에 실패했어요(유저 ID 없음).') };
+    return { userId };
+  };
+
   /* ─── 새 매장 분양 (super=dealer/shop, dealer=shop만 — RLS stores write) ─
-     opts = { slug, name, type:'shop'|'dealer' } */
+     opts = { slug, name, type:'shop'|'dealer', ownerUserId, email }
+       - ownerUserId: skmCreateStoreAccount 로 만든 운영자 계정 → stores.owner_user_id 연결(로그인 권한)
+       - email: 로그인 ID 겸 매장 연락 이메일(stores.email) */
   window.skmCreateChildStore = async function(parentId, opts){
     if (!parentId) return { error: new Error('parentId 필요') };
     const slug = ((opts && opts.slug) || '').trim();
     if (!slug) return { error: new Error('슬러그가 필요해요.') };
     if (!/^[a-z0-9][a-z0-9-]*$/i.test(slug)) return { error: new Error('슬러그는 영문/숫자/하이픈만 가능해요.') };
     const type = (opts && opts.type === 'dealer') ? 'dealer' : 'shop';
+    const row = { slug, name: ((opts.name) || '').trim() || slug, type, parent_store_id: parentId };
+    if (opts && opts.ownerUserId) row.owner_user_id = opts.ownerUserId;
+    if (opts && opts.email) row.email = String(opts.email).trim();
     const { data, error } = await window.sb
       .from('stores')
-      .insert({ slug, name: ((opts.name) || '').trim() || slug, type, parent_store_id: parentId })
+      .insert(row)
       .select()
       .maybeSingle();
     if (error) console.warn('[skmCreateChildStore]', error);

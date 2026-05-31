@@ -1128,6 +1128,7 @@
   }
 
   /* ===== 사이트분양 (분양관리) ===== */
+  const DEPLOY_DEFAULT_PW = 'sk1234';   // 분양 시 판매점 초기 비밀번호 (6자 — Supabase 최소길이 충족)
   let _dpBound = false;
   async function initDeploy(){
     bindDeployUI();
@@ -1168,22 +1169,44 @@
     const btn = document.getElementById('dp-add');
     if (btn) btn.addEventListener('click', async () => {
       const slug = (document.getElementById('dp-slug').value || '').trim();
+      const email = (document.getElementById('dp-email').value || '').trim();
       const name = (document.getElementById('dp-name').value || '').trim();
       const typeSel = document.getElementById('dp-type');
       const type = (typeSel && !typeSel.hidden) ? typeSel.value : 'shop';
       const st = document.getElementById('dp-status');
       const fail = m => { if (st){ st.textContent = m; st.className = 'adm-deploy-status err'; st.hidden = false; } };
       if (!slug) return fail('슬러그를 입력하세요.');
-      if (!state.store?.id || !window.skmCreateChildStore) return fail('매장 정보를 불러오지 못했어요.');
+      if (!email) return fail('ID(이메일)를 입력하세요.');
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return fail('이메일 형식을 확인하세요.');
+      if (!state.store?.id || !window.skmCreateChildStore || !window.skmCreateStoreAccount){
+        return fail('매장 정보를 불러오지 못했어요.');
+      }
+      // 슬러그 중복 사전 체크 — 계정만 만들어지고 매장 생성 실패하는 orphan 계정 방지
+      if (window.skmFetchStore){
+        const exists = await window.skmFetchStore(slug);
+        if (exists) return fail('이미 사용 중인 슬러그예요. 다른 슬러그를 쓰세요.');
+      }
       btn.disabled = true;
-      const { error } = await window.skmCreateChildStore(state.store.id, { slug, name, type });
+      // 1) 로그인 계정 생성 (별도 세션 — 분양하는 본인 로그인 유지)
+      const acct = await window.skmCreateStoreAccount(email, DEPLOY_DEFAULT_PW);
+      if (acct.error){ btn.disabled = false; return fail('계정 생성 실패: ' + (acct.error.message || acct.error)); }
+      // 2) 매장 생성 + 계정 연결(owner_user_id)
+      const { error } = await window.skmCreateChildStore(state.store.id, { slug, name, type, email, ownerUserId: acct.userId });
       btn.disabled = false;
-      if (error){ fail('분양 실패: ' + (error.message || error)); return; }
-      if (st){ st.textContent = '분양 완료'; st.className = 'adm-deploy-status ok'; st.hidden = false; setTimeout(() => { st.hidden = true; }, 2500); }
+      if (error){ fail('매장 생성 실패: ' + (error.message || error)); return; }
+      if (st){
+        st.textContent = `분양 완료 — ID ${email} / 초기비번 ${DEPLOY_DEFAULT_PW}`;
+        st.className = 'adm-deploy-status ok'; st.hidden = false;
+        setTimeout(() => { st.hidden = true; }, 8000);
+      }
       document.getElementById('dp-slug').value = '';
+      document.getElementById('dp-email').value = '';
       document.getElementById('dp-name').value = '';
       loadDeploy();
     });
+    // 초기 비밀번호 안내 라벨
+    const pwLabel = document.getElementById('dp-pw-label');
+    if (pwLabel) pwLabel.textContent = DEPLOY_DEFAULT_PW;
   }
 
   function bindMenu(){

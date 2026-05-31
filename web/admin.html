@@ -411,9 +411,13 @@
 
   <!-- ===== 사이트분양 패널 ===== -->
   <section class="adm-panel" data-panel="deploy" hidden>
-    <p class="adm-panel-hint">산하 판매점을 분양·관리합니다. 새 판매점을 추가하면 <code>/슬러그</code> 주소로 그 매장 카탈로그가 열려요. 판매점 운영자 계정 연결은 본부에서 처리합니다.</p>
+    <p class="adm-panel-hint">산하 판매점을 분양·관리합니다. 추가하면 <code>/슬러그</code> 주소로 그 매장 카탈로그가 열리고, 입력한 <strong>ID(이메일) + 초기 비밀번호</strong>로 판매점이 직접 <code>/슬러그/admin</code> 에 로그인할 수 있어요.</p>
     <div class="adm-deploy-form">
-      <input type="text" id="dp-slug" class="adm-input adm-deploy-slug" placeholder="슬러그 (영문/숫자, 예: gangnam1)" autocomplete="off">
+      <div class="adm-deploy-url">
+        <span class="adm-deploy-url-prefix">https://sk-magic.kr/</span>
+        <input type="text" id="dp-slug" class="adm-input adm-deploy-slug" placeholder="슬러그 (영문/숫자)" autocomplete="off">
+      </div>
+      <input type="email" id="dp-email" class="adm-input adm-deploy-email" placeholder="ID (이메일)" autocomplete="off">
       <input type="text" id="dp-name" class="adm-input adm-deploy-name" placeholder="판매점 상호명">
       <select id="dp-type" class="adm-input adm-deploy-type" hidden>
         <option value="shop">단독형 (분양 기능 없음)</option>
@@ -422,6 +426,7 @@
       <button type="button" class="adm-btn adm-btn-primary" id="dp-add">판매점 추가(분양)</button>
       <span class="adm-deploy-status" id="dp-status" hidden></span>
     </div>
+    <p class="adm-deploy-pwnote">초기 비밀번호는 <strong id="dp-pw-label">—</strong> 입니다. 판매점에 ID(이메일)와 함께 안내하고, 첫 로그인 후 변경하도록 하세요.</p>
     <div class="adm-deploy-list" id="dp-list"><div class="adm-empty">불러오는 중…</div></div>
   </section>
 
