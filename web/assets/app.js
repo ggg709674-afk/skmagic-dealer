@@ -258,6 +258,7 @@ const App = (() => {
   let _overrides = null;
   let _cardDiscounts = {};   // { goodsId: {sale, compete} } — 제휴카드 할인액(card_benefits.discounts)
   let _store = null;         // 현재 매장(상담/주문 신청 INSERT 시 store_id 사용)
+  let _storeMissing = false; // 슬러그는 있는데 등록된 매장이 아님(가짜 슬러그)
   async function loadOverrides() {
     if (_overrides) return _overrides;
     _overrides = new Map();
@@ -266,7 +267,7 @@ const App = (() => {
       const slug = window.skmGetSlug();
       if (!slug) return _overrides;
       const store = await window.skmFetchStore(slug);
-      if (!store) return _overrides;
+      if (!store) { _storeMissing = true; return _overrides; }
       _store = store;
       renderStoreInfo(store);
 
@@ -1512,7 +1513,28 @@ const App = (() => {
     });
   }
 
+  /* 등록되지 않은 매장 슬러그 — 카탈로그 대신 안내 (아무 슬러그나 사이트가 열리는 것 방지) */
+  function renderStoreNotFound(){
+    document.querySelectorAll('[data-view]').forEach(el => { el.hidden = true; });
+    let nf = document.getElementById('store-nf');
+    if (!nf){
+      nf = document.createElement('div');
+      nf.id = 'store-nf';
+      nf.style.cssText = 'max-width:640px;margin:90px auto;padding:0 20px;text-align:center';
+      nf.innerHTML = '<h1 style="font-size:26px;font-weight:800;color:var(--ink-1)">존재하지 않는 매장이에요</h1>'
+        + '<p style="margin-top:14px;color:var(--ink-3);line-height:1.7">주소를 다시 확인해 주세요. 등록된 매장만 접속할 수 있어요.</p>'
+        + '<a href="/" style="display:inline-block;margin-top:24px;background:var(--primary,#DE4F41);color:#fff;font-weight:700;padding:13px 28px;border-radius:10px;text-decoration:none">홈으로</a>';
+      const main = document.querySelector('main');
+      if (main) main.insertAdjacentElement('afterbegin', nf); else document.body.appendChild(nf);
+    }
+    nf.hidden = false;
+    document.title = '매장을 찾을 수 없습니다';
+  }
+
   async function route(opts) {
+    // 매장 검증 — 슬러그가 있는데 등록된 매장이 아니면 안내 (가짜 슬러그로 카탈로그 뜨는 것 방지)
+    await loadOverrides();
+    if ((window.skmGetSlug && window.skmGetSlug()) && _storeMissing) { renderStoreNotFound(); return; }
     const view = getViewFromUrl();
     // 모든 view 숨김 → 해당 view만 표시
     document.querySelectorAll('[data-view]').forEach(el => { el.hidden = (el.dataset.view !== view); });
