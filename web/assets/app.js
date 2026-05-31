@@ -569,12 +569,12 @@ const App = (() => {
             const fmtN = n => Number(n).toLocaleString('ko-KR');
             const toNum = v => Number(String(v == null ? '' : v).replace(/[^\d]/g, '')) || 0;
             // 제휴카드 적용가 줄 — 기본요금(sale) 기준. 정책/크롤 어느 경로든 공통 사용.
-            // 할인액이 기본요금 이상이면(0원/음수) 줄 생략 — 잘못된 입력 방지.
+            // 할인액이 기본요금 이상이어도 적용가는 0원으로 표기(음수 방지). 할인 미설정이면 줄 생략.
             const cardAppliedLine = (baseFee) => {
               const cDisc = Number((_cardDiscounts[p.goodsId] || {}).sale) || 0;
               const base = toNum(baseFee);
-              if (cDisc <= 0 || base <= 0 || cDisc >= base) return '';
-              return `<div class="card-applied">제휴카드 적용 월 <strong>${fmtN(base - cDisc)}</strong>원</div>`;
+              if (cDisc <= 0 || base <= 0) return '';
+              return `<div class="card-applied">제휴카드 적용 월 <strong>${fmtN(Math.max(0, base - cDisc))}</strong>원</div>`;
             };
             if (pol && pol.기본요금 != null) {
               const del = (pol.기준가 != null && pol.기준가 !== pol.기본요금) ? `<div class="del">월 ${fmtN(pol.기준가)}원</div>` : '';
