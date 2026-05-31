@@ -962,11 +962,12 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .adm-margin-status{font-size:13px;font-weight:600}
 .adm-margin-status.ok{color:#1a8f4c}
 .adm-margin-status.err{color:var(--primary)}
-.adm-mg-table{min-width:1120px}
-.adm-mg-table .mg-num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.adm-mg-table{min-width:1180px}
+.adm-mg-table tbody td{font-variant-numeric:tabular-nums;white-space:nowrap}
+.adm-mg-table .mg-left{text-align:left}
 .adm-mg-table .mg-fee-col{font-weight:700;color:var(--ink-1)}
 .adm-mg-table .mg-shop{font-weight:700;color:var(--primary)}
-.mg-margin-input{width:96px;font-size:12.5px;padding:6px 9px;border:1px solid var(--line);border-radius:7px;font-family:inherit;text-align:right;color:var(--ink-1);font-variant-numeric:tabular-nums;background:#fff}
+.mg-margin-input{width:96px;font-size:12.5px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;font-family:inherit;text-align:right;color:var(--ink-1);font-variant-numeric:tabular-nums;background:#fff}
 .mg-margin-input:focus{outline:none;border-color:var(--primary)}
 
 /* 관리자는 PC 전용. 창이 min-width(1024px)보다 좁아지면 레이아웃을 줄이지 않고

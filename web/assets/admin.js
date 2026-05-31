@@ -947,20 +947,20 @@
       const shopSupply = (shopFee != null) ? Math.round(shopFee / 1.1) : null;
       return `<tr class="mg-row">
         <td>${escape(r.품목 || '')}</td>
-        <td class="cs-c-name">${escape(r.모델 || '')}</td>
-        <td class="cs-c-birth">${escape(r.코드 || '')}</td>
+        <td class="mg-left">${escape(r.모델 || '')}</td>
+        <td class="mg-left">${escape(r.코드 || '')}</td>
         <td>${escape(r.형태 || '')}</td>
-        <td class="mg-num">${r.의무 != null ? escape(r.의무) + '개월' : '—'}</td>
+        <td>${r.의무 != null ? escape(r.의무) + '개월' : '—'}</td>
         <td>${escape(r.관리주기 || '—')}</td>
-        <td class="mg-num">${supply != null ? comFmt(supply) : '—'}</td>
-        <td class="mg-num mg-fee-col">${fee != null ? comFmt(fee) : '—'}</td>
+        <td>${supply != null ? comFmt(supply) : '—'}</td>
+        <td class="mg-fee-col">${fee != null ? comFmt(fee) : '—'}</td>
         <td><input type="number" class="mg-margin-input" data-mg-key="${escape(key)}" data-mg-fee-val="${fee != null ? fee : ''}" value="${margin || ''}" placeholder="0" min="0" step="1000"></td>
-        <td class="mg-num mg-shop" data-mg-supply="${escape(key)}">${shopSupply != null ? comFmt(shopSupply) : '—'}</td>
-        <td class="mg-num mg-shop" data-mg-fee="${escape(key)}">${shopFee != null ? comFmt(shopFee) : '—'}</td>
+        <td class="mg-shop" data-mg-supply="${escape(key)}">${shopSupply != null ? comFmt(shopSupply) : '—'}</td>
+        <td class="mg-shop" data-mg-fee="${escape(key)}">${shopFee != null ? comFmt(shopFee) : '—'}</td>
       </tr>`;
     }).join('');
-    wrap.innerHTML = `<div class="adm-cs-scroll"><table class="adm-cs-table adm-mg-table">
-      <thead><tr><th>품목</th><th>모델</th><th>제품코드</th><th>형태</th><th>의무기간</th><th>관리주기</th><th>공급가액</th><th>수수료합계</th><th>마진입력</th><th>판매점 공급가액</th><th>판매점 수수료</th></tr></thead>
+    wrap.innerHTML = `<div class="adm-cs-scroll"><table class="adm-table adm-mg-table">
+      <thead><tr><th>품목</th><th>모델</th><th>제품코드</th><th>형태</th><th>의무기간</th><th>관리주기</th><th>공급가액</th><th>수수료합계</th><th>마진입력 (VAT 포함)</th><th>판매점 공급가액</th><th>판매점 수수료</th></tr></thead>
       <tbody>${body}</tbody></table></div>`;
   }
   function bindMarginUI(){
