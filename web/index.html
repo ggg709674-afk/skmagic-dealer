@@ -263,6 +263,23 @@
   </section>
 </main>
 
+<!-- ★ 첫 페인트 전 현재 view 펼치기 (CLS 방지) — 본문 3 view 가 모두 hidden 으로
+     시작해서 app.js(맨 끝 로드) 가 route() 로 펼치기 전까지 헤더+푸터만 붙어있다가
+     본문이 펼쳐지며 푸터가 아래로 쿵 내려가는 깜빡임(특히 외부페이지→여기 full-load)
+     이 있었음. 이 인라인 스크립트가 URL 기준으로 맞는 main 을 즉시 보여줘서
+     :empty min-height 가 첫 페인트부터 자리 잡게 함. app.js route() 가 다시 정리. -->
+<script>
+  (function(){
+    try{
+      var p = new URLSearchParams(location.search);
+      var view = p.get('id') ? 'detail' : (p.get('cls') || p.get('view')==='category') ? 'category' : 'home';
+      document.querySelectorAll('main[data-view]').forEach(function(m){
+        m.hidden = (m.dataset.view !== view);
+      });
+    }catch(e){}
+  })();
+</script>
+
 <!-- ===== Footer (공통) ===== -->
 <footer class="site-footer" id="consult">
   <div class="container">
