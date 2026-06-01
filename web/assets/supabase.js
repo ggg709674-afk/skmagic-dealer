@@ -84,6 +84,39 @@
     });
   };
 
+  /* ─── 상담 신청 FAB 마운트 (정적 정보페이지 공용) ────────
+     메인 카탈로그의 우하단 '상담 신청' 플로팅 버튼 + 전화/카카오 팝업을,
+     card-benefits/faq/terms/privacy 같은 정적 페이지에도 동일하게 띄운다.
+     CSS(.fab-consult/.fab-popup)는 style.css 공용. store 없으면 라벨만(전화/카카오 생략). */
+  window.skmMountConsultFab = function(store){
+    if (document.getElementById('fab-consult')) return;   // 이미 있으면(메인 등) 스킵
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    store = store || {};
+    const tel   = (store.phone || '').trim();
+    const kakao = (store.kakao_url || '').trim();
+    const hours = (store.biz_hours || '').trim();
+    const chat  = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+    const fab = document.createElement('a');
+    fab.className = 'fab-consult'; fab.href = '#'; fab.id = 'fab-consult'; fab.setAttribute('aria-label', '상담 신청 열기');
+    fab.innerHTML = chat + '<span class="fab-label">상담 신청</span>';
+    const popup = document.createElement('div');
+    popup.className = 'fab-popup'; popup.id = 'fab-popup'; popup.hidden = true;
+    popup.innerHTML =
+      '<p class="pop-label">지금 바로 상담 가능</p>' +
+      (tel   ? `<a class="pop-tel" href="tel:${esc(tel.replace(/[^0-9+]/g,''))}">${esc(tel)}</a>` : '') +
+      (hours ? `<div class="pop-hours">${esc(hours)}</div>` : '') +
+      (kakao ? `<a class="pop-kakao" href="${esc(kakao)}" target="_blank" rel="noopener">카카오톡 상담</a>` : '');
+    document.body.appendChild(fab);
+    document.body.appendChild(popup);
+    fab.addEventListener('click', e => { e.preventDefault(); popup.hidden = !popup.hidden; });
+    document.addEventListener('click', e => {
+      if (popup.hidden) return;
+      if (e.target.closest('.fab-consult') || e.target.closest('.fab-popup')) return;
+      popup.hidden = true;
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !popup.hidden) popup.hidden = true; });
+  };
+
   /* ─── 매장 정보 조회 ───────────────────────────── */
   window.skmFetchStore = async function(slug){
     if (!slug) return null;

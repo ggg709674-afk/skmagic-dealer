@@ -206,6 +206,7 @@
     if (!slug) slug = 'skmagic';
     let store = await window.skmFetchStore(slug);
     if (!store && slug !== 'skmagic') store = await window.skmFetchStore('skmagic');
+    if (window.skmMountConsultFab) window.skmMountConsultFab(store);
     if (!store) return;
 
     // 푸터 biz-row (값 없으면 행 숨김)

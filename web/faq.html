@@ -194,6 +194,7 @@
     if (!slug) slug = 'skmagic';
     let store = await window.skmFetchStore(slug);
     if (!store && slug !== 'skmagic') store = await window.skmFetchStore('skmagic');
+    if (window.skmMountConsultFab) window.skmMountConsultFab(store);
     if (!store) return;
     const set = (id, v) => {
       const dd = document.getElementById(id); if (!dd) return;
