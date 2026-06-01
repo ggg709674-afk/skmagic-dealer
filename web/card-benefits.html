@@ -63,8 +63,11 @@
 
   @media (max-width:860px){
     .cb-grid{grid-template-columns:1fr}
-    .cb-hero-card{display:none}
-    .cb-hero-inner{padding:0 28px}
+    /* 모바일: 텍스트 위 · 카드 아래로 세로 스택 (카드 숨기지 않고 축소해서 살림) */
+    .cb-hero{min-height:0}
+    .cb-hero-inner{flex-direction:column;align-items:flex-start;padding:28px;gap:20px}
+    .cb-hero-text h1{font-size:26px}
+    .cb-hero-card{width:240px;align-self:center;transform:rotate(-5deg);margin-top:2px}
     .cb-item-top{flex-direction:column;align-items:flex-start}
     .cb-mini{width:200px}
   }
