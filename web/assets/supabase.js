@@ -402,6 +402,21 @@
     return data;
   };
 
+  /* ─── 수수료표 스코프 조회 (서버 계산 — 산하는 차감된 값만) ───
+     get_commission_scoped() RPC 호출. 호출자(로그인)에 맞춰 서버가
+     수수료합계를 차감/제거해 돌려줌. 원본은 산하 브라우저로 안 옴.
+       - 비로그인/외부계정 : 수수료합계 제거(고객가만)
+       - 본부             : 원본
+       - 본부직속         : 본부마진 차감(정책그룹 미지정이면 fee_hidden)
+       - 그룹산하 판매점   : 본부마진 + 그룹마진(cascade)
+     반환: payload 모양 jsonb({ source, built_at, 품목순, rows, _scope, fee_hidden }) 또는 null */
+  window.skmFetchCommissionScoped = async function(){
+    if (!window.sb || !window.sb.rpc) return null;
+    const { data, error } = await window.sb.rpc('get_commission_scoped');
+    if (error){ console.warn('[skmFetchCommissionScoped]', error); return null; }
+    return data || null;
+  };
+
   /* ─── 수수료표 저장 (로그인 필요 — RLS 의존) ─────
      payload = { source, built_at, 품목순, rows } */
   window.skmSaveCommission = async function(payload){

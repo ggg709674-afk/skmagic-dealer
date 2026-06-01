@@ -1627,11 +1627,12 @@ const App = (() => {
   /* 외부에서 호출하는 진입점 */
   async function startRouter() {
     // 공개 사이트도 admin 업로드(DB) 최신 수수료를 우선 사용 (없으면 정적 commission.js)
+    // 서버 스코프 RPC 사용 — 카탈로그(비로그인)는 수수료합계 제거된 고객가만 받음(본부 원본 미노출).
     try {
-      if (window.skmFetchCommission) {
-        const remote = await window.skmFetchCommission();
-        if (remote && remote.payload && Array.isArray(remote.payload.rows) && remote.payload.rows.length) {
-          window.COMMISSION_DB = remote.payload;
+      if (window.skmFetchCommissionScoped) {
+        const remote = await window.skmFetchCommissionScoped();
+        if (remote && Array.isArray(remote.rows) && remote.rows.length) {
+          window.COMMISSION_DB = remote;
         }
       }
     } catch (_) {}

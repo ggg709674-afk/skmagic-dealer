@@ -1510,7 +1510,9 @@
   let comUploadBound = false;
   let comData = null; // 업로드/Supabase 로 받은 데이터 (window.COMMISSION_DB 보다 우선)
   const comState = { cat: 'all', form: 'all', q: '' };
-  function comDB(){ return comData || window.COMMISSION_DB || null; }
+  // 산하(비-super)는 정적 commission.js(원본) 로 fallback 금지 — 서버 스코프(comData)만 사용.
+  // RPC 미배포/오류 시 산하는 데이터 없음으로 보일지언정 원본은 절대 노출 안 함. 본부만 정적 fallback 허용.
+  function comDB(){ return comData || (_isSuper ? (window.COMMISSION_DB || null) : null); }
 
   /* ─── 정책테이블 수수료에 적용할 마진 계산 (산하 매장 admin 전용) ───
      - 본부(super)            : null → 원본 수수료 그대로 (차감 없음)
@@ -1520,39 +1522,30 @@
      수수료합계·공급가액 컬럼에만 적용. (요금 등 고객가는 그대로) */
   let _comMarginMap = null, _comFeeHidden = false, _comReady = false;
   async function computeComMargins(){
+    // ★ 차감은 서버(get_commission_scoped)가 이미 수행 → comDB 의 수수료합계가 곧 '내가 받는 수수료'.
+    //   클라는 추가 차감 안 함(_comMarginMap=null). '정책그룹 미지정(숨김)' 여부만 서버 플래그로 반영.
+    //   원본은 산하 브라우저로 내려오지 않으므로 새로고침 시 원본 깜빡임/역산이 원천적으로 불가.
     _comMarginMap = null; _comFeeHidden = false;
     if (_isSuper) return;                       // 본부 = 원본
-    const store = state.store;
-    if (!store || !window.skmFetchStore) return;
-    let parent = null;
-    if (store.parent_store_id && window.skmFetchAllStores){
-      try { const all = await window.skmFetchAllStores(); parent = all.find(s => s.id === store.parent_store_id) || null; } catch(_){}
-    }
-    const parentIsHQ = parent && (parent.type === 'super_admin' || parent.slug === DEPLOY_HQ_SLUG);
-    if (parent && parent.type === 'dealer' && !parentIsHQ){
-      // 진짜 그룹산하 판매점(부모가 skmagic 아닌 dealer) → 부모 그룹이 정한 평면 마진
-      let full = null; try { full = await window.skmFetchStore(parent.slug); } catch(_){}
-      _comMarginMap = (full && full.margins) || {};
-      return;
-    }
-    // 본부산하(부모가 본부 메인 skmagic 또는 super_admin) → 본부 margins[자기 정책그룹]
-    if (!store.margin_group){ _comFeeHidden = true; return; }   // 정책그룹 미지정 → 수수료 숨김
-    let hq = null;
-    try {
-      if (parent) hq = await window.skmFetchStore(parent.slug);
-      if (!hq){ const all = await window.skmFetchAllStores(); const sup = all.find(s => s.slug === DEPLOY_HQ_SLUG) || all.find(s => s.type === 'super_admin'); if (sup) hq = await window.skmFetchStore(sup.slug); }
-    } catch(_){}
-    const groups = (hq && hq.margins) || {};
-    _comMarginMap = (groups[store.margin_group] && typeof groups[store.margin_group] === 'object') ? groups[store.margin_group] : {};
+    await ensureCommissionData();
+    _comFeeHidden = !!(comData && comData.fee_hidden);
   }
   // 정책(수수료표) 최신 1회 로드 — 상품 가격이 정책테이블 기준이라 상품관리에서도 필요
   let comFetched = false;
   async function ensureCommissionData(){
     if (comFetched) return;
     comFetched = true;
-    if (window.skmFetchCommission){
-      try { const r = await window.skmFetchCommission(); if (r && r.payload && Array.isArray(r.payload.rows) && r.payload.rows.length) comData = r.payload; } catch(_){}
-    }
+    try {
+      if (_isSuper && window.skmFetchCommission){
+        // 본부: 원본 직접(업로드·편집·저장에 원본 payload 필요)
+        const r = await window.skmFetchCommission();
+        if (r && r.payload && Array.isArray(r.payload.rows) && r.payload.rows.length) comData = r.payload;
+      } else if (window.skmFetchCommissionScoped){
+        // 산하/비로그인: 서버가 차감(또는 제거)한 값만. 원본은 안 옴.
+        const p = await window.skmFetchCommissionScoped();
+        if (p && Array.isArray(p.rows) && p.rows.length) comData = p;
+      }
+    } catch(_){}
   }
   const comFmt = (v) => (v == null || v === '') ? '<span class="price-empty">—</span>' : Number(v).toLocaleString('ko-KR');
 
@@ -2850,6 +2843,9 @@
     renderStoreLabel();
     renderBackToSite();
     renderChips();
+    // auth/권한(_isSuper) 확정 전(applyMenuFromHash@init 초입)에 anon 으로 받았을 수 있어
+    // 캐시를 비우고 올바른 스코프로 재로드 (본부=원본 / 산하=서버 차감값)
+    comFetched = false; comData = null;
     await ensureCommissionData();   // 상품 가격이 정책테이블 기준 → 테이블 렌더 전 로드
     renderTable();
     populateStoreForm();
