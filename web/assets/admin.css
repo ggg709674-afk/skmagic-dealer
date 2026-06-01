@@ -996,6 +996,10 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .dp-url{font-size:12.5px}
 .dp-copy{margin-left:8px;padding:3px 10px;font-size:12px;font-weight:600;border:1px solid var(--line-strong);border-radius:6px;background:#fff;color:var(--ink-2);cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s,color .12s}
 .dp-copy:hover{border-color:var(--primary);color:var(--primary)}
+/* 분양목록 정책그룹 선택 */
+.dp-mg-sel{padding:4px 8px;border:1px solid var(--line-strong);border-radius:6px;font-size:12.5px;font-weight:600;font-family:inherit;background:#fff;color:var(--ink-1);cursor:pointer}
+.dp-mg-sel.is-unset{border-color:var(--primary);color:var(--primary)}
+.dp-mg-na{color:var(--ink-4);text-align:center}
 
 /* 마진 그룹 탭 (본부 전용) */
 .adm-mg-tabs{display:flex;align-items:center;gap:6px;margin-bottom:14px}

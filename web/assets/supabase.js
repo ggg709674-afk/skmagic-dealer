@@ -170,7 +170,7 @@
     if (!parentId) return [];
     const { data, error } = await window.sb
       .from('stores')
-      .select('id, slug, name, type, email, biz_owner, phone, created_at')
+      .select('id, slug, name, type, email, margin_group, biz_owner, phone, created_at')
       .eq('parent_store_id', parentId)
       .order('created_at', { ascending: true });
     if (error){ console.warn('[skmFetchChildStores]', error); return []; }
@@ -183,7 +183,7 @@
   window.skmFetchAllStores = async function(){
     const { data, error } = await window.sb
       .from('stores')
-      .select('id, slug, name, type, email, parent_store_id, biz_owner, phone, created_at')
+      .select('id, slug, name, type, email, parent_store_id, margin_group, biz_owner, phone, created_at')
       .order('created_at', { ascending: true });
     if (error){ console.warn('[skmFetchAllStores]', error); return []; }
     return data || [];
@@ -209,6 +209,16 @@
     const userId = data && data.user && data.user.id;
     if (!userId) return { error: new Error('계정 생성에 실패했어요(유저 ID 없음).') };
     return { userId };
+  };
+
+  /* ─── 매장 정책그룹(margin_group) 지정/변경 (본부 전용 — RLS stores_super_all) ─
+     group: 'A'|'B'|'C'|'D' 또는 빈값/그외 → null(미지정) */
+  window.skmUpdateStoreMarginGroup = async function(storeId, group){
+    if (!storeId) return { error: new Error('storeId 필요') };
+    const val = ['A','B','C','D'].includes(group) ? group : null;
+    const { error } = await window.sb.from('stores').update({ margin_group: val }).eq('id', storeId);
+    if (error) console.warn('[skmUpdateStoreMarginGroup]', error);
+    return { error };
   };
 
   /* ─── 새 매장 분양 (super=dealer/shop, dealer=shop만 — RLS stores write) ─

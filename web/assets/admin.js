@@ -1223,22 +1223,33 @@
     const urlCell = (url) =>
       `<a class="dp-url" href="${escape(url)}" target="_blank" rel="noopener">${escape(url)}</a>` +
       `<button type="button" class="dp-copy" data-copy="${escape(url)}">복사</button>`;
+    // 정책그룹 셀 (본부 전용) — 본부직속 매장만 A/B/C/D 선택, 그룹산하 판매점은 그룹이 정하므로 제외
+    const mgGroupCell = (s) => {
+      if (s._groupName) return '<td class="mg-left dp-mg-na">—</td>';
+      const cur = s.margin_group || '';
+      const opts = [['','미지정'],['A','A'],['B','B'],['C','C'],['D','D']]
+        .map(([v,l]) => `<option value="${v}" ${cur===v?'selected':''}>${l}</option>`).join('');
+      return `<td class="mg-left"><select class="dp-mg-sel${cur?'':' is-unset'}" data-store-id="${escape(s.id)}">${opts}</select></td>`;
+    };
     const body = kids.map(s => {
       const isDealer = s.type === 'dealer';
       const siteUrl  = `${DEPLOY_SITE_ORIGIN}/${s.slug}`;
       const adminUrl = `${DEPLOY_SITE_ORIGIN}/${s.slug}/admin`;
+      const created  = s.created_at ? String(s.created_at).slice(0,10) : '—';
       return `<tr>
         <td><span class="cs-kind cs-kind-${isDealer?'order':'consult'}">${isDealer?'분양형':'단독형'}</span></td>
         <td class="mg-left">${escape(s._groupName || '')}</td>
         <td class="mg-left">${escape(s.name || '')}</td>
         <td class="mg-left">${escape(s.slug || '')}</td>
         <td class="mg-left">${escape(s.email || '—')}</td>
+        ${_isSuper ? mgGroupCell(s) : ''}
+        <td class="mg-left">${created}</td>
         <td class="mg-left dp-url-cell">${urlCell(siteUrl)}</td>
         <td class="mg-left dp-url-cell">${urlCell(adminUrl)}</td>
       </tr>`;
     }).join('');
     listEl.innerHTML = `<div class="adm-table-wrap"><table class="adm-table adm-deploy-tbl">
-      <thead><tr><th>유형</th><th>그룹</th><th>상호</th><th>슬러그</th><th>이메일</th><th>사이트 주소</th><th>관리자 주소</th></tr></thead>
+      <thead><tr><th>유형</th><th>그룹</th><th>상호</th><th>슬러그</th><th>이메일</th>${_isSuper ? '<th>정책그룹</th>' : ''}<th>생성일</th><th>사이트 주소</th><th>관리자 주소</th></tr></thead>
       <tbody>${body}</tbody></table></div>`;
   }
   function bindDeployUI(){
@@ -1300,6 +1311,16 @@
         try { document.execCommand('copy'); done(); } catch(_){}
         document.body.removeChild(ta);
       }
+    });
+    // 정책그룹(margin_group) 드롭다운 변경 → 즉시 저장 (본부 전용)
+    if (list) list.addEventListener('change', async (e) => {
+      const sel = e.target.closest('.dp-mg-sel');
+      if (!sel || !window.skmUpdateStoreMarginGroup) return;
+      sel.disabled = true;
+      const { error } = await window.skmUpdateStoreMarginGroup(sel.dataset.storeId, sel.value);
+      sel.disabled = false;
+      if (error){ alert('정책그룹 저장 실패: ' + (error.message || error)); return; }
+      sel.classList.toggle('is-unset', !sel.value);
     });
   }
 
