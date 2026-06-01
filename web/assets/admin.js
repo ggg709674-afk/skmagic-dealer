@@ -1194,6 +1194,7 @@
   /* ===== 사이트분양 (분양관리) ===== */
   const DEPLOY_DEFAULT_PW = 'sk1234';   // 분양 시 판매점 초기 비밀번호 (6자 — Supabase 최소길이 충족)
   const DEPLOY_SITE_ORIGIN = 'https://sk-magic.kr';   // 분양 목록의 전체 주소 표기용
+  const DEPLOY_HQ_SLUG = 'skmagic';   // 본부 메인 카탈로그(dealer) — 분양목록에서 제외(분양받은 매장 아님)
   let _dpBound = false;
   async function initDeploy(){
     bindDeployUI();
@@ -1212,7 +1213,7 @@
       // 본부: 모든 분양 매장(본부 제외) + 소속 그룹(부모 dealer)명. 본부 직속은 그룹 공란.
       const all = await window.skmFetchAllStores();
       const byId = {}; all.forEach(s => { byId[s.id] = s; });
-      rows = all.filter(s => s.type !== 'super_admin').map(s => {
+      rows = all.filter(s => s.type !== 'super_admin' && s.slug !== DEPLOY_HQ_SLUG).map(s => {
         const parent = s.parent_store_id ? byId[s.parent_store_id] : null;
         s._groupName = (parent && parent.type === 'dealer') ? (parent.name || '') : '';
         return s;
