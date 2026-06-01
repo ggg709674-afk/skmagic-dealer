@@ -1430,6 +1430,40 @@
   let comData = null; // 업로드/Supabase 로 받은 데이터 (window.COMMISSION_DB 보다 우선)
   const comState = { cat: 'all', form: 'all', q: '' };
   function comDB(){ return comData || window.COMMISSION_DB || null; }
+
+  /* ─── 정책테이블 수수료에 적용할 마진 계산 (산하 매장 admin 전용) ───
+     - 본부(super)            : null → 원본 수수료 그대로 (차감 없음)
+     - 본부산하(그룹/판매점)  : 정책그룹(margin_group) 미지정 → _comFeeHidden=true(수수료 숨김),
+                                지정 → 본부 margins[그 그룹] 차감
+     - 그룹산하 판매점        : 부모 그룹의 margins(평면) 차감 (그룹이 정함)
+     수수료합계·공급가액 컬럼에만 적용. (요금 등 고객가는 그대로) */
+  let _comMarginMap = null, _comFeeHidden = false;
+  async function computeComMargins(){
+    _comMarginMap = null; _comFeeHidden = false;
+    if (_isSuper) return;                       // 본부 = 원본
+    const store = state.store;
+    if (!store || !window.skmFetchStore) return;
+    let parent = null;
+    if (store.parent_store_id && window.skmFetchAllStores){
+      try { const all = await window.skmFetchAllStores(); parent = all.find(s => s.id === store.parent_store_id) || null; } catch(_){}
+    }
+    if (parent && parent.type === 'dealer'){
+      // 그룹산하 판매점 → 부모 그룹이 정한 마진(평면)
+      let full = null; try { full = await window.skmFetchStore(parent.slug); } catch(_){}
+      _comMarginMap = (full && full.margins) || {};
+      return;
+    }
+    // 본부산하(그룹 or 본부직속 판매점)
+    if (!store.margin_group){ _comFeeHidden = true; return; }   // 정책그룹 미지정 → 수수료 숨김
+    let hq = null;
+    try {
+      const all = await window.skmFetchAllStores();
+      const sup = all.find(s => s.type === 'super_admin');
+      if (sup) hq = await window.skmFetchStore(sup.slug);
+    } catch(_){}
+    const groups = (hq && hq.margins) || {};
+    _comMarginMap = (groups[store.margin_group] && typeof groups[store.margin_group] === 'object') ? groups[store.margin_group] : {};
+  }
   // 정책(수수료표) 최신 1회 로드 — 상품 가격이 정책테이블 기준이라 상품관리에서도 필요
   let comFetched = false;
   async function ensureCommissionData(){
@@ -2016,6 +2050,7 @@
       if (tbody) tbody.innerHTML = `<tr><td colspan="10" class="adm-empty">수수료 데이터가 없어요. 헤더의 업로드 영역에 엑셀(.xlsx)을 올려 주세요.</td></tr>`;
       return;
     }
+    await computeComMargins();   // 산하 매장이면 적용 마진/숨김 여부 산출
     updateComSourceHint();
     renderComCatChips();
     renderComFormChips();
@@ -2326,8 +2361,15 @@
           const half = (mo && r.타사보상 != null) ? comFmt(Math.round(r.타사보상/2)) : '<span class="price-empty">—</span>';
           return `<td class="col-com-half">${half}</td><td class="col-com-half">${mo ? mo+'개월' : '<span class="price-empty">—</span>'}</td>`;
         })()}
-        <td class="col-com-num">${r.수수료합계!=null ? comFmt(Math.round(r.수수료합계/1.1)) : '<span class="price-empty">—</span>'}</td>
-        <td class="col-com-num com-fee">${comFmt(r.수수료합계)}</td>
+        ${(() => {
+          // 산하 매장: 적용마진 차감(없으면 0=원본) / 본부산하 미지정이면 수수료 숨김 / 본부는 원본
+          if (_comFeeHidden) return '<td class="col-com-num"><span class="price-empty">미지정</span></td><td class="col-com-num com-fee"><span class="price-empty">정책그룹 미지정</span></td>';
+          const m = _comMarginMap ? (Number(_comMarginMap[mgKey(r)]) || 0) : 0;
+          const fee = (r.수수료합계 != null) ? Math.max(0, r.수수료합계 - m) : null;
+          const supply = (fee != null) ? Math.round(fee / 1.1) : null;
+          return `<td class="col-com-num">${supply != null ? comFmt(supply) : '<span class="price-empty">—</span>'}</td>` +
+                 `<td class="col-com-num com-fee">${fee != null ? comFmt(fee) : '<span class="price-empty">—</span>'}</td>`;
+        })()}
       </tr>`;
     }).join('');
   }
