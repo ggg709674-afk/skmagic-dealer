@@ -1220,6 +1220,8 @@
         // 분양형(dealer)=자기 상호가 곧 그룹명 / 판매점(shop)=소속 분양형 이름 / 본부직속=공란
         s._groupName = (s.type === 'dealer') ? (s.name || '')
                      : (parent && parent.type === 'dealer') ? (parent.name || '') : '';
+        // '진짜 그룹(=skmagic 아닌 dealer) 산하'만 정책그룹 제외. skmagic(본부 메인) 직속은 본부산하로 봄.
+        s._underDealer = !!(parent && parent.type === 'dealer' && parent.slug !== DEPLOY_HQ_SLUG);
         return s;
       });
     } else if (window.skmFetchChildStores){
@@ -1240,7 +1242,7 @@
       `<button type="button" class="dp-copy" data-copy="${escape(url)}">복사</button>`;
     // 정책그룹 셀 (본부 전용) — 본부직속 매장만 A/B/C/D 선택, 그룹산하 판매점은 그룹이 정하므로 제외
     const mgGroupCell = (s) => {
-      if (s._groupName) return '<td class="mg-left dp-mg-na">—</td>';
+      if (s._underDealer) return '<td class="mg-left dp-mg-na">—</td>';   // 그룹산하 판매점 = 그룹이 정함
       const cur = s.margin_group || '';
       const opts = [['','미지정'],['A','A'],['B','B'],['C','C'],['D','D']]
         .map(([v,l]) => `<option value="${v}" ${cur===v?'selected':''}>${l}</option>`).join('');
@@ -1261,7 +1263,7 @@
         <td class="mg-left">${created}</td>
         <td class="mg-left dp-url-cell">${urlCell(siteUrl)}</td>
         <td class="mg-left dp-url-cell">${urlCell(adminUrl)}</td>
-        <td><button type="button" class="dp-edit" data-id="${escape(s.id)}" data-name="${escape(s.name || '')}">수정</button></td>
+        <td class="dp-actions"><button type="button" class="dp-edit" data-id="${escape(s.id)}" data-name="${escape(s.name || '')}" data-slug="${escape(s.slug || '')}">수정</button><button type="button" class="dp-del" data-id="${escape(s.id)}" data-name="${escape(s.name || '')}">삭제</button></td>
       </tr>`;
     }).join('');
     listEl.innerHTML = `<div class="adm-table-wrap"><table class="adm-table adm-deploy-tbl">
@@ -1327,14 +1329,32 @@
     if (list) list.addEventListener('click', async (e) => {
       const eb = e.target.closest('.dp-edit');
       if (eb){
-        const cur = eb.dataset.name || '';
-        const nv = prompt('상호명(판매점명) 수정', cur);
-        if (nv === null) return;
-        const name = nv.trim();
-        if (!name || name === cur) return;
+        const curName = eb.dataset.name || '', curSlug = eb.dataset.slug || '';
+        const name = prompt('상호명(판매점명)', curName);
+        if (name === null) return;
+        const slug = prompt('슬러그 (URL — 바꾸면 기존 /주소·링크가 달라집니다!)', curSlug);
+        if (slug === null) return;
+        const patch = {};
+        const nm = name.trim(), sl = slug.trim();
+        if (nm && nm !== curName) patch.name = nm;
+        if (sl && sl !== curSlug){
+          if (!/^[a-z0-9][a-z0-9-]*$/i.test(sl)){ alert('슬러그는 영문/숫자/하이픈만 가능해요.'); return; }
+          patch.slug = sl;
+        }
+        if (!Object.keys(patch).length) return;
         if (!window.skmUpdateStore){ alert('수정 기능을 불러오지 못했어요.'); return; }
-        const { error } = await window.skmUpdateStore(eb.dataset.id, { name });
-        if (error){ alert('수정 실패: ' + (error.message || error)); return; }
+        const { error } = await window.skmUpdateStore(eb.dataset.id, patch);
+        if (error){ alert('수정 실패: ' + (error.message || error) + (patch.slug ? '\n(슬러그 중복일 수 있어요)' : '')); return; }
+        loadDeploy();
+        return;
+      }
+      const db = e.target.closest('.dp-del');
+      if (db){
+        const nm = db.dataset.name || '이 매장';
+        if (!confirm(`'${nm}' 매장을 삭제할까요?\n\n매장·상품설정·상담이 함께 삭제됩니다.\n로그인 계정(이메일)은 Supabase 대시보드 Users 에서 별도로 지워야 같은 이메일로 재분양할 수 있어요.`)) return;
+        if (!window.skmDeleteStore){ alert('삭제 기능을 불러오지 못했어요.'); return; }
+        const { error } = await window.skmDeleteStore(db.dataset.id);
+        if (error){ alert('삭제 실패: ' + (error.message || error)); return; }
         loadDeploy();
         return;
       }

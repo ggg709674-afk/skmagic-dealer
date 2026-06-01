@@ -1005,8 +1005,11 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .dp-mg-sel{padding:4px 8px;border:1px solid var(--line-strong);border-radius:6px;font-size:12.5px;font-weight:600;font-family:inherit;background:#fff;color:var(--ink-1);cursor:pointer}
 .dp-mg-sel.is-unset{border-color:var(--primary);color:var(--primary)}
 .dp-mg-na{color:var(--ink-4);text-align:center}
+.dp-actions{white-space:nowrap}
 .dp-edit{padding:4px 12px;font-size:12px;font-weight:600;border:1px solid var(--line-strong);border-radius:6px;background:#fff;color:var(--ink-2);cursor:pointer;font-family:inherit;white-space:nowrap}
 .dp-edit:hover{border-color:var(--primary);color:var(--primary)}
+.dp-del{margin-left:6px;padding:4px 12px;font-size:12px;font-weight:600;border:1px solid #f3c2bd;border-radius:6px;background:#fff;color:var(--danger);cursor:pointer;font-family:inherit;white-space:nowrap}
+.dp-del:hover{background:var(--primary-soft)}
 
 /* 마진 그룹 탭 (본부 전용) */
 .adm-mg-tabs{display:flex;align-items:center;gap:6px;margin-bottom:14px}

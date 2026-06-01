@@ -225,6 +225,16 @@
     return { userId };
   };
 
+  /* ─── 매장 삭제 (본부=모든 매장 / 분양형=자기 산하 shop — RLS) ───
+     stores 삭제 → admin_overrides·consultations cascade 삭제.
+     ※ 로그인 계정(auth.users)은 클라에서 못 지움 → Supabase 대시보드 Users 에서 별도 삭제. */
+  window.skmDeleteStore = async function(storeId){
+    if (!storeId) return { error: new Error('storeId 필요') };
+    const { error } = await window.sb.from('stores').delete().eq('id', storeId);
+    if (error) console.warn('[skmDeleteStore]', error);
+    return { error };
+  };
+
   /* ─── 로그인 비밀번호 변경 (본인 계정 — 기본정보 메뉴) ───
      Supabase 세션 기반. 최소 6자(프로젝트 정책). */
   window.skmChangePassword = async function(newPw){
