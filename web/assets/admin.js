@@ -1228,8 +1228,8 @@
       const myName = (state.store && state.store.name) || '';
       rows.forEach(s => { s._groupName = myName; });
     }
-    // 그룹별로 묶어 보기 좋게(공란=본부직속 먼저), 그 안에서 상호순
-    rows.sort((a, b) => (a._groupName || '').localeCompare(b._groupName || '') || (a.name || '').localeCompare(b.name || ''));
+    // 최근 분양이 맨 위 (생성일 내림차순)
+    rows.sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
     renderDeployList(rows);
   }
   function renderDeployList(kids){
@@ -1261,10 +1261,11 @@
         <td class="mg-left">${created}</td>
         <td class="mg-left dp-url-cell">${urlCell(siteUrl)}</td>
         <td class="mg-left dp-url-cell">${urlCell(adminUrl)}</td>
+        <td><button type="button" class="dp-edit" data-id="${escape(s.id)}" data-name="${escape(s.name || '')}">수정</button></td>
       </tr>`;
     }).join('');
     listEl.innerHTML = `<div class="adm-table-wrap"><table class="adm-table adm-deploy-tbl">
-      <thead><tr><th>유형</th><th>그룹</th><th>상호</th><th>슬러그</th><th>이메일</th>${_isSuper ? '<th>정책그룹</th>' : ''}<th>생성일</th><th>사이트 주소</th><th>관리자 주소</th></tr></thead>
+      <thead><tr><th>유형</th><th>그룹</th><th>상호</th><th>슬러그</th><th>이메일</th>${_isSuper ? '<th>정책그룹</th>' : ''}<th>생성일</th><th>사이트 주소</th><th>관리자 주소</th><th>관리</th></tr></thead>
       <tbody>${body}</tbody></table></div>`;
   }
   function bindDeployUI(){
@@ -1321,9 +1322,22 @@
     const pwLabel = document.getElementById('dp-pw-label');
     if (pwLabel) pwLabel.textContent = DEPLOY_DEFAULT_PW;
 
-    // 주소 복사 버튼 (이벤트 위임 — 목록을 매번 다시 그려도 동작)
+    // 목록 클릭 위임 (복사 / 수정) — 목록을 매번 다시 그려도 동작
     const list = document.getElementById('dp-list');
-    if (list) list.addEventListener('click', (e) => {
+    if (list) list.addEventListener('click', async (e) => {
+      const eb = e.target.closest('.dp-edit');
+      if (eb){
+        const cur = eb.dataset.name || '';
+        const nv = prompt('상호명(판매점명) 수정', cur);
+        if (nv === null) return;
+        const name = nv.trim();
+        if (!name || name === cur) return;
+        if (!window.skmUpdateStore){ alert('수정 기능을 불러오지 못했어요.'); return; }
+        const { error } = await window.skmUpdateStore(eb.dataset.id, { name });
+        if (error){ alert('수정 실패: ' + (error.message || error)); return; }
+        loadDeploy();
+        return;
+      }
       const cbtn = e.target.closest('.dp-copy');
       if (!cbtn) return;
       const text = cbtn.dataset.copy || '';
