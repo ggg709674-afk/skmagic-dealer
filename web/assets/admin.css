@@ -1024,6 +1024,7 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 
 /* 마진 그룹 탭 (본부 전용) */
 .adm-mg-tabs{display:flex;align-items:center;gap:6px;margin-bottom:14px}
+.adm-mg-tabs[hidden]{display:none}   /* display:flex 가 hidden 속성을 덮어쓰지 않게 — 권한매장만 노출 */
 .adm-mg-tabs-label{font-size:13px;font-weight:600;color:var(--ink-2);margin-right:4px}
 .adm-mg-tab{min-width:38px;height:34px;padding:0 10px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;color:var(--ink-2);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s,color .12s}
 .adm-mg-tab:hover{border-color:var(--primary);color:var(--primary)}
