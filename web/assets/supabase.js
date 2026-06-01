@@ -329,11 +329,13 @@
     return data || [];
   };
 
-  /* ─── 신청 상태·메모 변경 (매장 owner — RLS consult_visible_update) ─
-     patch = { status, memo } 중 허용 키만 update */
+  /* ─── 신청 상태·메모·상세값 변경 (매장 owner — RLS consult_visible_update) ─
+     patch 의 허용 키만 update. 상세 모달에서 유형(전환구매 포함)·고객정보·관심상품(products)까지 수정 가능. */
   window.skmUpdateConsultation = async function(id, patch){
     if (!id) return { error: new Error('id 필요') };
-    const ALLOWED = ['status', 'memo'];
+    const ALLOWED = ['status', 'memo', 'kind',
+      'customer_name', 'customer_phone', 'customer_email', 'customer_birth', 'customer_address',
+      'products'];
     const row = { updated_at: new Date().toISOString() };
     for (const k of ALLOWED){
       if (patch && Object.prototype.hasOwnProperty.call(patch, k)) row[k] = patch[k];

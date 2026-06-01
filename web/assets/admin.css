@@ -942,17 +942,19 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .cs-row.cs-st-activated td{background:#e7f7ee}
 .cs-row.cs-st-hold td{background:#fff4e3}
 .cs-row.cs-st-cancelled td{background:#f4f4f6;color:var(--ink-4)}
-.cs-row:hover td{filter:brightness(.985)}
+.cs-row{cursor:pointer}
+.cs-row:hover td{filter:brightness(.96)}
 /* 셀 */
 .cs-kind{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap}
 .cs-kind-order{background:#fdecea;color:var(--primary)}
 .cs-kind-consult{background:#e9ebf0;color:var(--ink-3)}
+.cs-kind-convert{background:#e7f0ff;color:#2563c9}
 .adm-cs-table td.cs-c-name{font-weight:700;white-space:nowrap}
 .cs-phone{color:var(--ink-2);text-decoration:none;font-variant-numeric:tabular-nums;white-space:nowrap}
 .cs-phone:hover{color:var(--primary)}
 .cs-c-birth{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink-2)}
-.cs-c-addr{min-width:220px;color:var(--ink-2)}
-.cs-c-prod{max-width:180px;color:var(--ink-3);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cs-c-addr{max-width:200px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cs-c-prod{max-width:200px;color:var(--ink-3);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cs-c-date{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink-3);font-size:12px}
 .cs-status-sel{font-size:12.5px;font-weight:600;padding:6px 10px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink-1);cursor:pointer;font-family:inherit}
 .cs-status-sel:focus{outline:none;border-color:var(--primary)}
@@ -1020,6 +1022,15 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .adm-modal-back{position:absolute;inset:0;background:rgba(20,20,30,.45)}
 .adm-modal-panel{position:relative;z-index:1;background:#fff;border-radius:14px;padding:24px;width:min(560px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.3)}
 .adm-modal-panel .adm-store-grid{grid-template-columns:1fr}   /* 모달 안은 1열 세로 — 라벨 줄바뀜 방지 */
+/* 넓은 모달(신청 상세) — 항목 많아 2열 + 스크롤 */
+.adm-modal-panel-wide{width:min(720px,94vw);max-height:90vh;overflow:auto}
+.adm-modal-panel-wide .adm-store-grid{grid-template-columns:1fr 1fr;gap:12px 16px}
+.adm-modal-panel-wide .adm-store-full{grid-column:1 / -1}
+.adm-csm-sec{margin:18px 0 8px;font-size:12px;font-weight:800;color:var(--ink-3);letter-spacing:.02em}
+.adm-csm-check{flex-direction:row;align-items:center;gap:8px}
+.adm-csm-check span{order:2}
+.adm-csm-check input{width:18px;height:18px}
+@media (max-width:640px){ .adm-modal-panel-wide .adm-store-grid{grid-template-columns:1fr} }
 .adm-modal-title{margin:0 0 16px;font-size:18px;font-weight:800;color:var(--ink-1)}
 .dpm-note{font-size:12px;color:var(--ink-3);margin:12px 0 0;line-height:1.5}
 .dpm-note strong{color:var(--ink-1)}

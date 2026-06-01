@@ -819,6 +819,18 @@
   let _csData = null, _csFilter = 'all', _csBound = false;
   const CS_STATUS = { new:'신규접수', confirmed:'주문확인', subscribed:'청약완료', activated:'개통완료', hold:'보류', cancelled:'취소' };
   const CS_ORDER = ['new','confirmed','subscribed','activated','hold','cancelled'];
+  const CS_KIND = { consult:'상담', order:'주문', convert:'전환구매' };
+  const csKindOf = r => (r && CS_KIND[r.kind]) ? r.kind : 'consult';
+  // products[0] → 옵션 요약 문자열 (관리유형·약정·사이즈·타사보상·제휴카드)
+  function csProdLine(prods){
+    return (Array.isArray(prods) ? prods : []).map(p => {
+      const ps = [p.careType, p.contract, p.size].filter(Boolean);
+      if (p.priceMode === 'compete') ps.push('타사보상');
+      if (p.card) ps.push('제휴카드');
+      const opt = ps.join(' · ');
+      return escape(p.name || '') + (opt ? ` (${escape(opt)})` : '');
+    }).join(', ');
+  }
 
   async function initConsult(){
     bindConsultUI();
@@ -862,7 +874,93 @@
         if (row) row.memo = memo;
         inp.classList.add('cs-memo-saved'); setTimeout(() => inp.classList.remove('cs-memo-saved'), 800);
       }, true);  // blur 는 버블하지 않으므로 capture
+      // 행 클릭 → 상세/수정 모달 (인터랙티브 셀 제외)
+      list.addEventListener('click', (e) => {
+        if (e.target.closest('.cs-status-sel, .cs-memo, .cs-phone')) return;
+        const tr = e.target.closest('[data-cs-row]'); if (!tr) return;
+        const row = (_csData || []).find(r => r.id === tr.dataset.csRow);
+        if (row) openConsultModal(row);
+      });
     }
+    // 모달 닫기/저장 바인딩 (1회)
+    document.querySelectorAll('[data-csm-close]').forEach(el => el.addEventListener('click', closeConsultModal));
+    const csmSave = document.getElementById('csm-save');
+    if (csmSave) csmSave.addEventListener('click', saveConsultModal);
+  }
+
+  /* ── 신청 상세/수정 모달 ── */
+  let _csEditId = null;
+  function csModelOptions(selectedGid, current){
+    // 카탈로그(state.products)에서 모델 드롭다운. 현재 값이 목록에 없으면 맨 위에 보존 옵션.
+    const list = (state.products || []);
+    const opts = list.map(p => {
+      const code = (p.model || '').split('\n')[0].trim();
+      const label = (p.name || code || p.goodsId);
+      const sel = p.goodsId === selectedGid ? ' selected' : '';
+      return `<option value="${escape(p.goodsId)}"${sel}>${escape(label)}${code && code !== label ? ' · ' + escape(code) : ''}</option>`;
+    });
+    const inList = list.some(p => p.goodsId === selectedGid);
+    if (!inList){
+      const nm = (current && (current.name || current.model)) || '(현재 상품)';
+      opts.unshift(`<option value="${escape(selectedGid || '')}" selected>${escape(nm)} (현재)</option>`);
+    }
+    return opts.join('');
+  }
+  function openConsultModal(row){
+    _csEditId = row.id;
+    const p0 = (Array.isArray(row.products) && row.products[0]) ? row.products[0] : {};
+    const $ = id => document.getElementById(id);
+    if ($('csm-status')) $('csm-status').innerHTML = CS_ORDER.map(s => `<option value="${s}">${CS_STATUS[s]}</option>`).join('');
+    $('csm-kind').value    = csKindOf(row);
+    $('csm-status').value  = row.status || 'new';
+    $('csm-name').value    = row.customer_name || '';
+    $('csm-phone').value   = row.customer_phone || '';
+    $('csm-birth').value   = row.customer_birth || '';
+    $('csm-address').value = row.customer_address || '';
+    $('csm-model').innerHTML = csModelOptions(p0.goodsId, p0);
+    $('csm-care').value     = (p0.careType === '셀프관리' || p0.careType === '방문관리') ? p0.careType : '';
+    $('csm-contract').value = p0.contract || '';
+    $('csm-pricemode').value = (p0.priceMode === 'compete') ? 'compete' : 'new';
+    $('csm-card').checked   = !!p0.card;
+    $('csm-memo').value     = row.memo || '';
+    const msg = $('csm-status-msg'); if (msg){ msg.hidden = true; msg.textContent = ''; }
+    const m = $('cs-edit-modal'); if (m) m.hidden = false;
+  }
+  function closeConsultModal(){ const m = document.getElementById('cs-edit-modal'); if (m) m.hidden = true; _csEditId = null; }
+  async function saveConsultModal(){
+    if (!_csEditId || !window.skmUpdateConsultation) return;
+    const row = (_csData || []).find(r => r.id === _csEditId); if (!row) return;
+    const $ = id => document.getElementById(id);
+    const tv = id => ($(id).value || '').trim();
+    // 관심상품: 기존 product0 의 부가필드(기본요금/타사보상 등)는 보존하고 편집값만 덮어씀
+    const prev = (Array.isArray(row.products) && row.products[0]) ? Object.assign({}, row.products[0]) : {};
+    const gid = $('csm-model').value;
+    const cat = (state.products || []).find(p => p.goodsId === gid);
+    if (cat){ prev.goodsId = cat.goodsId; prev.name = cat.name || prev.name; prev.model = (cat.model || '').split('\n')[0].trim() || prev.model; }
+    prev.careType = $('csm-care').value || '';
+    prev.contract = tv('csm-contract');
+    prev.priceMode = $('csm-pricemode').value;
+    if ($('csm-card').checked) prev.card = true; else delete prev.card;
+    const products = [prev];
+    const patch = {
+      kind: $('csm-kind').value,
+      status: $('csm-status').value,
+      customer_name: tv('csm-name'),
+      customer_phone: tv('csm-phone'),
+      customer_birth: tv('csm-birth') || null,
+      customer_address: tv('csm-address') || null,
+      memo: tv('csm-memo') || null,
+      products,
+    };
+    const btn = $('csm-save'); if (btn) btn.disabled = true;
+    const { error } = await window.skmUpdateConsultation(_csEditId, patch);
+    if (btn) btn.disabled = false;
+    const msg = $('csm-status-msg');
+    if (error){ if (msg){ msg.hidden = false; msg.textContent = '저장 실패: ' + (error.code || error.message || ''); } return; }
+    // 로컬 반영 후 목록 갱신
+    Object.assign(row, patch);
+    renderConsultList();
+    closeConsultModal();
   }
   async function loadConsult(){
     const listEl = document.getElementById('cs-list');
@@ -894,26 +992,20 @@
     if (_csFilter !== 'all') rows = rows.filter(r => (r.kind || 'consult') === _csFilter);
     if (!rows.length){ listEl.innerHTML = '<div class="adm-empty">신청 내역이 없어요.</div>'; return; }
     const body = rows.map(r => {
-      const isOrder = (r.kind === 'order');
-      const prods = Array.isArray(r.products) ? r.products : [];
-      const prodLine = prods.map(p => {
-        const ps = [p.careType, p.contract, p.size].filter(Boolean);
-        if (p.priceMode === 'compete') ps.push('타사보상');
-        const opt = ps.join(' · ');
-        return escape(p.name || '') + (opt ? ` (${escape(opt)})` : '');
-      }).join(', ');
+      const k = csKindOf(r);
+      const prodLine = csProdLine(r.products);
       const dt = String(r.created_at || '').slice(0, 16).replace('T', ' ');
       const tel = String(r.customer_phone || '').replace(/[^0-9+]/g, '');
       const opts = CS_ORDER.map(s => `<option value="${s}" ${r.status===s?'selected':''}>${CS_STATUS[s]}</option>`).join('');
       return `
-      <tr class="cs-row cs-st-${escape(r.status || 'new')}">
-        <td><span class="cs-kind cs-kind-${isOrder?'order':'consult'}">${isOrder?'주문':'상담'}</span></td>
+      <tr class="cs-row cs-st-${escape(r.status || 'new')}" data-cs-row="${escape(r.id)}">
+        <td><span class="cs-kind cs-kind-${k}">${CS_KIND[k]}</span></td>
         <td class="cs-c-store">${escape((r.store && r.store.name) || '—')}</td>
         <td class="cs-c-name">${escape(r.customer_name || '')}</td>
         <td><a class="cs-phone" href="tel:${escape(tel)}">${escape(r.customer_phone || '')}</a></td>
         <td class="cs-c-birth">${escape(r.customer_birth || '-')}</td>
-        <td class="cs-c-addr">${escape(r.customer_address || '-')}</td>
-        <td class="cs-c-prod">${prodLine || '-'}</td>
+        <td class="cs-c-addr" title="${escape(r.customer_address || '')}">${escape(r.customer_address || '-')}</td>
+        <td class="cs-c-prod" title="${escape(prodLine)}">${prodLine || '-'}</td>
         <td class="cs-c-date">${escape(dt)}</td>
         <td><select class="cs-status-sel" data-cs-id="${escape(r.id)}">${opts}</select></td>
         <td><input type="text" class="cs-memo" data-cs-id="${escape(r.id)}" value="${escape(r.memo || '')}" placeholder="메모"></td>

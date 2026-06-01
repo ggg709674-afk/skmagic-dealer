@@ -385,11 +385,69 @@
         <button type="button" class="adm-chip on" data-cs-filter="all">전체</button>
         <button type="button" class="adm-chip" data-cs-filter="consult">상담</button>
         <button type="button" class="adm-chip" data-cs-filter="order">주문</button>
+        <button type="button" class="adm-chip" data-cs-filter="convert">전환구매</button>
       </div>
       <button type="button" class="adm-btn adm-btn-ghost" id="cs-reload">새로고침</button>
     </div>
     <div class="adm-consult-list" id="cs-list">
       <div class="adm-empty">불러오는 중…</div>
+    </div>
+
+    <!-- 신청 상세/수정 모달 -->
+    <div class="adm-modal" id="cs-edit-modal" hidden>
+      <div class="adm-modal-back" data-csm-close></div>
+      <div class="adm-modal-panel adm-modal-panel-wide">
+        <h3 class="adm-modal-title">신청 상세 / 수정</h3>
+        <div class="adm-store-grid">
+          <label class="adm-edit-field"><span>유형</span>
+            <select id="csm-kind" class="adm-input">
+              <option value="consult">상담</option>
+              <option value="order">주문</option>
+              <option value="convert">전환구매</option>
+            </select></label>
+          <label class="adm-edit-field"><span>상태</span>
+            <select id="csm-status" class="adm-input"></select></label>
+          <label class="adm-edit-field"><span>이름</span>
+            <input id="csm-name" class="adm-input" type="text"></label>
+          <label class="adm-edit-field"><span>연락처</span>
+            <input id="csm-phone" class="adm-input" type="text" autocomplete="off"></label>
+          <label class="adm-edit-field"><span>생년월일</span>
+            <input id="csm-birth" class="adm-input" type="text" placeholder="예: 19900101"></label>
+          <label class="adm-edit-field"><span>주소</span>
+            <input id="csm-address" class="adm-input" type="text"></label>
+        </div>
+
+        <div class="adm-csm-sec">관심상품</div>
+        <div class="adm-store-grid">
+          <label class="adm-edit-field adm-store-full"><span>모델</span>
+            <select id="csm-model" class="adm-input"></select></label>
+          <label class="adm-edit-field"><span>관리유형</span>
+            <select id="csm-care" class="adm-input">
+              <option value="">-</option>
+              <option value="셀프관리">셀프관리</option>
+              <option value="방문관리">방문관리</option>
+            </select></label>
+          <label class="adm-edit-field"><span>약정</span>
+            <input id="csm-contract" class="adm-input" type="text" placeholder="예: 5년 / 60개월"></label>
+          <label class="adm-edit-field"><span>가격기준</span>
+            <select id="csm-pricemode" class="adm-input">
+              <option value="new">신규 렌탈</option>
+              <option value="compete">타사 보상</option>
+            </select></label>
+          <label class="adm-edit-field adm-csm-check"><span>제휴카드 적용</span>
+            <input id="csm-card" type="checkbox"></label>
+        </div>
+
+        <label class="adm-edit-field adm-store-full"><span>메모(내부용)</span>
+          <input id="csm-memo" class="adm-input" type="text" placeholder="메모"></label>
+
+        <p class="adm-deploy-status" id="csm-status-msg" hidden></p>
+        <div class="adm-modal-foot">
+          <span class="adm-modal-spacer"></span>
+          <button type="button" class="adm-btn adm-btn-ghost" data-csm-close>취소</button>
+          <button type="button" class="adm-btn adm-btn-primary" id="csm-save">저장</button>
+        </div>
+      </div>
     </div>
   </section>
 
