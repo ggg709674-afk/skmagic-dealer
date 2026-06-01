@@ -2522,6 +2522,24 @@
   function bindStoreForm(){
     const btn = document.getElementById('store-save');
     if (btn) btn.addEventListener('click', saveStoreInfo);
+    // 비밀번호 변경 (로그인 본인 계정)
+    const pwBtn = document.getElementById('pw-change');
+    if (pwBtn) pwBtn.addEventListener('click', async () => {
+      const np = (document.getElementById('pw-new').value || '');
+      const cf = (document.getElementById('pw-confirm').value || '');
+      const st = document.getElementById('pw-status');
+      const show = (m, ok) => { if (st){ st.textContent = m; st.className = 'adm-store-status ' + (ok ? 'ok' : 'err'); st.hidden = false; } };
+      if (np.length < 6) return show('비밀번호는 6자 이상이어야 해요.', false);
+      if (np !== cf) return show('새 비밀번호가 일치하지 않아요.', false);
+      if (!window.skmChangePassword) return show('변경 기능을 불러오지 못했어요.', false);
+      pwBtn.disabled = true;
+      const { error } = await window.skmChangePassword(np);
+      pwBtn.disabled = false;
+      if (error) return show('변경 실패: ' + (error.message || error), false);
+      document.getElementById('pw-new').value = '';
+      document.getElementById('pw-confirm').value = '';
+      show('비밀번호가 변경됐어요.', true);
+    });
   }
 
   /* ─── Toast ─────────────────────────────────────── */

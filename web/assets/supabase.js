@@ -211,6 +211,15 @@
     return { userId };
   };
 
+  /* ─── 로그인 비밀번호 변경 (본인 계정 — 기본정보 메뉴) ───
+     Supabase 세션 기반. 최소 6자(프로젝트 정책). */
+  window.skmChangePassword = async function(newPw){
+    if (!newPw || newPw.length < 6) return { error: new Error('비밀번호는 6자 이상이어야 해요.') };
+    const { error } = await window.sb.auth.updateUser({ password: newPw });
+    if (error) console.warn('[skmChangePassword]', error);
+    return { error };
+  };
+
   /* ─── 매장 정책그룹(margin_group) 지정/변경 (본부 전용 — RLS stores_super_all) ─
      group: 'A'|'B'|'C'|'D' 또는 빈값/그외 → null(미지정) */
   window.skmUpdateStoreMarginGroup = async function(storeId, group){
