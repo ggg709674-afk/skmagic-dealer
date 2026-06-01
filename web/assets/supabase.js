@@ -115,6 +115,20 @@
       popup.hidden = true;
     });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !popup.hidden) popup.hidden = true; });
+    if (window.skmMountScrollTop) window.skmMountScrollTop();   // 정적페이지에도 맨위로 버튼 같이
+  };
+
+  /* ─── 맨 위로 버튼 (스크롤 내려가면 좌하단에 노출) ──────── */
+  window.skmMountScrollTop = function(){
+    if (document.getElementById('scroll-top')) return;
+    const btn = document.createElement('button');
+    btn.id = 'scroll-top'; btn.className = 'scroll-top'; btn.type = 'button'; btn.setAttribute('aria-label', '맨 위로');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+    document.body.appendChild(btn);
+    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    const onScroll = () => btn.classList.toggle('show', window.scrollY > 400);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
   };
 
   /* ─── 매장 정보 조회 ───────────────────────────── */
