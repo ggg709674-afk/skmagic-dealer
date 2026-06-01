@@ -1217,13 +1217,16 @@
       const byId = {}; all.forEach(s => { byId[s.id] = s; });
       rows = all.filter(s => s.type !== 'super_admin' && s.slug !== DEPLOY_HQ_SLUG).map(s => {
         const parent = s.parent_store_id ? byId[s.parent_store_id] : null;
-        s._groupName = (parent && parent.type === 'dealer') ? (parent.name || '') : '';
+        // 분양형(dealer)=자기 상호가 곧 그룹명 / 판매점(shop)=소속 분양형 이름 / 본부직속=공란
+        s._groupName = (s.type === 'dealer') ? (s.name || '')
+                     : (parent && parent.type === 'dealer') ? (parent.name || '') : '';
         return s;
       });
     } else if (window.skmFetchChildStores){
-      // 분양형: 자기 산하 판매점만 (그룹명 표시 안 함)
+      // 분양형 계정: 자기 산하 판매점만 → 그룹명 = 자기(분양형) 상호
       rows = await window.skmFetchChildStores(pid);
-      rows.forEach(s => { s._groupName = ''; });
+      const myName = (state.store && state.store.name) || '';
+      rows.forEach(s => { s._groupName = myName; });
     }
     // 그룹별로 묶어 보기 좋게(공란=본부직속 먼저), 그 안에서 상호순
     rows.sort((a, b) => (a._groupName || '').localeCompare(b._groupName || '') || (a.name || '').localeCompare(b.name || ''));
