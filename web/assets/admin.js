@@ -1191,14 +1191,15 @@
     // 사이트분양 폼의 유형 select — 본부만(분양형 생성 가능). 분양형은 단독형(shop) 고정
     const dpType = document.getElementById('dp-type');
     if (dpType) dpType.hidden = !_isSuper;
-    // 판매점마진설정 = 산하에 줄 마진 → 본부·분양형만. 단독형(shop)은 산하가 없어 숨김.
+    // 판매점마진설정 = 산하에 줄 마진 → 본부·분양형만 노출. 단독형(shop)·매장미연결은 숨김.
+    // (기본 hidden → 권한 확정 시에만 드러냄: 첫 페인트 번쩍임 + _myType 미상 노출 둘 다 방지)
     const isShop = _myType === 'shop';
     const mgItem = document.querySelector('.adm-nav-item[data-menu="margin"]');
-    if (mgItem) mgItem.hidden = isShop;
+    if (mgItem) mgItem.hidden = !(_isSuper || isDealer);
     // 가시성 바뀐 메뉴가 현재 선택돼 있으면 상품관리로 보정
     const cur = currentMenuFromHash();
     if ((cur === 'deploy' && !(_isSuper || isDealer)) ||
-        (cur === 'margin' && isShop) ||
+        (cur === 'margin' && !(_isSuper || isDealer)) ||
         ((cur === 'cards' || cur === 'iconlab') && !_isSuper)) {
       location.hash = '#products';
     }
