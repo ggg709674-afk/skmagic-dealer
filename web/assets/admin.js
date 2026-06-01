@@ -966,9 +966,8 @@
     }
     const raw = (state.store && state.store.margins) || {};
     const tabs = document.getElementById('mg-group-tabs');
-    // 마진그룹 탭은 '본부 권한매장(super_admin)' 컨텍스트에서만. 본부가 분양형/판매점 매장
-    // admin 을 보는 경우엔 그 매장 구조(평면)라 탭 X (탭 띄우면 그 매장 마진이 깨짐).
-    if (state.store && state.store.type === 'super_admin'){
+    // 마진그룹 탭 = 본부 매장(super_admin 권한행 또는 본부 메인 skmagic)에서만. 일반 분양형/판매점 매장은 평면.
+    if (state.store && (state.store.type === 'super_admin' || state.store.slug === DEPLOY_HQ_SLUG)){
       // 본부: 마진그룹(A/B/C/D) 중첩 구조 — 탭으로 그룹 전환하며 입력
       _mgGroups = mgAsGroups(raw);
       if (!['A','B','C','D'].includes(_mgGroup)) _mgGroup = 'A';
@@ -1516,19 +1515,19 @@
     if (store.parent_store_id && window.skmFetchAllStores){
       try { const all = await window.skmFetchAllStores(); parent = all.find(s => s.id === store.parent_store_id) || null; } catch(_){}
     }
-    if (parent && parent.type === 'dealer'){
-      // 그룹산하 판매점 → 부모 그룹이 정한 마진(평면)
+    const parentIsHQ = parent && (parent.type === 'super_admin' || parent.slug === DEPLOY_HQ_SLUG);
+    if (parent && parent.type === 'dealer' && !parentIsHQ){
+      // 진짜 그룹산하 판매점(부모가 skmagic 아닌 dealer) → 부모 그룹이 정한 평면 마진
       let full = null; try { full = await window.skmFetchStore(parent.slug); } catch(_){}
       _comMarginMap = (full && full.margins) || {};
       return;
     }
-    // 본부산하(그룹 or 본부직속 판매점)
+    // 본부산하(부모가 본부 메인 skmagic 또는 super_admin) → 본부 margins[자기 정책그룹]
     if (!store.margin_group){ _comFeeHidden = true; return; }   // 정책그룹 미지정 → 수수료 숨김
     let hq = null;
     try {
-      const all = await window.skmFetchAllStores();
-      const sup = all.find(s => s.type === 'super_admin');
-      if (sup) hq = await window.skmFetchStore(sup.slug);
+      if (parent) hq = await window.skmFetchStore(parent.slug);
+      if (!hq){ const all = await window.skmFetchAllStores(); const sup = all.find(s => s.slug === DEPLOY_HQ_SLUG) || all.find(s => s.type === 'super_admin'); if (sup) hq = await window.skmFetchStore(sup.slug); }
     } catch(_){}
     const groups = (hq && hq.margins) || {};
     _comMarginMap = (groups[store.margin_group] && typeof groups[store.margin_group] === 'object') ? groups[store.margin_group] : {};
