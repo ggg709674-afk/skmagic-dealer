@@ -62,6 +62,8 @@ body.admin-body{
   transition:background .12s, color .12s;
 }
 .adm-nav-item:hover{background:rgba(255,255,255,.05)}
+/* display:flex 가 hidden 속성을 덮어쓰지 않도록 — 권한별 메뉴 숨김(단독형 판매점마진설정 등)이 실제로 먹게 */
+.adm-nav-item[hidden], .adm-nav-group[hidden]{display:none !important}
 .adm-nav-item.on{
   background:var(--adm-side-on);
   color:#fff;
