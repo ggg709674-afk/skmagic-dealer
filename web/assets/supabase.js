@@ -125,7 +125,7 @@
     btn.id = 'scroll-top'; btn.className = 'scroll-top'; btn.type = 'button'; btn.setAttribute('aria-label', '맨 위로');
     btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
     document.body.appendChild(btn);
-    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    btn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); btn.blur(); });
     const onScroll = () => btn.classList.toggle('show', window.scrollY > 400);
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();

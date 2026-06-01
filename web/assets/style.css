@@ -829,8 +829,9 @@ ul,ol{margin:0;padding:0;list-style:none}
   transition:opacity .2s,transform .2s,visibility .2s;
 }
 .scroll-top.show{opacity:1;visibility:visible;transform:translateY(0)}
-/* hover 색변화는 마우스 기기만 — 모바일 터치 후 빨강이 눌린 채 남는 것 방지 */
-@media (hover:hover){ .scroll-top:hover{color:var(--primary);border-color:var(--primary)} }
+/* 모바일 터치 후 색 잔상 원천 차단 — hover 에서 색을 안 바꾸고(PC는 그림자만), 포커스 외곽선 제거 */
+.scroll-top:focus{outline:none}
+@media (hover:hover){ .scroll-top:hover{box-shadow:0 7px 20px rgba(0,0,0,.22)} }
 .scroll-top svg{width:20px;height:20px}
 @media (max-width:560px){ .scroll-top{right:16px;bottom:78px;width:42px;height:42px} }
 
