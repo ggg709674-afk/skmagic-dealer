@@ -982,7 +982,7 @@
       if (tabs) tabs.hidden = true;
     }
     // 상위(본부)가 나에게 뗀 마진 — 그룹 판매점마진설정의 기준 수수료에서 차감해 '내가 받는 수수료'로
-    await computeComMargins();
+    _comReady = false; await computeComMargins(); _comReady = true;
     // 메뉴 진입 시 필터 초기화 (누수 방지)
     mgState.cat = 'all'; mgState.form = 'all'; mgState.q = '';
     const s = document.getElementById('mg-search'); if (s) s.value = '';
@@ -1024,6 +1024,8 @@
   }
   function renderMarginTable(){
     const wrap = document.getElementById('mg-wrap'); if (!wrap) return;
+    // 산하(그룹) 매장은 상위마진 계산 전엔 기준 수수료 원본 노출 금지
+    if (!_isSuper && !_comReady){ wrap.innerHTML = '<div class="adm-empty">불러오는 중…</div>'; return; }
     const db = (typeof comDB === 'function') ? comDB() : null;
     if (!db || !db.rows || !db.rows.length){ wrap.innerHTML = '<div class="adm-empty">정책 테이블이 없습니다. 먼저 정책 테이블을 업로드하세요.</div>'; return; }
     const list = mgFiltered();
@@ -1189,9 +1191,14 @@
     // 사이트분양 폼의 유형 select — 본부만(분양형 생성 가능). 분양형은 단독형(shop) 고정
     const dpType = document.getElementById('dp-type');
     if (dpType) dpType.hidden = !_isSuper;
+    // 판매점마진설정 = 산하에 줄 마진 → 본부·분양형만. 단독형(shop)은 산하가 없어 숨김.
+    const isShop = _myType === 'shop';
+    const mgItem = document.querySelector('.adm-nav-item[data-menu="margin"]');
+    if (mgItem) mgItem.hidden = isShop;
     // 가시성 바뀐 메뉴가 현재 선택돼 있으면 상품관리로 보정
     const cur = currentMenuFromHash();
     if ((cur === 'deploy' && !(_isSuper || isDealer)) ||
+        (cur === 'margin' && isShop) ||
         ((cur === 'cards' || cur === 'iconlab') && !_isSuper)) {
       location.hash = '#products';
     }
@@ -1511,7 +1518,7 @@
                                 지정 → 본부 margins[그 그룹] 차감
      - 그룹산하 판매점        : 부모 그룹의 margins(평면) 차감 (그룹이 정함)
      수수료합계·공급가액 컬럼에만 적용. (요금 등 고객가는 그대로) */
-  let _comMarginMap = null, _comFeeHidden = false;
+  let _comMarginMap = null, _comFeeHidden = false, _comReady = false;
   async function computeComMargins(){
     _comMarginMap = null; _comFeeHidden = false;
     if (_isSuper) return;                       // 본부 = 원본
@@ -2124,7 +2131,9 @@
       if (tbody) tbody.innerHTML = `<tr><td colspan="10" class="adm-empty">수수료 데이터가 없어요. 헤더의 업로드 영역에 엑셀(.xlsx)을 올려 주세요.</td></tr>`;
       return;
     }
+    _comReady = false;           // 계산 끝나기 전 산하 매장 수수료 원본 노출 방지
     await computeComMargins();   // 산하 매장이면 적용 마진/숨김 여부 산출
+    _comReady = true;
     updateComSourceHint();
     renderComCatChips();
     renderComFormChips();
@@ -2436,6 +2445,8 @@
           return `<td class="col-com-half">${half}</td><td class="col-com-half">${mo ? mo+'개월' : '<span class="price-empty">—</span>'}</td>`;
         })()}
         ${(() => {
+          // ★ 산하 매장은 마진 계산 완료 전엔 수수료를 절대 노출하지 않음(원본 깜빡임=마진 역산 방지)
+          if (!_isSuper && !_comReady) return '<td class="col-com-num"><span class="price-empty">…</span></td><td class="col-com-num com-fee"><span class="price-empty">…</span></td>';
           // 산하 매장: 적용마진 차감(없으면 0=원본) / 본부산하 미지정이면 수수료 숨김 / 본부는 원본
           if (_comFeeHidden) return '<td class="col-com-num"><span class="price-empty">미지정</span></td><td class="col-com-num com-fee"><span class="price-empty">정책그룹 미지정</span></td>';
           const m = _comMarginMap ? (Number(_comMarginMap[mgKey(r)]) || 0) : 0;
