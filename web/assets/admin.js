@@ -1278,11 +1278,14 @@
       const email = (document.getElementById('dp-email').value || '').trim();
       const name = (document.getElementById('dp-name').value || '').trim();
       const typeWrap = document.getElementById('dp-type');
-      const onBtn = (typeWrap && !typeWrap.hidden) ? typeWrap.querySelector('.adm-type-btn.on') : null;
-      const type = onBtn ? (onBtn.dataset.type || 'shop') : 'shop';   // 본부 아니면(숨김) 단독형 고정
+      const typeVisible = typeWrap && !typeWrap.hidden;
+      const onBtn = typeVisible ? typeWrap.querySelector('.adm-type-btn.on') : null;
+      // 본부=선택값(미선택이면 null → 아래서 막음) / 토글 숨김(분양형 계정)=단독형 고정
+      const type = typeVisible ? (onBtn ? onBtn.dataset.type : null) : 'shop';
       const st = document.getElementById('dp-status');
       const fail = m => { if (st){ st.textContent = m; st.className = 'adm-deploy-status err'; st.hidden = false; } };
       if (!slug) return fail('슬러그를 입력하세요.');
+      if (!type) return fail('유형(분양형/단독형)을 선택하세요.');
       if (!email) return fail('ID(이메일)를 입력하세요.');
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return fail('이메일 형식을 확인하세요.');
       if (!state.store?.id || !window.skmCreateChildStore || !window.skmCreateStoreAccount){
