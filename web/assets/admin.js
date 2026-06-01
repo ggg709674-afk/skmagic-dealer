@@ -1385,7 +1385,8 @@
         const { error } = await window.skmUpdateStore(_dpEditId, patch);
         save.disabled = false;
         if (error){ dpmStatus('저장 실패: ' + (error.message || error) + (patch.slug ? ' (슬러그 중복일 수 있어요)' : ''), false); return; }
-        closeDpEditModal(); loadDeploy(); toast('수정 내용이 저장됐어요');
+        dpmStatus('저장됐어요', true);
+        setTimeout(() => { closeDpEditModal(); loadDeploy(); }, 800);
       });
       const del = document.getElementById('dpm-delete');
       if (del) del.addEventListener('click', async () => {
@@ -1396,7 +1397,7 @@
         const { error } = await window.skmDeleteStore(_dpEditId);
         del.disabled = false;
         if (error){ alert('삭제 실패: ' + (error.message || error)); return; }
-        closeDpEditModal(); loadDeploy(); toast('매장이 삭제됐어요');
+        closeDpEditModal(); loadDeploy();
       });
     }
   }
