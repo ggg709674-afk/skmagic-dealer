@@ -981,6 +981,8 @@
       _mgMargins = Object.assign({}, raw);
       if (tabs) tabs.hidden = true;
     }
+    // 상위(본부)가 나에게 뗀 마진 — 그룹 판매점마진설정의 기준 수수료에서 차감해 '내가 받는 수수료'로
+    await computeComMargins();
     // 메뉴 진입 시 필터 초기화 (누수 방지)
     mgState.cat = 'all'; mgState.form = 'all'; mgState.q = '';
     const s = document.getElementById('mg-search'); if (s) s.value = '';
@@ -1030,7 +1032,10 @@
     const body = list.map(r => {
       const key = mgKey(r);
       const d = comDisplay(r);
-      const fee = (r.수수료합계 != null) ? r.수수료합계 : null;
+      const rawFee = (r.수수료합계 != null) ? r.수수료합계 : null;
+      // 상위(본부)가 뗀 마진 차감 = 내가 받는 수수료(기준). 그룹은 본부마진 빠진 금액 기준으로 산하 마진 설정.
+      const up = _comMarginMap ? (Number(_comMarginMap[key]) || 0) : 0;
+      const fee = (rawFee != null) ? Math.max(0, rawFee - up) : null;
       const supply = (fee != null) ? Math.round(fee / 1.1) : null;
       const margin = Number(_mgMargins[key]) || 0;
       const shopFee = (fee != null) ? Math.max(0, fee - margin) : null;
