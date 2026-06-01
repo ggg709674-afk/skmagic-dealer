@@ -1014,7 +1014,8 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .adm-modal{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center}
 .adm-modal[hidden]{display:none}
 .adm-modal-back{position:absolute;inset:0;background:rgba(20,20,30,.45)}
-.adm-modal-panel{position:relative;z-index:1;background:#fff;border-radius:14px;padding:24px;width:min(480px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.adm-modal-panel{position:relative;z-index:1;background:#fff;border-radius:14px;padding:24px;width:min(560px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.adm-modal-panel .adm-store-grid{grid-template-columns:1fr}   /* 모달 안은 1열 세로 — 라벨 줄바뀜 방지 */
 .adm-modal-title{margin:0 0 16px;font-size:18px;font-weight:800;color:var(--ink-1)}
 .dpm-note{font-size:12px;color:var(--ink-3);margin:12px 0 0;line-height:1.5}
 .dpm-note strong{color:var(--ink-1)}
