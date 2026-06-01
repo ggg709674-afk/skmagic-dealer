@@ -443,10 +443,10 @@
       </div>
       <input type="email" id="dp-email" class="adm-input adm-deploy-email" placeholder="ID (이메일)" autocomplete="off">
       <input type="text" id="dp-name" class="adm-input adm-deploy-name" placeholder="판매점 상호명">
-      <select id="dp-type" class="adm-input adm-deploy-type" hidden>
-        <option value="shop">단독형 (분양 기능 없음)</option>
-        <option value="dealer">분양형 (산하 판매점 분양 가능)</option>
-      </select>
+      <div id="dp-type" class="adm-type-toggle" hidden>
+        <button type="button" class="adm-type-btn" data-type="dealer">분양형</button>
+        <button type="button" class="adm-type-btn on" data-type="shop">단독형</button>
+      </div>
       <button type="button" class="adm-btn adm-btn-primary" id="dp-add">판매점 추가(분양)</button>
       <span class="adm-deploy-status" id="dp-status" hidden></span>
     </div>

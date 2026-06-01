@@ -1264,13 +1264,20 @@
   }
   function bindDeployUI(){
     if (_dpBound) return; _dpBound = true;
+    // 유형 토글(본부만 노출) — 분양형/단독형 버튼
+    const typeToggle = document.getElementById('dp-type');
+    if (typeToggle) typeToggle.addEventListener('click', (e) => {
+      const b = e.target.closest('.adm-type-btn'); if (!b) return;
+      typeToggle.querySelectorAll('.adm-type-btn').forEach(x => x.classList.toggle('on', x === b));
+    });
     const btn = document.getElementById('dp-add');
     if (btn) btn.addEventListener('click', async () => {
       const slug = (document.getElementById('dp-slug').value || '').trim();
       const email = (document.getElementById('dp-email').value || '').trim();
       const name = (document.getElementById('dp-name').value || '').trim();
-      const typeSel = document.getElementById('dp-type');
-      const type = (typeSel && !typeSel.hidden) ? typeSel.value : 'shop';
+      const typeWrap = document.getElementById('dp-type');
+      const onBtn = (typeWrap && !typeWrap.hidden) ? typeWrap.querySelector('.adm-type-btn.on') : null;
+      const type = onBtn ? (onBtn.dataset.type || 'shop') : 'shop';   // 본부 아니면(숨김) 단독형 고정
       const st = document.getElementById('dp-status');
       const fail = m => { if (st){ st.textContent = m; st.className = 'adm-deploy-status err'; st.hidden = false; } };
       if (!slug) return fail('슬러그를 입력하세요.');

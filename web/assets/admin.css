@@ -978,6 +978,11 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 /* ===== 사이트분양 ===== */
 .adm-deploy-form{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
 .adm-deploy-name,.adm-deploy-email{width:200px}
+/* 유형 토글(분양형/단독형) — 드롭다운 대신 세그먼트 버튼 */
+.adm-type-toggle{display:inline-flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden}
+.adm-type-btn{padding:9px 18px;font-size:13px;font-weight:600;background:#fff;color:var(--ink-2);border:none;cursor:pointer;font-family:inherit;transition:background .12s,color .12s}
+.adm-type-btn + .adm-type-btn{border-left:1px solid var(--line-strong)}
+.adm-type-btn.on{background:var(--primary);color:#fff}
 .adm-deploy-slug{width:150px;border:none;border-radius:0;padding-left:2px}
 .adm-deploy-slug:focus{border:none}
 /* https://sk-magic.kr/ [슬러그] 한 덩어리 인풋 */
