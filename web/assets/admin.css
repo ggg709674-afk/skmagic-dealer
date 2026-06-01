@@ -994,6 +994,8 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .adm-deploy-status{font-size:13px;font-weight:600;margin-left:4px}
 .adm-deploy-status.ok{color:#1a8f4c}
 .adm-deploy-status.err{color:var(--primary)}
+.adm-deploy-tbl tbody td{padding-top:15px;padding-bottom:15px}
+.adm-deploy-tbl thead th{padding-top:14px;padding-bottom:14px}
 .adm-deploy-tbl .mg-left{text-align:left}
 .adm-deploy-tbl a{color:var(--primary);text-decoration:none;font-weight:600}
 .adm-deploy-tbl a:hover{text-decoration:underline}
