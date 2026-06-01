@@ -1510,6 +1510,7 @@
   let comInited = false;
   let comUploadBound = false;
   let comData = null; // 업로드/Supabase 로 받은 데이터 (window.COMMISSION_DB 보다 우선)
+  let comUpdatedAt = null; // 정책표 마지막 저장 시각(timestamptz) — 갱신 표시용(시·분)
   const comState = { cat: 'all', form: 'all', q: '' };
   // 산하(비-super)는 정적 commission.js(원본) 로 fallback 금지 — 서버 스코프(comData)만 사용.
   // RPC 미배포/오류 시 산하는 데이터 없음으로 보일지언정 원본은 절대 노출 안 함. 본부만 정적 fallback 허용.
@@ -1540,11 +1541,11 @@
       if (_isSuper && window.skmFetchCommission){
         // 본부: 원본 직접(업로드·편집·저장에 원본 payload 필요)
         const r = await window.skmFetchCommission();
-        if (r && r.payload && Array.isArray(r.payload.rows) && r.payload.rows.length) comData = r.payload;
+        if (r && r.payload && Array.isArray(r.payload.rows) && r.payload.rows.length){ comData = r.payload; comUpdatedAt = r.updated_at || null; }
       } else if (window.skmFetchCommissionScoped){
         // 산하/비로그인: 서버가 차감(또는 제거)한 값만. 원본은 안 옴.
         const p = await window.skmFetchCommissionScoped();
-        if (p && Array.isArray(p.rows) && p.rows.length) comData = p;
+        if (p && Array.isArray(p.rows) && p.rows.length){ comData = p; comUpdatedAt = p.updated_at || null; }
       }
     } catch(_){}
   }
@@ -2139,8 +2140,17 @@
     const db = comDB();
     if (!hint || !db) return;
     const models = new Set(db.rows.map(r=>r.모델)).size;
-    const when = db.built_at ? ` · 갱신 ${escape(db.built_at)}` : '';
-    hint.innerHTML = `기준: <strong>${escape(db.source || '')}</strong>${when} · 홈페이지 등록 모델 ${models}종 · 색상은 묶어서 표시(요금·수수료 동일)`;
+    // 갱신: 저장 시각(updated_at)을 KST 날짜+시·분으로. 없으면 built_at(날짜) fallback.
+    let when = '';
+    const d = comUpdatedAt ? new Date(comUpdatedAt) : null;
+    if (d && !isNaN(d.getTime())){
+      const kst = new Date(d.getTime() + 9 * 3600 * 1000);
+      const p = n => String(n).padStart(2, '0');
+      when = `갱신 ${kst.getUTCFullYear()}-${p(kst.getUTCMonth()+1)}-${p(kst.getUTCDate())} ${p(kst.getUTCHours())}:${p(kst.getUTCMinutes())} · `;
+    } else if (db.built_at){
+      when = `갱신 ${escape(db.built_at)} · `;
+    }
+    hint.innerHTML = `${when}홈페이지 등록 모델 ${models}종 · 색상은 묶어서 표시(요금·수수료 동일)`;
   }
 
   /* ─── 엑셀 업로드 (드래그앤드랍 / 클릭) ───────────── */
@@ -2846,7 +2856,7 @@
     renderChips();
     // auth/권한(_isSuper) 확정 전(applyMenuFromHash@init 초입)에 anon 으로 받았을 수 있어
     // 캐시를 비우고 올바른 스코프로 재로드 (본부=원본 / 산하=서버 차감값)
-    comFetched = false; comData = null;
+    comFetched = false; comData = null; comUpdatedAt = null;
     await ensureCommissionData();   // 상품 가격이 정책테이블 기준 → 테이블 렌더 전 로드
     renderTable();
     populateStoreForm();
