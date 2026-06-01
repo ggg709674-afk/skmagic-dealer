@@ -136,7 +136,7 @@
     if (!slug) return null;
     const { data, error } = await window.sb
       .from('stores')
-      .select('id, slug, name, type, parent_store_id, biz_no, biz_owner, mail_order_no, address, phone, email, biz_hours, kakao_url, theme_color, logo_url, margins')
+      .select('id, slug, name, type, parent_store_id, margin_group, biz_no, biz_owner, mail_order_no, address, phone, email, biz_hours, kakao_url, theme_color, logo_url, margins')
       .eq('slug', slug)
       .maybeSingle();
     if (error){
