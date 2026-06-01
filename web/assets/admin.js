@@ -966,7 +966,9 @@
     }
     const raw = (state.store && state.store.margins) || {};
     const tabs = document.getElementById('mg-group-tabs');
-    if (_isSuper){
+    // 마진그룹 탭은 '본부 권한매장(super_admin)' 컨텍스트에서만. 본부가 분양형/판매점 매장
+    // admin 을 보는 경우엔 그 매장 구조(평면)라 탭 X (탭 띄우면 그 매장 마진이 깨짐).
+    if (state.store && state.store.type === 'super_admin'){
       // 본부: 마진그룹(A/B/C/D) 중첩 구조 — 탭으로 그룹 전환하며 입력
       _mgGroups = mgAsGroups(raw);
       if (!['A','B','C','D'].includes(_mgGroup)) _mgGroup = 'A';
