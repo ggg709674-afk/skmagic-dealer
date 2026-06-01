@@ -933,7 +933,7 @@
      판매점 공급가액 = 판매점수수료 ÷ 1.1. 매장(stores.margins)에 저장.
      ※ 표시명은 comDisplay(정책 테이블과 동일: 홈 등록 상품명 우선). */
   let _mgBound = false, _mgMargins = {};
-  let _mgGroup = 'A', _mgGroups = null;   // 본부 전용: 마진그룹(A~D) 중첩. 그룹/판매점이면 null(평면)
+  let _mgGroup = 'A', _mgGroups = null, _mgStores = [];   // 본부 전용: 마진그룹(A~D) 중첩 + 정책그룹 지정된 매장 목록
   const mgState = { cat: 'all', form: 'all', q: '' };
   const mgKey = r => r.코드 + '|' + r.형태 + '|' + r.의무;
 
@@ -949,7 +949,14 @@
   function renderMgGroupTabs(){
     document.querySelectorAll('.adm-mg-tab').forEach(b => b.classList.toggle('on', b.dataset.mgGroup === _mgGroup));
     const hint = document.getElementById('mg-group-hint');
-    if (hint) hint.textContent = `${_mgGroup} 그룹 마진 입력 중 — 저장하면 ${_mgGroup} 그룹 매장에 적용`;
+    if (!hint) return;
+    const members = (_mgStores || []).filter(s => s.margin_group === _mgGroup);
+    if (members.length){
+      hint.innerHTML = `<strong>${_mgGroup} 그룹</strong> 적용 매장 ${members.length}곳: ` +
+        members.map(s => escape(s.name || s.slug || '')).join(', ');
+    } else {
+      hint.innerHTML = `<strong>${_mgGroup} 그룹</strong> — 지정된 매장 없음 (사이트분양에서 정책그룹 지정)`;
+    }
   }
 
   async function initMargin(){
@@ -964,6 +971,8 @@
       _mgGroups = mgAsGroups(raw);
       if (!['A','B','C','D'].includes(_mgGroup)) _mgGroup = 'A';
       _mgMargins = _mgGroups[_mgGroup];          // 참조 공유 → 입력이 곧 해당 그룹에 반영
+      // 정책그룹별 소속 매장 목록 (탭 hint 표시용)
+      if (window.skmFetchAllStores){ try { _mgStores = await window.skmFetchAllStores(); } catch(_){ _mgStores = []; } }
       if (tabs){ tabs.hidden = false; renderMgGroupTabs(); }
     } else {
       // 그룹/판매점: 기존 평면 구조 그대로 유지
