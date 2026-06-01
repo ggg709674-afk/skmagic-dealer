@@ -953,8 +953,9 @@ textarea.adm-input{resize:vertical; min-height:60px; line-height:1.5}
 .cs-phone{color:var(--ink-2);text-decoration:none;font-variant-numeric:tabular-nums;white-space:nowrap}
 .cs-phone:hover{color:var(--primary)}
 .cs-c-birth{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink-2)}
-.cs-c-addr{max-width:200px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cs-c-prod{max-width:200px;color:var(--ink-3);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 전부 표시 + 가로 스크롤 정책: 주소·관심상품 말줄임 없이 한 줄로 전부 노출(넘치면 .adm-cs-scroll 가로 스크롤) */
+.cs-c-addr{color:var(--ink-2);white-space:nowrap}
+.cs-c-prod{color:var(--ink-3);font-size:12px;white-space:nowrap}
 .cs-c-card{text-align:center;font-weight:700;white-space:nowrap}
 .cs-card-y{color:#1a9956}
 .cs-card-n{color:var(--ink-3)}
