@@ -821,12 +821,14 @@
   const CS_ORDER = ['new','confirmed','subscribed','activated','hold','cancelled'];
   const CS_KIND = { consult:'상담', order:'주문', convert:'전환구매' };
   const csKindOf = r => (r && CS_KIND[r.kind]) ? r.kind : 'consult';
-  // products[0] → 옵션 요약 문자열 (관리유형·약정·사이즈·타사보상·제휴카드)
+  // 카드상담 값 정규화: 'Y'/'N'/'' (구 boolean true 도 'Y' 로 호환)
+  const csCardVal = v => (v === true || v === 'Y') ? 'Y' : (v === 'N' ? 'N' : '');
+  const csCardOf = r => csCardVal((Array.isArray(r.products) && r.products[0]) ? r.products[0].card : '');
+  // products[0] → 옵션 요약 문자열 (관리유형·약정·사이즈·타사보상). 카드상담은 별도 컬럼.
   function csProdLine(prods){
     return (Array.isArray(prods) ? prods : []).map(p => {
       const ps = [p.careType, p.contract, p.size].filter(Boolean);
       if (p.priceMode === 'compete') ps.push('타사보상');
-      if (p.card) ps.push('제휴카드');
       const opt = ps.join(' · ');
       return escape(p.name || '') + (opt ? ` (${escape(opt)})` : '');
     }).join(', ');
@@ -921,7 +923,7 @@
     $('csm-care').value     = (p0.careType === '셀프관리' || p0.careType === '방문관리') ? p0.careType : '';
     $('csm-contract').value = p0.contract || '';
     $('csm-pricemode').value = (p0.priceMode === 'compete') ? 'compete' : 'new';
-    $('csm-card').checked   = !!p0.card;
+    $('csm-card').value     = csCardVal(p0.card);
     $('csm-memo').value     = row.memo || '';
     const msg = $('csm-status-msg'); if (msg){ msg.hidden = true; msg.textContent = ''; }
     const m = $('cs-edit-modal'); if (m) m.hidden = false;
@@ -940,7 +942,7 @@
     prev.careType = $('csm-care').value || '';
     prev.contract = tv('csm-contract');
     prev.priceMode = $('csm-pricemode').value;
-    if ($('csm-card').checked) prev.card = true; else delete prev.card;
+    const cardv = $('csm-card').value; if (cardv) prev.card = cardv; else delete prev.card;
     const products = [prev];
     const patch = {
       kind: $('csm-kind').value,
@@ -993,6 +995,7 @@
     if (!rows.length){ listEl.innerHTML = '<div class="adm-empty">신청 내역이 없어요.</div>'; return; }
     const body = rows.map(r => {
       const k = csKindOf(r);
+      const cardv = csCardOf(r);
       const prodLine = csProdLine(r.products);
       const dt = String(r.created_at || '').slice(0, 16).replace('T', ' ');
       const tel = String(r.customer_phone || '').replace(/[^0-9+]/g, '');
@@ -1006,6 +1009,7 @@
         <td class="cs-c-birth">${escape(r.customer_birth || '-')}</td>
         <td class="cs-c-addr" title="${escape(r.customer_address || '')}">${escape(r.customer_address || '-')}</td>
         <td class="cs-c-prod" title="${escape(prodLine)}">${prodLine || '-'}</td>
+        <td class="cs-c-card cs-card-${cardv?cardv.toLowerCase():'none'}">${cardv || '-'}</td>
         <td class="cs-c-date">${escape(dt)}</td>
         <td><select class="cs-status-sel" data-cs-id="${escape(r.id)}">${opts}</select></td>
         <td><input type="text" class="cs-memo" data-cs-id="${escape(r.id)}" value="${escape(r.memo || '')}" placeholder="메모"></td>
@@ -1013,7 +1017,7 @@
     }).join('');
     listEl.innerHTML = `<div class="adm-cs-scroll"><table class="adm-cs-table">
       <thead><tr>
-        <th>유형</th><th>매장</th><th>이름</th><th>연락처</th><th>생년월일</th><th>주소</th><th>관심상품</th><th>접수일</th><th>상태</th><th>메모</th>
+        <th>유형</th><th>매장</th><th>이름</th><th>연락처</th><th>생년월일</th><th>주소</th><th>관심상품</th><th>카드상담</th><th>접수일</th><th>상태</th><th>메모</th>
       </tr></thead>
       <tbody>${body}</tbody>
     </table></div>`;
