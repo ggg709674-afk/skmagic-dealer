@@ -1198,6 +1198,19 @@
   const DEPLOY_SITE_ORIGIN = 'https://sk-magic.kr';   // 분양 목록의 전체 주소 표기용
   const DEPLOY_HQ_SLUG = 'skmagic';   // 본부 메인 카탈로그(dealer) — 분양목록에서 제외(분양받은 매장 아님)
   let _dpBound = false;
+  let _dpEditId = null;
+  function openDpEditModal(btn){
+    _dpEditId = btn.dataset.id;
+    document.getElementById('dpm-name').value = btn.dataset.name || '';
+    document.getElementById('dpm-slug').value = btn.dataset.slug || '';
+    document.getElementById('dpm-email').value = btn.dataset.email || '';
+    const st = document.getElementById('dpm-status'); if (st) st.hidden = true;
+    const m = document.getElementById('dp-edit-modal'); if (m) m.hidden = false;
+  }
+  function closeDpEditModal(){
+    const m = document.getElementById('dp-edit-modal'); if (m) m.hidden = true;
+    _dpEditId = null;
+  }
   async function initDeploy(){
     bindDeployUI();
     await loadDeploy();
@@ -1242,7 +1255,7 @@
       `<button type="button" class="dp-copy" data-copy="${escape(url)}">복사</button>`;
     // 정책그룹 셀 (본부 전용) — 본부직속 매장만 A/B/C/D 선택, 그룹산하 판매점은 그룹이 정하므로 제외
     const mgGroupCell = (s) => {
-      if (s._underDealer) return '<td class="mg-left dp-mg-na">—</td>';   // 그룹산하 판매점 = 그룹이 정함
+      if (s._underDealer) return '<td class="mg-left dp-mg-na">그룹 관리</td>';   // 그룹산하 판매점 = 그 그룹이 정함
       const cur = s.margin_group || '';
       const opts = [['','미지정'],['A','A'],['B','B'],['C','C'],['D','D']]
         .map(([v,l]) => `<option value="${v}" ${cur===v?'selected':''}>${l}</option>`).join('');
@@ -1263,7 +1276,7 @@
         <td class="mg-left">${created}</td>
         <td class="mg-left dp-url-cell">${urlCell(siteUrl)}</td>
         <td class="mg-left dp-url-cell">${urlCell(adminUrl)}</td>
-        <td class="dp-actions"><button type="button" class="dp-edit" data-id="${escape(s.id)}" data-name="${escape(s.name || '')}" data-slug="${escape(s.slug || '')}">수정</button><button type="button" class="dp-del" data-id="${escape(s.id)}" data-name="${escape(s.name || '')}">삭제</button></td>
+        <td class="dp-actions"><button type="button" class="dp-edit" data-id="${escape(s.id)}" data-name="${escape(s.name || '')}" data-slug="${escape(s.slug || '')}" data-email="${escape(s.email || '')}">수정</button></td>
       </tr>`;
     }).join('');
     listEl.innerHTML = `<div class="adm-table-wrap"><table class="adm-table adm-deploy-tbl">
@@ -1328,36 +1341,7 @@
     const list = document.getElementById('dp-list');
     if (list) list.addEventListener('click', async (e) => {
       const eb = e.target.closest('.dp-edit');
-      if (eb){
-        const curName = eb.dataset.name || '', curSlug = eb.dataset.slug || '';
-        const name = prompt('상호명(판매점명)', curName);
-        if (name === null) return;
-        const slug = prompt('슬러그 (URL — 바꾸면 기존 /주소·링크가 달라집니다!)', curSlug);
-        if (slug === null) return;
-        const patch = {};
-        const nm = name.trim(), sl = slug.trim();
-        if (nm && nm !== curName) patch.name = nm;
-        if (sl && sl !== curSlug){
-          if (!/^[a-z0-9][a-z0-9-]*$/i.test(sl)){ alert('슬러그는 영문/숫자/하이픈만 가능해요.'); return; }
-          patch.slug = sl;
-        }
-        if (!Object.keys(patch).length) return;
-        if (!window.skmUpdateStore){ alert('수정 기능을 불러오지 못했어요.'); return; }
-        const { error } = await window.skmUpdateStore(eb.dataset.id, patch);
-        if (error){ alert('수정 실패: ' + (error.message || error) + (patch.slug ? '\n(슬러그 중복일 수 있어요)' : '')); return; }
-        loadDeploy();
-        return;
-      }
-      const db = e.target.closest('.dp-del');
-      if (db){
-        const nm = db.dataset.name || '이 매장';
-        if (!confirm(`'${nm}' 매장을 삭제할까요?\n\n매장·상품설정·상담이 함께 삭제됩니다.\n로그인 계정(이메일)은 Supabase 대시보드 Users 에서 별도로 지워야 같은 이메일로 재분양할 수 있어요.`)) return;
-        if (!window.skmDeleteStore){ alert('삭제 기능을 불러오지 못했어요.'); return; }
-        const { error } = await window.skmDeleteStore(db.dataset.id);
-        if (error){ alert('삭제 실패: ' + (error.message || error)); return; }
-        loadDeploy();
-        return;
-      }
+      if (eb){ openDpEditModal(eb); return; }
       const cbtn = e.target.closest('.dp-copy');
       if (!cbtn) return;
       const text = cbtn.dataset.copy || '';
@@ -1381,6 +1365,41 @@
       if (error){ alert('정책그룹 저장 실패: ' + (error.message || error)); return; }
       sel.classList.toggle('is-unset', !sel.value);
     });
+    // 수정 모달 — 저장 / 삭제 / 닫기
+    const dpm = document.getElementById('dp-edit-modal');
+    if (dpm){
+      const dpmStatus = (msg, ok) => { const st = document.getElementById('dpm-status'); if (st){ st.textContent = msg; st.className = 'adm-deploy-status ' + (ok ? 'ok' : 'err'); st.hidden = false; } };
+      dpm.querySelectorAll('[data-dpm-close]').forEach(el => el.addEventListener('click', closeDpEditModal));
+      const save = document.getElementById('dpm-save');
+      if (save) save.addEventListener('click', async () => {
+        if (!_dpEditId || !window.skmUpdateStore) return;
+        const name = document.getElementById('dpm-name').value.trim();
+        const slug = document.getElementById('dpm-slug').value.trim();
+        const patch = {};
+        if (name) patch.name = name;
+        if (slug){
+          if (!/^[a-z0-9][a-z0-9-]*$/i.test(slug)){ dpmStatus('슬러그는 영문/숫자/하이픈만 가능해요.', false); return; }
+          patch.slug = slug;
+        }
+        if (!Object.keys(patch).length){ closeDpEditModal(); return; }
+        save.disabled = true;
+        const { error } = await window.skmUpdateStore(_dpEditId, patch);
+        save.disabled = false;
+        if (error){ dpmStatus('저장 실패: ' + (error.message || error) + (patch.slug ? ' (슬러그 중복일 수 있어요)' : ''), false); return; }
+        closeDpEditModal(); loadDeploy();
+      });
+      const del = document.getElementById('dpm-delete');
+      if (del) del.addEventListener('click', async () => {
+        if (!_dpEditId || !window.skmDeleteStore) return;
+        const nm = document.getElementById('dpm-name').value.trim() || '이 매장';
+        if (!confirm(`'${nm}' 매장을 삭제할까요?\n\n매장·상품설정·상담이 함께 삭제됩니다.\n로그인 계정(이메일)은 Supabase 대시보드 Users 에서 별도로 지워야 같은 이메일로 재분양할 수 있어요.`)) return;
+        del.disabled = true;
+        const { error } = await window.skmDeleteStore(_dpEditId);
+        del.disabled = false;
+        if (error){ alert('삭제 실패: ' + (error.message || error)); return; }
+        closeDpEditModal(); loadDeploy();
+      });
+    }
   }
 
   function bindMenu(){

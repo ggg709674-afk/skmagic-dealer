@@ -452,6 +452,30 @@
     </div>
     <p class="adm-deploy-pwnote">초기 비밀번호는 <strong id="dp-pw-label">—</strong> 입니다. 판매점에 ID(이메일)와 함께 안내하고, 첫 로그인 후 변경하도록 하세요.</p>
     <div class="adm-deploy-list" id="dp-list"><div class="adm-empty">불러오는 중…</div></div>
+
+    <!-- 매장 수정 모달 -->
+    <div class="adm-modal" id="dp-edit-modal" hidden>
+      <div class="adm-modal-back" data-dpm-close></div>
+      <div class="adm-modal-panel">
+        <h3 class="adm-modal-title">매장 수정</h3>
+        <div class="adm-store-grid">
+          <label class="adm-edit-field"><span>상호명(판매점명)</span>
+            <input id="dpm-name" class="adm-input" type="text"></label>
+          <label class="adm-edit-field"><span>슬러그 (URL — 바꾸면 기존 주소·링크가 달라짐)</span>
+            <input id="dpm-slug" class="adm-input" type="text" autocomplete="off"></label>
+          <label class="adm-edit-field adm-store-full"><span>이메일(로그인 ID) — 변경 불가</span>
+            <input id="dpm-email" class="adm-input" type="text" readonly></label>
+        </div>
+        <p class="dpm-note">로그인 이메일은 여기서 못 바꿔요. 바꿔야 하면 <strong>삭제 후 재분양</strong>하세요. (삭제 시 로그인 계정은 Supabase 대시보드 Users 에서 별도 삭제)</p>
+        <p class="adm-deploy-status" id="dpm-status" hidden></p>
+        <div class="adm-modal-foot">
+          <button type="button" class="adm-btn adm-btn-danger" id="dpm-delete">매장 삭제</button>
+          <span class="adm-modal-spacer"></span>
+          <button type="button" class="adm-btn adm-btn-ghost" data-dpm-close>취소</button>
+          <button type="button" class="adm-btn adm-btn-primary" id="dpm-save">저장</button>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- ===== 제휴카드 관리 패널 ===== -->
