@@ -56,7 +56,7 @@
   --container: 1200px;
 }
 
-*{box-sizing:border-box}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 /* 스크롤바 자리를 항상 확보 — 콘텐츠 양에 따라 스크롤바 등장/소멸하면서 가로폭이 17px 튀는 현상 방지.
    scrollbar-gutter:stable 미지원 브라우저용 fallback: overflow-y:scroll */
