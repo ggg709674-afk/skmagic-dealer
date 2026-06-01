@@ -297,13 +297,17 @@
       products: Array.isArray(payload.products) ? payload.products : [],
       memo: trim(payload.memo) || null,
     };
-    const { data, error } = await window.sb
-      .from('consultations')
-      .insert(row)
-      .select()
-      .maybeSingle();
-    if (error) console.warn('[skmInsertConsultation]', error);
-    return { data, error };
+    // ★ .select() 안 함(return=minimal): 방문자(anon)는 consultations SELECT 권한이 없어
+    //   insert 후 RETURNING 되읽기가 RLS에 막혀 빈값/오류로 떨어질 수 있음. insert 성공이면 그만.
+    const insertOnce = () => window.sb.from('consultations').insert(row);
+    let { error } = await insertOnce();
+    // 네트워크류(코드 없는 fetch 실패)면 1회 재시도. DB 제약 오류(코드 있음)는 재시도해도 같아 → 즉시 반환.
+    if (error && !error.code){
+      await new Promise(r => setTimeout(r, 600));
+      ({ error } = await insertOnce());
+    }
+    if (error) console.warn('[skmInsertConsultation]', error.code || '', error.message || error);
+    return { data: error ? null : { ok: true }, error };
   };
 
   /* ─── 상담/주문 신청 목록 조회 (계층 — RLS consult_visible_view = my_visible_stores) ─

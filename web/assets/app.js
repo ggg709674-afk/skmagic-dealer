@@ -1770,7 +1770,13 @@ const App = (() => {
         birth: fd.get('birth'), address: fd.get('address'),
         products: buildProducts(),
       });
-      if (error){ submitBtn.disabled = false; submitBtn.textContent = '신청하기'; return fail('접수 중 오류가 났어요. 잠시 후 다시 시도해 주세요.'); }
+      if (error){
+        submitBtn.disabled = false; submitBtn.textContent = '신청하기';
+        // 진단용 임시: 간헐 오류 원인 파악 위해 코드 노출 (원인 확정되면 제거)
+        const code = (error.code || error.status || error.name || '').toString();
+        try { window.__lastConsultError = error; } catch(_){}
+        return fail('접수 중 오류가 났어요. 잠시 후 다시 시도해 주세요.' + (code ? ` (E:${code})` : ' (E:net)'));
+      }
       document.getElementById('cm-done-msg').textContent = curKind === 'order'
         ? '주문 신청이 접수됐어요. 매장에서 가입 절차를 안내드릴게요.'
         : '상담 신청이 접수됐어요. 매장에서 곧 연락드릴게요.';
