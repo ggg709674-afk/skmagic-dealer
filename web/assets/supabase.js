@@ -126,7 +126,15 @@
     btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
     document.body.appendChild(btn);
     btn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); btn.blur(); });
-    const onScroll = () => btn.classList.toggle('show', window.scrollY > 400);
+    // 아래로 스크롤 + 400px 넘으면 표시 / 위로 스크롤하면 무조건 숨김
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y < lastY) btn.classList.remove('show');         // 위로 올림 → 숨김
+      else if (y > 400) btn.classList.add('show');          // 아래로 + 충분히 내려옴 → 표시
+      if (y <= 0) btn.classList.remove('show');
+      lastY = y;
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
   };
