@@ -339,6 +339,7 @@ const App = (() => {
     setRow('ft-biz-no', store.biz_no);
     setRow('ft-biz-mailorder', store.mail_order_no);
     setRow('ft-biz-address', store.address);
+    setRow('ft-biz-hours', store.biz_hours);
     setRow('ft-biz-phone', store.phone);
     setRow('ft-biz-email', store.email);
 
