@@ -382,6 +382,9 @@ const App = (() => {
         p._featured = !!r.featured;
         p._featRank = (r.featured_rank != null) ? r.featured_rank : null;
         p._order = (r.order_index != null) ? r.order_index : null;
+        // 카드 표시 기준(약정·관리유형) — 매장이 고른 대표 노출 기준
+        if (r.display_term != null) p._dispTerm = r.display_term;
+        if (r.display_care) p._dispCare = r.display_care;
         if (r.price_regular || r.price_sale || r.price_compete || r.price_card) {
           const orig = (p.prices && p.prices[0]) || {};
           const regular = r.price_regular || stripUnit(orig.del);
@@ -472,19 +475,23 @@ const App = (() => {
     return p.prices[0];
   }
 
-  // 카드 표시용 정책 가격 — 셀프관리(없으면 방문관리) + 5년(60개월, 없으면 가장 가까운).
+  // 카드 표시용 정책 가격 — 관리유형(기본 셀프, 없으면 방문) + 약정(기본 60=5년, 없으면 가장 가까운).
+  // term/care = 매장이 고른 표시 기준(admin_overrides.display_term/care). 없으면 셀프·5년.
   // 반환: { 기준가, 기본요금 } 또는 null (정책표 매칭 실패 시 크롤 가격 fallback)
-  function cardPolicyPrice(modelCode) {
+  function cardPolicyPrice(modelCode, term, care) {
     const rows = (window.COMMISSION_DB && window.COMMISSION_DB.rows) || [];
     const base = (modelCode || '').slice(0, 10);
     if (!base) return null;
     const mine = rows.filter(r => (r.코드 || '').slice(0, 10) === base);
     if (!mine.length) return null;
-    let pool = mine.filter(r => r.형태 === '셀프형');
+    const wantCare = (care === '방문형' || care === '셀프형') ? care : '셀프형';
+    let pool = mine.filter(r => r.형태 === wantCare);
+    if (!pool.length) pool = mine.filter(r => r.형태 === '셀프형');
     if (!pool.length) pool = mine.filter(r => r.형태 === '방문형');
     if (!pool.length) pool = mine;
-    let row = pool.find(r => r.의무 === 60);
-    if (!row) row = pool.slice().sort((a, b) => Math.abs((a.의무 || 0) - 60) - Math.abs((b.의무 || 0) - 60))[0];
+    const wantTerm = Number(term) > 0 ? Number(term) : 60;
+    let row = pool.find(r => r.의무 === wantTerm);
+    if (!row) row = pool.slice().sort((a, b) => Math.abs((a.의무 || 0) - wantTerm) - Math.abs((b.의무 || 0) - wantTerm))[0];
     return row || null;
   }
 
@@ -546,8 +553,8 @@ const App = (() => {
     const tag = p._featured ? '<span class="badge b-best">추천</span>' : '';
     // 본사 model 필드는 "코드\n별점N (수)" 형식 — 모델코드만 추출
     const modelCode = (p.model || '').split('\n')[0].trim();
-    // 카드 표시 기준(셀프/방문 5년) 행 + 그 행의 반값할인 개월수
-    const pol = cardPolicyPrice(modelCode);
+    // 카드 표시 기준 행(매장이 고른 약정·관리유형, 기본 셀프·5년) + 그 행의 반값할인 개월수
+    const pol = cardPolicyPrice(modelCode, p._dispTerm, p._dispCare);
     const halfMonths = cardMaxHalfMonths(modelCode);
     const halfBadge = halfMonths ? `<div class="half-badge"><span class="m">${halfMonths}개월</span><span class="t">반값</span></div>` : '';
     // 매트리스(1000000245) 카테고리면 워커힐 브랜드 배지 표시
@@ -577,7 +584,7 @@ const App = (() => {
               const cDisc = Number((_cardDiscounts[p.goodsId] || {}).sale) || 0;
               const base = toNum(baseFee);
               if (cDisc <= 0 || base <= 0) return '';
-              return `<div class="card-applied"><small>제휴카드 적용시</small> 월 <strong>${fmtN(Math.max(0, base - cDisc))}</strong>원</div>`;
+              return `<div class="card-applied"><small>제휴카드 적용시</small><span class="ca-price">월 <strong>${fmtN(Math.max(0, base - cDisc))}</strong>원</span></div>`;
             };
             if (pol && pol.기본요금 != null) {
               const del = (pol.기준가 != null && pol.기준가 !== pol.기본요금) ? `<div class="del">월 ${fmtN(pol.기준가)}원</div>` : '';

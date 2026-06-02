@@ -531,7 +531,9 @@ ul,ol{margin:0;padding:0;list-style:none}
 .product-card .price-row .now{font-size:13px;color:var(--ink-3);display:flex;align-items:baseline;gap:4px}
 .product-card .price-row .now strong{font-size:20px;color:var(--ink-1);letter-spacing:-0.5px}
 /* 제휴카드 적용가 — 구독 요금과 동일한 크기·서식·굵기, 금액만 빨강 */
-.product-card .price-row .card-applied{font-size:13px;color:var(--ink-3);display:flex;align-items:baseline;justify-content:flex-end;gap:4px;margin-top:5px}
+.product-card .price-row .card-applied{font-size:13px;color:var(--ink-3);display:flex;flex-wrap:wrap;align-items:baseline;justify-content:flex-end;gap:2px 4px;margin-top:5px}
+.product-card .price-row .card-applied small{white-space:nowrap;flex-shrink:0}
+.product-card .price-row .card-applied .ca-price{white-space:nowrap}
 .product-card .price-row .card-applied strong{font-size:20px;color:var(--primary);letter-spacing:-0.5px}
 
 /* 색상 dot — 모델코드 줄에 inline (우측 정렬). 카드 세로 공간 절약. */
