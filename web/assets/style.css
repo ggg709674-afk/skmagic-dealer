@@ -720,13 +720,13 @@ ul,ol{margin:0;padding:0;list-style:none}
 }
 .price-card .row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
 .price-card .row:last-child{border-bottom:none}
-.price-card .row .label{font-weight:700;color:var(--ink-2);word-break:keep-all}
+.price-card .row .label{font-weight:700;color:var(--ink-2)}
 .price-card .row .label .label-note{display:block;font-weight:500;font-size:11.5px;color:var(--ink-4);margin-top:3px}
 .price-card .row .val{font-size:24px;font-weight:800;color:var(--ink-1);letter-spacing:-0.5px;white-space:nowrap}
 .price-card .row .val small{font-size:13px;color:var(--ink-4);font-weight:600;margin-right:4px}
 .price-card .row .val .del{font-size:13px;color:var(--ink-4);text-decoration:line-through;display:block;font-weight:500}
 /* 반값할인 보조표기 — 처음 N개월 반값금액(빨강 작게) + 현재 요금 가로 배치 */
-.price-card .row .val .val-half{display:block;font-size:12.5px;font-weight:700;color:var(--primary);letter-spacing:0;margin:0 0 3px;white-space:nowrap}
+.price-card .row .val .val-half{display:inline;font-size:12.5px;font-weight:700;color:var(--primary);letter-spacing:0;margin-right:8px;white-space:nowrap}
 .price-card .row .val .val-now{display:inline;white-space:nowrap}
 /* 제휴카드 적용가(빨강 강조) + 안내 링크 */
 .price-card .val-card{color:var(--primary)}
