@@ -173,6 +173,7 @@
         products:['상품 관리','노출 여부 · 추천 배지 · 표시 순서 · 매장 자체 가격/이름 수정.'],
         commission:['정책 테이블','홈페이지 등록 모델의 약정·관리방식별 정책 테이블입니다.'],
         margin:['판매점마진설정','정책 수수료에서 행별 마진을 차감해 판매점 공급가액·수수료를 산출합니다.'],
+        support:['고객지원금설정','모델·약정·관리유형별 고객지원금을 입력합니다. 손님 상품카드 이미지 하단에 표시됩니다.'],
         carddiscount:['제휴카드 할인금액 설정','상품별 제휴카드 할인액을 설정합니다. 상품 카드에는 기본요금 기준만 적용됩니다.'],
         cards:['제휴카드 관리','카드 이미지와 자세히보기 링크를 등록합니다. 제휴카드 안내 페이지에 반영됩니다.'],
         iconlab:['아이콘 시안','홈 카테고리 아이콘 디자인 시안입니다. 마음에 드는 스타일을 골라 주세요.'],
@@ -191,6 +192,23 @@
         });
         var t=document.getElementById('adm-page-title'); if(t) t.textContent=TITLES[menu][0];
         var s=document.getElementById('adm-page-sub'); if(s) s.textContent=TITLES[menu][1];
+      }catch(e){}
+      // ── 권한 캐시 적용 (직전 세션 역할로 메뉴·계정칩을 첫 페인트 전 맞춤 → 번쩍임 방지).
+      //    실제 auth가 끝나면 admin.js 가 같은 요소를 정정. 데이터 RLS는 서버가 막으므로 노출 위험 없음. ──
+      try{
+        var segs=(location.pathname||'/').split('/').filter(Boolean), seg=segs[0]||'';
+        var curSlug=(!seg||seg==='web'||/\.html?$/i.test(seg)||['admin','_super','assets','products','data'].indexOf(seg)>=0)?'':seg;
+        var rc=null; try{ rc=JSON.parse(localStorage.getItem('skm_admin_role')||'null'); }catch(_){}
+        if(rc && rc.slug===curSlug){
+          var sup=!!rc.s, dealer=(rc.t==='dealer');
+          document.querySelectorAll('[data-group="super"]').forEach(function(el){el.hidden=!sup;});
+          document.querySelectorAll('[data-group="deploy"]').forEach(function(el){el.hidden=!(sup||dealer);});
+          var mg=document.querySelector('.adm-nav-item[data-menu="margin"]'); if(mg) mg.hidden=!(sup||dealer);
+          if(rc.chip){
+            var ch=document.getElementById('adm-user-chip'); if(ch){ ch.innerHTML=rc.chip; ch.hidden=false; }
+            var so=document.getElementById('btn-signout'); if(so) so.hidden=false;
+          }
+        }
       }catch(e){}
     })();
   </script>

@@ -1480,6 +1480,7 @@
 
   /* ===== 권한별 메뉴 가시성 (super_admin / dealer=분양형 / shop=단독형) ===== */
   let _isSuper = false, _myType = null;
+  let _bootReady = false;   // 데이터 로드 완료 전엔 메뉴 init* 스킵(이중 렌더 널뛰기 방지)
   function applyRoleVisibility(authCtx){
     _isSuper = !!(authCtx && authCtx.isSuperAdmin);
     _myType  = (authCtx && authCtx.store && authCtx.store.type) || null;   // 'dealer' | 'shop' | null
@@ -1777,23 +1778,27 @@
     document.getElementById('adm-page-title').textContent = meta.title;
     document.getElementById('adm-page-sub').textContent   = meta.sub;
 
-    if (meta.kind === 'store') populateStoreForm();
-    if (meta.kind === 'commission'){
-      // 메뉴 진입 시 필터 초기화 — 이전에 걸어둔 카테고리/검색이 남아 다운로드 범위가
-      // 엉뚱해지는(="다른 데이터") 현상 방지.
-      comState.cat = 'all'; comState.form = 'all'; comState.q = '';
-      const _cs = document.getElementById('com-search'); if (_cs) _cs.value = '';
-      initCommission();
+    // 데이터(매장/정책/상품) 로드 완료 전(부팅 초기 1차 호출)엔 init* 스킵 —
+    // 미완성 상태로 렌더됐다가 2차 호출에서 다시 그려지는 '널뛰기'를 막음.
+    if (_bootReady){
+      if (meta.kind === 'store') populateStoreForm();
+      if (meta.kind === 'commission'){
+        // 메뉴 진입 시 필터 초기화 — 이전에 걸어둔 카테고리/검색이 남아 다운로드 범위가
+        // 엉뚱해지는(="다른 데이터") 현상 방지.
+        comState.cat = 'all'; comState.form = 'all'; comState.q = '';
+        const _cs = document.getElementById('com-search'); if (_cs) _cs.value = '';
+        initCommission();
+      }
+      if (meta.kind === 'carddiscount') initCardDiscount();
+      if (meta.kind === 'cards') initCards();
+      if (meta.kind === 'faq') initFaq();
+      if (meta.kind === 'banner') initBanner();
+      if (meta.kind === 'iconlab') initIconLab();
+      if (meta.kind === 'consult') initConsult();
+      if (meta.kind === 'margin') initMargin();
+      if (meta.kind === 'support') initSupport();
+      if (meta.kind === 'deploy') initDeploy();
     }
-    if (meta.kind === 'carddiscount') initCardDiscount();
-    if (meta.kind === 'cards') initCards();
-    if (meta.kind === 'faq') initFaq();
-    if (meta.kind === 'banner') initBanner();
-    if (meta.kind === 'iconlab') initIconLab();
-    if (meta.kind === 'consult') initConsult();
-    if (meta.kind === 'margin') initMargin();
-    if (meta.kind === 'support') initSupport();
-    if (meta.kind === 'deploy') initDeploy();
 
     // 상품관리 패널의 카테고리 필터도 hash 와 동기화
     if (meta.kind === 'products' && state.filterCat !== cat){
@@ -3139,6 +3144,15 @@
 
     renderAuthChip(authCtx);
     applyRoleVisibility(authCtx);
+    // 다음 새로고침 때 첫 페인트 전 메뉴/계정칩을 맞추기 위한 역할 캐시(번쩍임 방지). 인라인 부트가 읽음.
+    try {
+      const _chip = document.getElementById('adm-user-chip');
+      localStorage.setItem('skm_admin_role', JSON.stringify({
+        slug: (window.skmGetSlug && window.skmGetSlug()) || '',
+        s: _isSuper, t: _myType,
+        chip: (_chip && !_chip.hidden) ? _chip.innerHTML : ''
+      }));
+    } catch(_){}
 
     if (slug && window.skmFetchStore){
       try {
@@ -3173,6 +3187,7 @@
     // 데이터(state.products) 로드 완료 후 현재 메뉴 재적용 —
     // 초기 applyMenuFromHash 는 loadProducts 전이라 carddiscount 등 state.products 의존
     // 패널이 빈 데이터로 렌더됐음. 여기서 다시 적용해 패널·데이터를 확정.
+    _bootReady = true;   // 이제부터 init* 실행 허용(1회 렌더)
     applyMenuFromHash();
   }
 
