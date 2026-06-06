@@ -234,6 +234,7 @@
             <th class="col-toggle">노출</th>
             <th class="col-toggle">추천</th>
             <th class="col-actions">정렬</th>
+            <th class="col-basis">기준</th>
             <th class="col-edit">수정</th>
           </tr>
         </thead>
@@ -668,7 +669,7 @@
 
         <div class="adm-edit-section">
           <h4>카드 표시 기준 (홈·카탈로그 대표 가격)</h4>
-          <div class="adm-edit-grid adm-edit-grid-2">
+          <div class="adm-edit-grid adm-edit-grid-3">
             <label class="adm-edit-field">
               <span>약정</span>
               <select id="edit-term" class="adm-input"></select>
@@ -676,6 +677,13 @@
             <label class="adm-edit-field">
               <span>관리유형</span>
               <select id="edit-care" class="adm-input"></select>
+            </label>
+            <label class="adm-edit-field">
+              <span>구분</span>
+              <select id="edit-mode" class="adm-input">
+                <option value="new">신규 렌탈</option>
+                <option value="compete">타사 보상</option>
+              </select>
             </label>
           </div>
           <small class="adm-edit-orig" id="edit-price-orig"></small>

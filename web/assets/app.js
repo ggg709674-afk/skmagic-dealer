@@ -315,9 +315,10 @@ const App = (() => {
           price_sale:    r.price_sale    || base.price_sale    || null,
           price_compete: r.price_compete || base.price_compete || null,
           price_card:    r.price_card    || base.price_card    || null,
-          // 카드 표시 기준(약정·관리유형) — 매장별 독립값(상위 상속 X, 본부 base 에서 안 받음)
+          // 카드 표시 기준(약정·관리유형·구분) — 매장별 독립값(상위 상속 X, 본부 base 에서 안 받음)
           display_term:  r.display_term ?? null,
           display_care:  r.display_care ?? null,
+          display_mode:  r.display_mode ?? null,
         });
       }
     } catch (e) {
@@ -386,9 +387,10 @@ const App = (() => {
         p._featured = !!r.featured;
         p._featRank = (r.featured_rank != null) ? r.featured_rank : null;
         p._order = (r.order_index != null) ? r.order_index : null;
-        // 카드 표시 기준(약정·관리유형) — 매장이 고른 대표 노출 기준
+        // 카드 표시 기준(약정·관리유형·구분) — 매장이 고른 대표 노출 기준
         if (r.display_term != null) p._dispTerm = r.display_term;
         if (r.display_care) p._dispCare = r.display_care;
+        if (r.display_mode) p._dispMode = r.display_mode;
         if (r.price_regular || r.price_sale || r.price_compete || r.price_card) {
           const orig = (p.prices && p.prices[0]) || {};
           const regular = r.price_regular || stripUnit(orig.del);
@@ -559,6 +561,11 @@ const App = (() => {
     const modelCode = (p.model || '').split('\n')[0].trim();
     // 카드 표시 기준 행(매장이 고른 약정·관리유형, 기본 셀프·5년) + 그 행의 반값할인 개월수
     const pol = cardPolicyPrice(modelCode, p._dispTerm, p._dispCare);
+    // 구분(신규렌탈/타사보상) 표시기준 — 타사보상 선택 + 타사보상가 있을 때만 적용, 없으면 신규 폴백
+    const useComp = p._dispMode === 'compete' && pol && typeof pol.타사보상 === 'number' && pol.타사보상 > 0;
+    const repFee  = useComp ? pol.타사보상 : (pol ? pol.기본요금 : null);
+    const repLabel = useComp ? '타사보상' : '구독';
+    const repDiscKey = useComp ? 'compete' : 'sale';
     const halfMonths = cardMaxHalfMonths(modelCode);
     const halfBadge = halfMonths ? `<div class="half-badge"><span class="m">${halfMonths}개월</span><span class="t">반값</span></div>` : '';
     // 매트리스(1000000245) 카테고리면 워커힐 브랜드 배지 표시
@@ -584,15 +591,15 @@ const App = (() => {
             const toNum = v => Number(String(v == null ? '' : v).replace(/[^\d]/g, '')) || 0;
             // 제휴카드 적용가 줄 — 기본요금(sale) 기준. 정책/크롤 어느 경로든 공통 사용.
             // 할인액이 기본요금 이상이어도 적용가는 0원으로 표기(음수 방지). 할인 미설정이면 줄 생략.
-            const cardAppliedLine = (baseFee) => {
-              const cDisc = Number((_cardDiscounts[p.goodsId] || {}).sale) || 0;
+            const cardAppliedLine = (baseFee, discKey) => {
+              const cDisc = Number((_cardDiscounts[p.goodsId] || {})[discKey || 'sale']) || 0;
               const base = toNum(baseFee);
               if (cDisc <= 0 || base <= 0) return '';
               return `<div class="card-applied"><small>제휴카드 적용시</small><span class="ca-price">월 <strong>${fmtN(Math.max(0, base - cDisc))}</strong>원</span></div>`;
             };
-            if (pol && pol.기본요금 != null) {
-              const del = (pol.기준가 != null && pol.기준가 !== pol.기본요금) ? `<div class="del">월 ${fmtN(pol.기준가)}원</div>` : '';
-              return `<div class="price-row"><div class="price-main">${del}<div class="now"><small>구독</small> 월 <strong>${fmtN(pol.기본요금)}</strong>원</div></div>${cardAppliedLine(pol.기본요금)}</div>`;
+            if (pol && repFee != null) {
+              const del = (pol.기준가 != null && pol.기준가 !== repFee) ? `<div class="del">월 ${fmtN(pol.기준가)}원</div>` : '';
+              return `<div class="price-row"><div class="price-main">${del}<div class="now"><small>${repLabel}</small> 월 <strong>${fmtN(repFee)}</strong>원</div></div>${cardAppliedLine(repFee, repDiscKey)}</div>`;
             }
             // 정책표에 없는 모델 — 크롤 가격(pr) fallback. 여기도 카드 적용가 줄 표시.
             return pr ? `
@@ -809,7 +816,8 @@ const App = (() => {
     const def = pickDefaultSelection(_optState.lastOpts, p && p._dispCare, p && p._dispTerm);
     _optState.careIdx = def.careIdx;
     _optState.contractIdx = def.contractIdx;
-    _optState.priceMode = 'new';   // 기본 = 신규 렌탈
+    // 기본 구분 = 매장 표시기준(타사보상 선택 시 compete, 없으면 신규). 타사보상가 없는 약정이면 렌더에서 new로 리셋.
+    _optState.priceMode = (p && p._dispMode === 'compete') ? 'compete' : 'new';
     // 제휴카드 안내 '보던 상품으로 돌아가기'로 진입 시 선택 복원 (?opt=care.contract.mode[.size])
     try {
       const opt = new URLSearchParams(location.search).get('opt');

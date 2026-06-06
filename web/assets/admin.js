@@ -90,9 +90,10 @@
           card:    r.price_card    || '',
         };
       }
-      // 표시 기준(카드 대표 노출 약정/관리유형)
+      // 표시 기준(카드 대표 노출 약정/관리유형/구분)
       if (r.display_term != null) ed.dispTerm = r.display_term;
       if (r.display_care)         ed.dispCare = r.display_care;
+      if (r.display_mode)         ed.dispMode = r.display_mode;
       if (Object.keys(ed).length) ov.edits[gid] = ed;
       // order_index → 카테고리별 분배 (product에서 primary cat 알아내야 함)
       if (r.order_index != null){
@@ -139,13 +140,14 @@
       price_card:    ed.price?.card    || null,
       display_term:  ed.dispTerm != null ? ed.dispTerm : null,
       display_care:  ed.dispCare || null,
+      display_mode:  ed.dispMode || null,
     };
   }
   function rowIsEmpty(r){
     return !r.hidden && !r.featured && r.order_index == null
       && !r.name_override && (!r.benefits_override || r.benefits_override.length === 0) && !r.tag_override
       && !r.price_regular && !r.price_sale && !r.price_compete && !r.price_card
-      && r.display_term == null && !r.display_care;
+      && r.display_term == null && !r.display_care && !r.display_mode;
   }
 
   /* ─── 즉시 클라우드 동기화 (auto-save) ──────────── */
@@ -317,6 +319,20 @@
   }
   // 의무개월 → 라벨 ("60"→"5년", 나누어떨어지지 않으면 "N개월")
   function termLabel(m){ const n = Number(m); return (n && n % 12 === 0) ? (n / 12) + '년' : (n ? n + '개월' : '-'); }
+  // 상품관리 표 '기준' 열용 — 현재 적용 표시기준 요약(미설정이면 기본 5년·셀프·신규)
+  function basisSummary(gid){
+    const e = (state.overrides && state.overrides.edits && state.overrides.edits[gid]) || {};
+    const term = (e.dispTerm != null) ? Number(e.dispTerm) : 60;
+    const care = e.dispCare || '셀프형';
+    const mode = e.dispMode || 'new';
+    return {
+      termLbl: termLabel(term),
+      careLbl: care === '방문형' ? '방문' : '셀프',
+      modeLbl: mode === 'compete' ? '타사보상' : '신규',
+      isComp:  mode === 'compete',
+      isDefault: (e.dispTerm == null) && !e.dispCare && !e.dispMode,
+    };
+  }
 
   /* 가격 4종 — 원본 + edits 를 합쳐 표시용으로 반환
      반환: { regular, sale, compete, card }   (모두 숫자 문자열, 단위 ₩ 없이 "13,200" 형태)
@@ -413,7 +429,7 @@
     //   대표 product에 _siblings(나머지 색상의 goodsId/model/color) 포함됨.
     if (typeof App === 'undefined' || typeof App.db !== 'function'){
       document.getElementById('products-tbody').innerHTML =
-        `<tr><td colspan="9" class="adm-empty">app.js 가 로드되지 않았습니다.</td></tr>`;
+        `<tr><td colspan="14" class="adm-empty">app.js 가 로드되지 않았습니다.</td></tr>`;
       return;
     }
     try {
@@ -425,7 +441,7 @@
     } catch(e){
       console.error('[admin] App.db() 실패', e);
       document.getElementById('products-tbody').innerHTML =
-        `<tr><td colspan="9" class="adm-empty">상품 데이터 로드 실패. 콘솔을 확인하세요.</td></tr>`;
+        `<tr><td colspan="14" class="adm-empty">상품 데이터 로드 실패. 콘솔을 확인하세요.</td></tr>`;
     }
   }
 
@@ -541,7 +557,7 @@
     if (cntEl) cntEl.innerHTML = `<strong>${list.length}</strong>개 표시 중 / 전체 ${state.products.length}개`;
 
     if (!list.length){
-      tbody.innerHTML = `<tr><td colspan="13" class="adm-empty">조건에 맞는 상품이 없어요.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="14" class="adm-empty">조건에 맞는 상품이 없어요.</td></tr>`;
       return;
     }
 
@@ -558,6 +574,7 @@
       const catLabel = CATEGORY_META[cat]?.label || '—';
       const mcode = modelCode(p);
       const colorLbl = colorLabelFromModel(p);
+      const bs = basisSummary(gid);
 
       const priceCell = (v) => v ? `<strong>${escape(v)}</strong>` : `<span class="price-empty">—</span>`;
 
@@ -600,6 +617,9 @@
           <td class="col-actions">
             <button class="adm-arrow" data-act="up" ${i === 0 || !singleCat ? 'disabled' : ''} title="${singleCat ? '위로' : '단일 카테고리에서만 정렬 가능'}">▲</button>
             <button class="adm-arrow" data-act="down" ${i === list.length - 1 || !singleCat ? 'disabled' : ''} title="${singleCat ? '아래로' : '단일 카테고리에서만 정렬 가능'}">▼</button>
+          </td>
+          <td class="col-basis ${bs.isDefault ? 'is-default' : ''}">
+            <span class="bs-line"><span class="bs-chip">${bs.termLbl}</span><span class="bs-chip">${bs.careLbl}</span><span class="${bs.isComp ? 'bs-comp' : 'bs-chip'}">${bs.modeLbl}</span></span>
           </td>
           <td class="col-edit">
             <button class="adm-row-edit" data-act="edit">✎ 수정</button>
@@ -684,18 +704,23 @@
     if (!gid) return;
     openEditModal(gid);
   }
-  // 표시기준(약정·관리유형) 선택에 따른 정책가 미리보기 힌트
+  // 표시기준(약정·관리유형·구분) 선택에 따른 정책가 미리보기 힌트
   function renderEditBasisHint(){
     if (!_editingGid) return;
     const orig = findProduct(_editingGid); if (!orig) return;
     const term = Number(document.getElementById('edit-term').value) || 60;
     const care = document.getElementById('edit-care').value || '셀프형';
+    const mode = document.getElementById('edit-mode')?.value || 'new';
     const pol = comPolicyRow(modelCode(orig), term, care);
     const fmt = n => (n == null ? '—' : Number(n).toLocaleString('ko-KR'));
     const el = document.getElementById('edit-price-orig'); if (!el) return;
-    el.innerHTML = pol
-      ? `이 기준 정책가: <code>정상가 ${fmt(pol.기준가)} / 월 ${fmt(pol.기본요금)}${(typeof pol.타사보상 === 'number' && pol.타사보상 > 0) ? ' / 타사보상 ' + fmt(pol.타사보상) : ''}</code> · 가격은 정책표에서 자동`
-      : `정책표에 이 모델이 없어 본사 크롤 가격으로 표시됩니다.`;
+    if (!pol){ el.innerHTML = `정책표에 이 모델이 없어 본사 크롤 가격으로 표시됩니다.`; return; }
+    const hasComp = typeof pol.타사보상 === 'number' && pol.타사보상 > 0;
+    const useComp = mode === 'compete' && hasComp;
+    const repFee = useComp ? pol.타사보상 : pol.기본요금;        // 대표 월요금
+    const repLbl = useComp ? '타사보상' : '월';
+    const fallback = (mode === 'compete' && !hasComp) ? ' <em>(타사보상가 없어 신규렌탈로 표시)</em>' : '';
+    el.innerHTML = `이 기준 정책가: <code>정상가 ${fmt(pol.기준가)} / <b>${repLbl} ${fmt(repFee)}</b>${(hasComp && !useComp) ? ' / 타사보상 ' + fmt(pol.타사보상) : ''}</code> · 가격은 정책표에서 자동${fallback}`;
   }
   function openEditModal(gid){
     const p = findProduct(gid);
@@ -733,6 +758,8 @@
       ? basis.cares.map(c => `<option value="${c}">${c === '셀프형' ? '셀프관리' : '방문관리'}</option>`).join('')
       : '<option value="셀프형">셀프관리</option>';
     careSel.value = basis.cares.includes(curCare) ? curCare : (careSel.options[0]?.value || '셀프형');
+    const modeSel = document.getElementById('edit-mode');
+    if (modeSel){ modeSel.value = e.dispMode === 'compete' ? 'compete' : 'new'; modeSel.onchange = renderEditBasisHint; }
     termSel.onchange = careSel.onchange = renderEditBasisHint;
     renderEditBasisHint();
 
@@ -757,6 +784,7 @@
     const tag   = document.getElementById('edit-tag').value.trim();
     const term  = Number(document.getElementById('edit-term').value) || 60;
     const care  = document.getElementById('edit-care').value || '셀프형';
+    const mode  = document.getElementById('edit-mode')?.value || 'new';
 
     const ed = {};
     if (name && name !== (orig.name || '')) ed.name = name;
@@ -766,9 +794,10 @@
     const origBenefits = (orig.benefits || []).slice();
     if (benefits.join('|') !== origBenefits.join('|')) ed.benefits = benefits;
 
-    // 표시 기준 — 기본(5년·셀프)과 다를 때만 override 저장(미설정=정책 기본 추종)
+    // 표시 기준 — 기본(5년·셀프·신규)과 다를 때만 override 저장(미설정=정책 기본 추종)
     if (term !== 60) ed.dispTerm = term;
     if (care !== '셀프형') ed.dispCare = care;
+    if (mode === 'compete') ed.dispMode = mode;
     // 기존 레거시 가격 override 가 있었다면 표시기준 방식으로 전환하며 제거
     // (price 는 더 이상 입력 UI 없음 — 정책가만 사용)
 

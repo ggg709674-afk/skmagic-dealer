@@ -386,6 +386,13 @@ body.admin-body{
 .col-toggle{width:56px}
 .col-actions{width:80px; white-space:nowrap}
 .col-edit{width:80px; white-space:nowrap}
+/* 현재 표시기준(약정·관리유형·구분) 요약 열 */
+.col-basis{width:118px; white-space:nowrap; font-size:11.5px; line-height:1.5; color:var(--ink-2)}
+.col-basis .bs-line{display:flex; gap:5px; flex-wrap:wrap}
+.col-basis .bs-chip{color:var(--ink-2)}
+.col-basis .bs-comp{color:var(--primary); font-weight:600}
+.col-basis.is-default{color:var(--ink-4)}
+.col-basis.is-default .bs-chip{color:var(--ink-4)}
 
 /* ===== Switch toggle ===== */
 .adm-switch{
@@ -558,6 +565,7 @@ body.admin-body{
   min-width:0;
 }
 .adm-edit-grid-4{grid-template-columns: repeat(4, minmax(0, 1fr))}
+.adm-edit-grid-3{grid-template-columns: repeat(3, minmax(0, 1fr))}
 .adm-edit-grid-2{grid-template-columns: repeat(2, minmax(0, 1fr))}
 .adm-edit-grid .adm-input{min-width:0}
 .adm-edit-field{display:flex; flex-direction:column; gap:4px}
