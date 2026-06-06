@@ -278,6 +278,11 @@ body.admin-body{
 [data-panel="margin"] .adm-filter,
 [data-panel="margin"] .adm-margin-bar,
 [data-panel="margin"] .adm-table-wrap{max-width:1180px}
+/* 고객지원금 = 마진 −1컬럼(수수료합계) → 표 폭에 맞춰 필터·저장바·표 정렬 */
+[data-panel="support"] .adm-filter,
+[data-panel="support"] .adm-margin-bar,
+[data-panel="support"] .adm-table-wrap{max-width:1080px}
+.adm-sp-enable{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-2)}
 [data-panel="banner"] .adm-panel-hint{max-width:820px}   /* 배너 콘텐츠(설정·목록) 폭에 맞춤 */
 
 /* ===== Table ===== */

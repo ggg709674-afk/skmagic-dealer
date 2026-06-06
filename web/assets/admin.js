@@ -1278,7 +1278,7 @@
      정책테이블(comDB) 행별로 고객지원금(원)만 입력 → stores.customer_support 평면 저장.
      매장별 독립. 손님 카드 이미지 하단에 표시. */
   const spState = { cat: 'all', form: 'all', q: '' };
-  let _spData = {}, _spBound = false, _spLoaded = false;
+  let _spData = {}, _spBound = false, _spLoaded = false, _spEnabled = false;
   async function initSupport(){
     if (typeof ensureCommissionData === 'function') await ensureCommissionData();
     if (state.store?.slug && window.skmFetchStore){
@@ -1290,9 +1290,11 @@
       _spData = {};
       const saved = state.store.customer_support || {};
       Object.keys(saved).forEach(k => {
+        if (k === '__enabled'){ _spEnabled = saved[k] === true; return; }   // 카드 노출 마스터 플래그(행 아님)
         const v = saved[k];
         _spData[k] = (v && typeof v === 'object') ? { m: Number(v.m) || 0, s: Number(v.s) || 0 } : { m: null, s: Number(v) || 0 };
       });
+      const en = document.getElementById('sp-enabled'); if (en) en.checked = _spEnabled;
       _spLoaded = true;
     }
     // 마진설정과 동일 — 상위(본부) 마진 차감 맵 준비 (수수료합계 기준 계산용)
@@ -1392,6 +1394,8 @@
       _spData[inp.dataset.spKey] = { m: margin, s: (supply != null) ? spFloorManwon(supply - margin) : 0 };
       recalcSupportRow(inp.closest('tr'), supply, margin);
     });
+    const enToggle = document.getElementById('sp-enabled');
+    if (enToggle) enToggle.addEventListener('change', () => { _spEnabled = enToggle.checked; });
     const bulkBtn = document.getElementById('sp-bulk-apply');
     if (bulkBtn) bulkBtn.addEventListener('click', () => {
       const v = Number(document.getElementById('sp-bulk-input').value) || 0;   // 일괄 마진(공급가액 기준)
@@ -1410,12 +1414,16 @@
       if (!state.store?.id || !window.skmSaveCustomerSupport){ alert('매장 정보를 불러오지 못했어요.'); return; }
       const payload = {};
       Object.keys(_spData).forEach(k => { const o = _spData[k]; if (o && Number(o.s) > 0) payload[k] = { m: Number(o.m) || 0, s: Number(o.s) || 0 }; });
+      payload.__enabled = _spEnabled;   // 카드 노출 마스터 플래그(기본 false=미노출)
       saveBtn.disabled = true;
       const { error } = await window.skmSaveCustomerSupport(state.store.id, payload);
       saveBtn.disabled = false;
       const st = document.getElementById('sp-status');
       if (st){ st.textContent = error ? '저장 실패' : '저장됨'; st.className = 'adm-margin-status ' + (error ? 'err' : 'ok'); st.hidden = false; setTimeout(() => { st.hidden = true; }, 2000); }
-      if (!error){ _spData = payload; if (state.store) state.store.customer_support = payload; }
+      if (!error){
+        if (state.store) state.store.customer_support = payload;
+        const nd = {}; Object.keys(payload).forEach(k => { if (k !== '__enabled') nd[k] = payload[k]; }); _spData = nd;
+      }
     });
   }
 
