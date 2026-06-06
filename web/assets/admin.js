@@ -1278,19 +1278,23 @@
      정책테이블(comDB) 행별로 고객지원금(원)만 입력 → stores.customer_support 평면 저장.
      매장별 독립. 손님 카드 이미지 하단에 표시. */
   const spState = { cat: 'all', form: 'all', q: '' };
-  let _spData = {}, _spBound = false;
+  let _spData = {}, _spBound = false, _spLoaded = false;
   async function initSupport(){
     if (typeof ensureCommissionData === 'function') await ensureCommissionData();
     if (state.store?.slug && window.skmFetchStore){
       try { const full = await window.skmFetchStore(state.store.slug); if (full) state.store.customer_support = full.customer_support || {}; } catch(_){}
     }
     // _spData[key] = { m: 입력마진, s: 고객지원금 }. 레거시(숫자)면 s만.
-    _spData = {};
-    const saved = (state.store && state.store.customer_support) || {};
-    Object.keys(saved).forEach(k => {
-      const v = saved[k];
-      _spData[k] = (v && typeof v === 'object') ? { m: Number(v.m) || 0, s: Number(v.s) || 0 } : { m: null, s: Number(v) || 0 };
-    });
+    // 매장 컨텍스트가 아직 없으면(초기 부팅) 표를 그리지 않고 '불러오는 중' 유지 → 깜빡임 방지.
+    if (state.store){
+      _spData = {};
+      const saved = state.store.customer_support || {};
+      Object.keys(saved).forEach(k => {
+        const v = saved[k];
+        _spData[k] = (v && typeof v === 'object') ? { m: Number(v.m) || 0, s: Number(v.s) || 0 } : { m: null, s: Number(v) || 0 };
+      });
+      _spLoaded = true;
+    }
     // 마진설정과 동일 — 상위(본부) 마진 차감 맵 준비 (수수료합계 기준 계산용)
     _comReady = false; await computeComMargins(); _comReady = true;
     spState.cat = 'all'; spState.form = 'all'; spState.q = '';
@@ -1334,6 +1338,8 @@
   }
   function renderSupportTable(){
     const wrap = document.getElementById('sp-wrap'); if (!wrap) return;
+    // 매장 고객지원금 로드 전엔 기본값으로 안 그림(깜빡임 방지)
+    if (!_spLoaded){ wrap.innerHTML = '<div class="adm-empty">불러오는 중…</div>'; return; }
     if (!_isSuper && !_comReady){ wrap.innerHTML = '<div class="adm-empty">불러오는 중…</div>'; return; }
     const db = (typeof comDB === 'function') ? comDB() : null;
     if (!db || !db.rows || !db.rows.length){ wrap.innerHTML = '<div class="adm-empty">정책 테이블이 없습니다. 먼저 정책 테이블을 업로드하세요.</div>'; return; }
