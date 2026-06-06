@@ -452,14 +452,6 @@ th.col-basis{text-align:center}
 }
 .adm-row-edit:hover{background:var(--primary-soft); border-color:var(--primary); color:var(--primary)}
 
-/* 수정된 행 강조 */
-.adm-table tbody tr.is-edited td.col-price::after{
-  content:'·수정됨';
-  display:block;
-  font-size:10px; color:var(--primary); font-weight:600;
-  margin-top:2px;
-}
-
 /* ===== Empty / loading ===== */
 .adm-empty{
   text-align:center;

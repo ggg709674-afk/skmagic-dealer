@@ -601,7 +601,7 @@
           <td class="col-price col-price-regular">${prices.regular ? `<s>${escape(prices.regular)}</s>` : priceCell('')}</td>
           <td class="col-price col-price-sale">${priceCell(prices.sale)}</td>
           <td class="col-price col-price-compete">${priceCell(prices.compete)}</td>
-          <td class="col-price col-price-card">${priceCell(prices.card)}</td>
+          <td class="col-price col-price-card">${cdResultHTML(bs.isComp ? prices.compete : prices.sale, (cdDiscounts[gid] || {})[bs.isComp ? 'compete' : 'sale'])}</td>
           <td class="col-toggle">
             <label class="adm-switch">
               <input type="checkbox" data-act="visible" ${hidden ? '' : 'checked'}>
@@ -2083,15 +2083,22 @@
   const cdNum = s => parseInt(String(s).replace(/[^\d]/g, ''), 10) || 0;
   let cdDiscounts = {};   // { gid: {sale, compete} } — 편집 중 상태
   let cdInited = false;
+  let cdDiscLoaded = false;
+  // 카드할인(노출금액) 데이터 1회 로드 — 상품관리 표 제휴카드 컬럼도 이 값을 씀
+  async function ensureCardDiscounts(){
+    if (cdDiscLoaded) return;
+    cdDiscLoaded = true;
+    if (window.skmFetchCardBenefits){
+      try { const r = await window.skmFetchCardBenefits(); if (r && r.payload && r.payload.discounts) cdDiscounts = r.payload.discounts; } catch(_){}
+    }
+  }
   const cdFilter = { cat: '', q: '' };   // 카드할인 전용 필터(상품관리와 별개)
   function cdBaseList(){ return state.products.filter(p => !state.overrides.hidden[p.goodsId]); }
   async function initCardDiscount(){
     await ensureCommissionData();   // 가격(정책)이 있어야 기본요금/타사보상 표시
+    await ensureCardDiscounts();
     if (!cdInited){
       cdInited = true;
-      if (window.skmFetchCardBenefits){
-        try { const r = await window.skmFetchCardBenefits(); if (r && r.payload && r.payload.discounts) cdDiscounts = r.payload.discounts; } catch(_){}
-      }
       const sv = document.getElementById('cd-save'); if (sv) sv.addEventListener('click', saveCardDiscounts);
       // 다운로드는 헤더 공용 버튼(hdr-download)이 현재 메뉴에 맞춰 처리
       bindCdUpload();
@@ -3011,6 +3018,7 @@
     // 캐시를 비우고 올바른 스코프로 재로드 (본부=원본 / 산하=서버 차감값)
     comFetched = false; comData = null; comUpdatedAt = null;
     await ensureCommissionData();   // 상품 가격이 정책테이블 기준 → 테이블 렌더 전 로드
+    await ensureCardDiscounts();     // 제휴카드 컬럼(노출금액) 표시용
     renderTable();
     populateStoreForm();
     updateDirtyFlag();
