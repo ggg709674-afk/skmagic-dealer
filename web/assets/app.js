@@ -259,6 +259,7 @@ const App = (() => {
   let _cardDiscounts = {};   // { goodsId: {sale, compete} } — 제휴카드 할인액(card_benefits.discounts)
   let _store = null;         // 현재 매장(상담/주문 신청 INSERT 시 store_id 사용)
   let _storeMissing = false; // 슬러그는 있는데 등록된 매장이 아님(가짜 슬러그)
+  let _custSupport = {};     // 매장 고객지원금 { "<코드>|<형태>|<의무>": 금액 } — 카드 이미지 하단 표시
   async function loadOverrides() {
     if (_overrides) return _overrides;
     _overrides = new Map();
@@ -269,6 +270,7 @@ const App = (() => {
       const store = await window.skmFetchStore(slug);
       if (!store) { _storeMissing = true; return _overrides; }
       _store = store;
+      _custSupport = (store.customer_support && typeof store.customer_support === 'object') ? store.customer_support : {};
       renderStoreInfo(store);
 
       // 1) 본부(_super) base: 내용(가격·상품명·혜택·태그·메모)만 상속.
@@ -571,6 +573,10 @@ const App = (() => {
     // 매트리스(1000000245) 카테고리면 워커힐 브랜드 배지 표시
     const isMattress = (p.categories || []).includes('1000000245');
     const brandBadge = isMattress ? '<span class="brand-badge" style="background-image:url(./assets/brand/walkerhill.png)" aria-label="워커힐"></span>' : '';
+    // 고객지원금 — 매장이 표시기준 행(코드|형태|의무)에 입력한 값. 이미지 하단 밴드. 0이면 숨김.
+    const supKey = pol ? (pol.코드 + '|' + pol.형태 + '|' + pol.의무) : null;
+    const custSup = supKey ? (Number(_custSupport[supKey]) || 0) : 0;
+    const custSupBand = custSup > 0 ? `<div class="cust-support">고객지원금 <strong>${Number(custSup).toLocaleString('ko-KR')}</strong>원</div>` : '';
     return `
       <a class="product-card${isMattress ? ' has-brand' : ''}" href="./detail.html?id=${encodeURIComponent(p.goodsId)}">
         ${brandBadge}
@@ -578,6 +584,7 @@ const App = (() => {
         <div class="thumb">
           <div class="badges">${tag}</div>
           <img loading="lazy" decoding="async" src="${escape(thumbOf(p))}" alt="${escape(p.name || '')}" data-fb="${escape(thumbFallback(p))}" onerror="if(this.dataset.fb&&this.src!==this.dataset.fb){this.src=this.dataset.fb}else{this.style.opacity=.3}">
+          ${custSupBand}
         </div>
         <div class="body">
           <div class="model">

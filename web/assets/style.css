@@ -447,6 +447,14 @@ ul,ol{margin:0;padding:0;list-style:none}
   transition:transform .3s;
 }
 .product-card:hover .thumb img{transform:scale(1.04)}
+/* 고객지원금 — 이미지 박스 하단 밴드(빈 공간에 표시). 0이면 마크업 자체가 없음 */
+.product-card .thumb .cust-support{
+  position:absolute;left:0;right:0;bottom:0;z-index:2;
+  padding:6px 10px;font-size:12px;text-align:center;
+  background:rgba(255,255,255,.86);
+  color:var(--ink-2);font-weight:600;border-top:1px solid var(--line);
+}
+.product-card .thumb .cust-support strong{color:var(--primary)}
 /* 워커힐 브랜드 배지 — 카드 좌상단에 absolute로 떠있는 layout (이미지 안 박힘) */
 .product-card{position:relative}
 .product-card .brand-badge{

@@ -144,7 +144,7 @@
     if (!slug) return null;
     const { data, error } = await window.sb
       .from('stores')
-      .select('id, slug, name, type, parent_store_id, margin_group, biz_no, biz_owner, mail_order_no, address, phone, email, biz_hours, kakao_url, theme_color, logo_url, margins')
+      .select('id, slug, name, type, parent_store_id, margin_group, biz_no, biz_owner, mail_order_no, address, phone, email, biz_hours, kakao_url, theme_color, logo_url, margins, customer_support')
       .eq('slug', slug)
       .maybeSingle();
     if (error){
@@ -184,6 +184,20 @@
       .select('margins')
       .maybeSingle();
     if (error) console.warn('[skmSaveMargins]', error);
+    return { data, error };
+  };
+
+  /* ─── 고객지원금 저장 (매장 owner — RLS stores update) ─
+     customer_support = { "<코드>|<형태>|<의무>": 금액(원), ... } */
+  window.skmSaveCustomerSupport = async function(storeId, support){
+    if (!storeId) return { error: new Error('storeId 필요') };
+    const { data, error } = await window.sb
+      .from('stores')
+      .update({ customer_support: support || {} })
+      .eq('id', storeId)
+      .select('customer_support')
+      .maybeSingle();
+    if (error) console.warn('[skmSaveCustomerSupport]', error);
     return { data, error };
   };
 

@@ -843,6 +843,7 @@
     products: { title: '상품 관리', sub: '노출 여부 · 추천 배지 · 표시 순서 · 매장 자체 가격/이름 수정.', kind: 'products' },
     commission: { title: '정책 테이블', sub: '홈페이지 등록 모델의 약정·관리방식별 정책 테이블입니다.', kind: 'commission' },
     margin:     { title: '판매점마진설정', sub: '정책 수수료에서 행별 마진을 차감해 판매점 공급가액·수수료를 산출합니다.', kind: 'margin' },
+    support:    { title: '고객지원금설정', sub: '모델·약정·관리유형별 고객지원금을 입력합니다. 손님 상품카드 이미지 하단에 표시됩니다.', kind: 'support' },
     carddiscount: { title: '제휴카드 할인금액 설정', sub: '상품별 제휴카드 할인액을 설정합니다. 상품 카드에는 기본요금 기준만 적용됩니다.', kind: 'carddiscount' },
     cards:    { title: '제휴카드 관리', sub: '카드 이미지와 자세히보기 링크를 등록합니다. 제휴카드 안내 페이지에 반영됩니다.', kind: 'cards' },
     iconlab:  { title: '아이콘 시안', sub: '홈 카테고리 아이콘 디자인 시안입니다. 마음에 드는 스타일을 골라 주세요.', kind: 'iconlab' },
@@ -1273,6 +1274,102 @@
       }
     });
   }
+  /* ===== 고객지원금 설정 (판매점마진설정 레이아웃 복사 — 계산/그룹/스코프 제거) =====
+     정책테이블(comDB) 행별로 고객지원금(원)만 입력 → stores.customer_support 평면 저장.
+     매장별 독립. 손님 카드 이미지 하단에 표시. */
+  const spState = { cat: 'all', form: 'all', q: '' };
+  let _spData = {}, _spBound = false;
+  async function initSupport(){
+    if (typeof ensureCommissionData === 'function') await ensureCommissionData();
+    if (state.store?.slug && window.skmFetchStore){
+      try { const full = await window.skmFetchStore(state.store.slug); if (full) state.store.customer_support = full.customer_support || {}; } catch(_){}
+    }
+    _spData = Object.assign({}, (state.store && state.store.customer_support) || {});
+    spState.cat = 'all'; spState.form = 'all'; spState.q = '';
+    const s = document.getElementById('sp-search'); if (s) s.value = '';
+    bindSupportUI();
+    renderSpCatChips();
+    renderSpFormChips();
+    renderSupportTable();
+  }
+  function spFiltered(){
+    const db = (typeof comDB === 'function') ? comDB() : null; if (!db) return [];
+    const q = spState.q.toLowerCase();
+    return db.rows.filter(r => {
+      if (spState.cat !== 'all' && r.품목 !== spState.cat) return false;
+      if (spState.form !== 'all' && r.형태 !== spState.form) return false;
+      if (q){ const d = comDisplay(r); if (!(`${d.name} ${d.code} ${r.모델} ${r.코드||''}`.toLowerCase().includes(q))) return false; }
+      return true;
+    });
+  }
+  function renderSpCatChips(){
+    const wrap = document.getElementById('sp-cat-chips'); const db = (typeof comDB==='function')?comDB():null; if (!wrap || !db) return;
+    const counts = {}; db.rows.forEach(r => { counts[r.품목] = (counts[r.품목]||0)+1; });
+    const chips = [comChipHTML('all','전체',db.rows.length,spState.cat==='all','spcat')];
+    db.품목순.filter(c=>counts[c]).forEach(c => chips.push(comChipHTML(c,c,counts[c],spState.cat===c,'spcat')));
+    wrap.innerHTML = chips.join('');
+    wrap.querySelectorAll('.adm-chip').forEach(el => el.addEventListener('click', () => { spState.cat = el.dataset.spcat; renderSpCatChips(); renderSupportTable(); }));
+  }
+  function renderSpFormChips(){
+    const wrap = document.getElementById('sp-form-chips'); if (!wrap) return;
+    const forms = [['all','전체'],['방문형','방문형'],['셀프형','셀프형']];
+    wrap.innerHTML = forms.map(([v,l]) => comChipHTML(v,l,null,spState.form===v,'spform')).join('');
+    wrap.querySelectorAll('.adm-chip').forEach(el => el.addEventListener('click', () => { spState.form = el.dataset.spform; renderSpFormChips(); renderSupportTable(); }));
+  }
+  function renderSupportTable(){
+    const wrap = document.getElementById('sp-wrap'); if (!wrap) return;
+    const db = (typeof comDB === 'function') ? comDB() : null;
+    if (!db || !db.rows || !db.rows.length){ wrap.innerHTML = '<div class="adm-empty">정책 테이블이 없습니다. 먼저 정책 테이블을 업로드하세요.</div>'; return; }
+    const list = spFiltered();
+    const cntEl = document.getElementById('sp-count'); if (cntEl) cntEl.textContent = list.length + '개';
+    if (!list.length){ wrap.innerHTML = '<div class="adm-empty">조건에 맞는 행이 없어요.</div>'; return; }
+    const body = list.map(r => {
+      const key = mgKey(r);
+      const d = comDisplay(r);
+      const amt = Number(_spData[key]) || 0;
+      return `<tr>
+        <td>${escape(r.품목 || '')}</td>
+        <td class="mg-left">${escape(d.name)}</td>
+        <td class="mg-left">${escape(d.code)}</td>
+        <td>${r.형태 ? `<span class="com-form com-form-${r.형태==='셀프형'?'self':'visit'}">${escape(r.형태)}</span>` : '—'}</td>
+        <td>${r.의무 != null ? escape(r.의무) + '개월' : '—'}</td>
+        <td>${escape(r.관리주기 || '—')}</td>
+        <td><input type="number" class="sp-amt-input" data-sp-key="${escape(key)}" value="${amt || ''}" placeholder="0" min="0" step="1000"></td>
+      </tr>`;
+    }).join('');
+    wrap.innerHTML = `<div class="adm-table-wrap"><table class="adm-table adm-mg-table">
+      <thead><tr><th>품목</th><th>모델</th><th>제품코드</th><th>형태</th><th>의무기간</th><th>관리주기</th><th>고객지원금 (원)</th></tr></thead>
+      <tbody>${body}</tbody></table></div>`;
+  }
+  function bindSupportUI(){
+    if (_spBound) return; _spBound = true;
+    const search = document.getElementById('sp-search');
+    if (search) search.addEventListener('input', () => { spState.q = search.value.trim(); renderSupportTable(); });
+    const wrap = document.getElementById('sp-wrap');
+    if (wrap) wrap.addEventListener('input', (e) => {
+      const inp = e.target.closest('.sp-amt-input'); if (!inp) return;
+      _spData[inp.dataset.spKey] = Number(inp.value) || 0;
+    });
+    const bulkBtn = document.getElementById('sp-bulk-apply');
+    if (bulkBtn) bulkBtn.addEventListener('click', () => {
+      const v = Number(document.getElementById('sp-bulk-input').value) || 0;
+      spFiltered().forEach(r => { _spData[mgKey(r)] = v; });
+      renderSupportTable();
+    });
+    const saveBtn = document.getElementById('sp-save');
+    if (saveBtn) saveBtn.addEventListener('click', async () => {
+      if (!state.store?.id || !window.skmSaveCustomerSupport){ alert('매장 정보를 불러오지 못했어요.'); return; }
+      const payload = {};
+      Object.keys(_spData).forEach(k => { if (Number(_spData[k]) > 0) payload[k] = Number(_spData[k]); });
+      saveBtn.disabled = true;
+      const { error } = await window.skmSaveCustomerSupport(state.store.id, payload);
+      saveBtn.disabled = false;
+      const st = document.getElementById('sp-status');
+      if (st){ st.textContent = error ? '저장 실패' : '저장됨'; st.className = 'adm-margin-status ' + (error ? 'err' : 'ok'); st.hidden = false; setTimeout(() => { st.hidden = true; }, 2000); }
+      if (!error){ _spData = payload; if (state.store) state.store.customer_support = payload; }
+    });
+  }
+
   /* 판매점 마진 엑셀 다운로드 — 현재 필터된 행 + 마진·판매점가 포함 */
   async function downloadMarginXlsx(){
     if (!(await ensureXLSX())){ alert('엑셀 모듈 로딩에 실패했어요. 잠시 후 다시 시도해 주세요.'); return; }
@@ -1645,6 +1742,7 @@
     if (meta.kind === 'iconlab') initIconLab();
     if (meta.kind === 'consult') initConsult();
     if (meta.kind === 'margin') initMargin();
+    if (meta.kind === 'support') initSupport();
     if (meta.kind === 'deploy') initDeploy();
 
     // 상품관리 패널의 카테고리 필터도 hash 와 동기화

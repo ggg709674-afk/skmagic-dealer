@@ -63,6 +63,9 @@
       <a class="adm-nav-item" href="#margin" data-menu="margin" hidden>
         <span class="adm-nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg></span> 판매점마진설정
       </a>
+      <a class="adm-nav-item" href="#support" data-menu="support">
+        <span class="adm-nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span> 고객지원금설정
+      </a>
       <a class="adm-nav-item" href="#carddiscount" data-menu="carddiscount">
         <span class="adm-nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span> 카드할인금액
       </a>
@@ -492,6 +495,37 @@
       </div>
     </div>
     <div class="adm-margin-wrap" id="mg-wrap">
+      <div class="adm-empty">불러오는 중…</div>
+    </div>
+  </section>
+
+  <!-- ===== 고객지원금 설정 패널 (판매점마진설정 레이아웃 복사) ===== -->
+  <section class="adm-panel" data-panel="support" hidden>
+    <div class="adm-filter">
+      <div class="adm-filter-row">
+        <div class="adm-chips" id="sp-cat-chips"></div>
+        <span class="adm-filter-div"></span>
+        <div class="adm-chips" id="sp-form-chips"></div>
+        <div class="adm-filter-tools">
+          <div class="adm-count" id="sp-count">—</div>
+          <div class="adm-search">
+            <input type="text" id="sp-search" placeholder="모델명 / 코드 검색…" autocomplete="off">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="adm-margin-bar">
+      <div class="adm-margin-bulk">
+        <span class="adm-margin-bulk-label">일괄 고객지원금</span>
+        <input type="number" id="sp-bulk-input" class="adm-input adm-margin-bulk-input" placeholder="원" min="0" step="1000">
+        <button type="button" class="adm-btn adm-btn-ghost" id="sp-bulk-apply">전체 적용</button>
+      </div>
+      <div class="adm-margin-actions">
+        <span class="adm-margin-status" id="sp-status" hidden></span>
+        <button type="button" class="adm-btn adm-btn-primary" id="sp-save">저장</button>
+      </div>
+    </div>
+    <div class="adm-margin-wrap" id="sp-wrap">
       <div class="adm-empty">불러오는 중…</div>
     </div>
   </section>
