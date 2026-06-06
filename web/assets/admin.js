@@ -1712,6 +1712,7 @@
     document.querySelector('[data-panel="soon"]').hidden       = (meta.kind !== 'soon');
     document.querySelector('[data-panel="consult"]').hidden    = (meta.kind !== 'consult');
     document.querySelector('[data-panel="margin"]').hidden     = (meta.kind !== 'margin');
+    document.querySelector('[data-panel="support"]').hidden    = (meta.kind !== 'support');
     document.querySelector('[data-panel="deploy"]').hidden     = (meta.kind !== 'deploy');
 
     // 수수료표 업로드 드롭존은 수수료 메뉴에서만 헤더에 노출
