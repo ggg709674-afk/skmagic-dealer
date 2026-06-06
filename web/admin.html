@@ -516,6 +516,21 @@
       <div class="adm-empty">불러오는 중…</div>
     </div>
   </section>
+  <!-- 마진그룹 탭 공간을 첫 페인트 전에 확보(본부) → initMargin 때 탭이 나타나며 표가 내려오는 점프 제거.
+       실제 라벨/적용매장은 admin.js 가 채움. 캐시 역할이 super 일 때만(분양/판매점은 평면). -->
+  <script>
+    (function(){
+      try{
+        if(((location.hash||'').replace(/^#/,'').split('/')[0]) !== 'margin') return;
+        var segs=(location.pathname||'/').split('/').filter(Boolean), seg=segs[0]||'';
+        var curSlug=(!seg||seg==='web'||/\.html?$/i.test(seg)||['admin','_super','assets','products','data'].indexOf(seg)>=0)?'':seg;
+        var rc=JSON.parse(localStorage.getItem('skm_admin_role')||'null');
+        if(rc && rc.slug===curSlug && rc.s){
+          var tabs=document.getElementById('mg-group-tabs'); if(tabs) tabs.hidden=false;
+        }
+      }catch(e){}
+    })();
+  </script>
 
   <!-- ===== 고객지원금 설정 패널 (판매점마진설정 레이아웃 복사) ===== -->
   <section class="adm-panel" data-panel="support" hidden>
