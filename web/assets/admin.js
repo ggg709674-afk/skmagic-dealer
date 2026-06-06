@@ -2830,7 +2830,6 @@
     document.getElementById('edit-close').addEventListener('click', closeEditModal);
     document.getElementById('edit-cancel').addEventListener('click', closeEditModal);
     document.getElementById('edit-save').addEventListener('click', saveEditModal);
-    document.getElementById('edit-revert').addEventListener('click', revertEditModal);
     // ESC 닫기
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape'){
