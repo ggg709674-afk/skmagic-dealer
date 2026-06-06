@@ -1285,6 +1285,8 @@
       try { const full = await window.skmFetchStore(state.store.slug); if (full) state.store.customer_support = full.customer_support || {}; } catch(_){}
     }
     _spData = Object.assign({}, (state.store && state.store.customer_support) || {});
+    // 마진설정과 동일 — 상위(본부) 마진 차감 맵 준비 (수수료합계 기준 계산용)
+    _comReady = false; await computeComMargins(); _comReady = true;
     spState.cat = 'all'; spState.form = 'all'; spState.q = '';
     const s = document.getElementById('sp-search'); if (s) s.value = '';
     bindSupportUI();
@@ -1316,8 +1318,14 @@
     wrap.innerHTML = forms.map(([v,l]) => comChipHTML(v,l,null,spState.form===v,'spform')).join('');
     wrap.querySelectorAll('.adm-chip').forEach(el => el.addEventListener('click', () => { spState.form = el.dataset.spform; renderSpFormChips(); renderSupportTable(); }));
   }
+  // 마진 입력에 따른 고객지원금(=수수료합계−마진) 셀 갱신
+  function recalcSupportRow(tr, fee, margin){
+    const support = (fee != null) ? Math.max(0, fee - margin) : null;
+    const s = tr.querySelector('[data-sp-support]'); if (s) s.textContent = support != null ? comFmt(support) : '—';
+  }
   function renderSupportTable(){
     const wrap = document.getElementById('sp-wrap'); if (!wrap) return;
+    if (!_isSuper && !_comReady){ wrap.innerHTML = '<div class="adm-empty">불러오는 중…</div>'; return; }
     const db = (typeof comDB === 'function') ? comDB() : null;
     if (!db || !db.rows || !db.rows.length){ wrap.innerHTML = '<div class="adm-empty">정책 테이블이 없습니다. 먼저 정책 테이블을 업로드하세요.</div>'; return; }
     const list = spFiltered();
@@ -1326,19 +1334,29 @@
     const body = list.map(r => {
       const key = mgKey(r);
       const d = comDisplay(r);
-      const amt = Number(_spData[key]) || 0;
-      return `<tr>
+      const rawFee = (r.수수료합계 != null) ? r.수수료합계 : null;
+      const up = _comMarginMap ? (Number(_comMarginMap[key]) || 0) : 0;
+      const fee = (rawFee != null) ? Math.max(0, rawFee - up) : null;
+      const supply = (fee != null) ? Math.round(fee / 1.1) : null;
+      // _spData = 저장된 고객지원금. 미설정 행은 마진0 → 고객지원금=수수료합계(표시만, 저장은 입력 시).
+      const hasVal = Object.prototype.hasOwnProperty.call(_spData, key);
+      const support = hasVal ? (Number(_spData[key]) || 0) : (fee != null ? fee : null);
+      const margin = (fee != null && support != null) ? Math.max(0, fee - support) : 0;
+      return `<tr class="mg-row">
         <td>${escape(r.품목 || '')}</td>
         <td class="mg-left">${escape(d.name)}</td>
         <td class="mg-left">${escape(d.code)}</td>
         <td>${r.형태 ? `<span class="com-form com-form-${r.형태==='셀프형'?'self':'visit'}">${escape(r.형태)}</span>` : '—'}</td>
         <td>${r.의무 != null ? escape(r.의무) + '개월' : '—'}</td>
         <td>${escape(r.관리주기 || '—')}</td>
-        <td><input type="number" class="sp-amt-input" data-sp-key="${escape(key)}" value="${amt || ''}" placeholder="0" min="0" step="1000"></td>
+        <td>${supply != null ? comFmt(supply) : '—'}</td>
+        <td class="mg-fee-col">${fee != null ? comFmt(fee) : '—'}</td>
+        <td><input type="number" class="sp-amt-input" data-sp-key="${escape(key)}" data-sp-fee-val="${fee != null ? fee : ''}" value="${margin || ''}" placeholder="0" min="0" step="1000"></td>
+        <td class="mg-shop" data-sp-support="${escape(key)}">${support != null ? comFmt(support) : '—'}</td>
       </tr>`;
     }).join('');
     wrap.innerHTML = `<div class="adm-table-wrap"><table class="adm-table adm-mg-table">
-      <thead><tr><th>품목</th><th>모델</th><th>제품코드</th><th>형태</th><th>의무기간</th><th>관리주기</th><th>고객지원금 (원)</th></tr></thead>
+      <thead><tr><th>품목</th><th>모델</th><th>제품코드</th><th>형태</th><th>의무기간</th><th>관리주기</th><th>공급가액</th><th>수수료합계</th><th>마진입력 (VAT 포함)</th><th>고객지원금</th></tr></thead>
       <tbody>${body}</tbody></table></div>`;
   }
   function bindSupportUI(){
@@ -1348,12 +1366,22 @@
     const wrap = document.getElementById('sp-wrap');
     if (wrap) wrap.addEventListener('input', (e) => {
       const inp = e.target.closest('.sp-amt-input'); if (!inp) return;
-      _spData[inp.dataset.spKey] = Number(inp.value) || 0;
+      const margin = Number(inp.value) || 0;
+      const fee = inp.dataset.spFeeVal !== '' ? Number(inp.dataset.spFeeVal) : null;
+      // 입력=마진, 저장/표시값=고객지원금(=수수료합계−마진)
+      _spData[inp.dataset.spKey] = (fee != null) ? Math.max(0, fee - margin) : 0;
+      recalcSupportRow(inp.closest('tr'), fee, margin);
     });
     const bulkBtn = document.getElementById('sp-bulk-apply');
     if (bulkBtn) bulkBtn.addEventListener('click', () => {
-      const v = Number(document.getElementById('sp-bulk-input').value) || 0;
-      spFiltered().forEach(r => { _spData[mgKey(r)] = v; });
+      const v = Number(document.getElementById('sp-bulk-input').value) || 0;   // 일괄 마진
+      spFiltered().forEach(r => {
+        const key = mgKey(r);
+        const rawFee = (r.수수료합계 != null) ? r.수수료합계 : null;
+        const up = _comMarginMap ? (Number(_comMarginMap[key]) || 0) : 0;
+        const fee = (rawFee != null) ? Math.max(0, rawFee - up) : null;
+        if (fee != null) _spData[key] = Math.max(0, fee - v);
+      });
       renderSupportTable();
     });
     const saveBtn = document.getElementById('sp-save');
