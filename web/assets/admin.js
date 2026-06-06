@@ -1318,9 +1318,10 @@
     wrap.innerHTML = forms.map(([v,l]) => comChipHTML(v,l,null,spState.form===v,'spform')).join('');
     wrap.querySelectorAll('.adm-chip').forEach(el => el.addEventListener('click', () => { spState.form = el.dataset.spform; renderSpFormChips(); renderSupportTable(); }));
   }
-  // 마진(공급가액 기준) 입력에 따른 고객지원금 = 공급가액 − 마진 셀 갱신
+  // 고객지원금 = (공급가액 − 마진) 을 만원 단위로 내림. 자투리는 마진에 흡수.
+  const spFloorManwon = n => Math.floor(Math.max(0, n) / 10000) * 10000;
   function recalcSupportRow(tr, supply, margin){
-    const support = (supply != null) ? Math.max(0, supply - margin) : null;
+    const support = (supply != null) ? spFloorManwon(supply - margin) : null;
     const s = tr.querySelector('[data-sp-support]'); if (s) s.textContent = support != null ? comFmt(support) : '—';
   }
   function renderSupportTable(){
@@ -1338,8 +1339,8 @@
       const up = _comMarginMap ? (Number(_comMarginMap[key]) || 0) : 0;
       const fee = (rawFee != null) ? Math.max(0, rawFee - up) : null;
       const supply = (fee != null) ? Math.round(fee / 1.1) : null;
-      // _spData = 저장된 고객지원금. 입력=마진(공급가액 기준), 고객지원금=공급가액−마진.
-      // 미설정 행은 마진0 → 고객지원금=공급가액(표시만, 저장은 입력 시).
+      // _spData = 저장된 고객지원금(만원 단위로 내림). 입력=마진, 고객지원금=floor((공급가액−마진)/10000)*10000.
+      // 자투리(만원 미만)는 자동으로 마진에 합산됨. 미설정 행은 마진0 → 고객지원금=공급가액(표시만).
       const hasVal = Object.prototype.hasOwnProperty.call(_spData, key);
       let support, margin;
       if (hasVal && supply != null){ support = Number(_spData[key]) || 0; margin = Math.max(0, supply - support); }
@@ -1352,13 +1353,12 @@
         <td>${r.의무 != null ? escape(r.의무) + '개월' : '—'}</td>
         <td>${escape(r.관리주기 || '—')}</td>
         <td>${supply != null ? comFmt(supply) : '—'}</td>
-        <td class="mg-fee-col">${fee != null ? comFmt(fee) : '—'}</td>
         <td><input type="number" class="mg-margin-input sp-amt-input" data-sp-key="${escape(key)}" data-sp-supply-val="${supply != null ? supply : ''}" value="${margin || ''}" placeholder="0" min="0" step="1000"></td>
         <td class="mg-shop" data-sp-support="${escape(key)}">${support != null ? comFmt(support) : '—'}</td>
       </tr>`;
     }).join('');
     wrap.innerHTML = `<div class="adm-table-wrap"><table class="adm-table adm-mg-table">
-      <thead><tr><th>품목</th><th>모델</th><th>제품코드</th><th>형태</th><th>의무기간</th><th>관리주기</th><th>공급가액</th><th>수수료합계</th><th>마진입력 (공급가액 기준)</th><th>고객지원금</th></tr></thead>
+      <thead><tr><th>품목</th><th>모델</th><th>제품코드</th><th>형태</th><th>의무기간</th><th>관리주기</th><th>공급가액</th><th>마진입력 (공급가액 기준)</th><th>고객지원금</th></tr></thead>
       <tbody>${body}</tbody></table></div>`;
   }
   function bindSupportUI(){
@@ -1370,8 +1370,8 @@
       const inp = e.target.closest('.sp-amt-input'); if (!inp) return;
       const margin = Number(inp.value) || 0;   // 공급가액 기준 마진
       const supply = inp.dataset.spSupplyVal !== '' ? Number(inp.dataset.spSupplyVal) : null;
-      // 입력=마진(공급가액 기준), 저장/표시값=고객지원금=공급가액−마진
-      _spData[inp.dataset.spKey] = (supply != null) ? Math.max(0, supply - margin) : 0;
+      // 입력=마진(공급가액 기준), 저장/표시값=고객지원금=floor((공급가액−마진)/만원)
+      _spData[inp.dataset.spKey] = (supply != null) ? spFloorManwon(supply - margin) : 0;
       recalcSupportRow(inp.closest('tr'), supply, margin);
     });
     const bulkBtn = document.getElementById('sp-bulk-apply');
@@ -1383,7 +1383,7 @@
         const up = _comMarginMap ? (Number(_comMarginMap[key]) || 0) : 0;
         const fee = (rawFee != null) ? Math.max(0, rawFee - up) : null;
         const supply = (fee != null) ? Math.round(fee / 1.1) : null;
-        if (supply != null) _spData[key] = Math.max(0, supply - v);
+        if (supply != null) _spData[key] = spFloorManwon(supply - v);
       });
       renderSupportTable();
     });
