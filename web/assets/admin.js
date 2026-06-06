@@ -1318,9 +1318,9 @@
     wrap.innerHTML = forms.map(([v,l]) => comChipHTML(v,l,null,spState.form===v,'spform')).join('');
     wrap.querySelectorAll('.adm-chip').forEach(el => el.addEventListener('click', () => { spState.form = el.dataset.spform; renderSpFormChips(); renderSupportTable(); }));
   }
-  // 마진(공급가액 기준) 입력에 따른 고객지원금 = (공급가액 − 마진) × 1.1 셀 갱신
+  // 마진(공급가액 기준) 입력에 따른 고객지원금 = 공급가액 − 마진 셀 갱신
   function recalcSupportRow(tr, supply, margin){
-    const support = (supply != null) ? Math.max(0, Math.round((supply - margin) * 1.1)) : null;
+    const support = (supply != null) ? Math.max(0, supply - margin) : null;
     const s = tr.querySelector('[data-sp-support]'); if (s) s.textContent = support != null ? comFmt(support) : '—';
   }
   function renderSupportTable(){
@@ -1338,12 +1338,12 @@
       const up = _comMarginMap ? (Number(_comMarginMap[key]) || 0) : 0;
       const fee = (rawFee != null) ? Math.max(0, rawFee - up) : null;
       const supply = (fee != null) ? Math.round(fee / 1.1) : null;
-      // _spData = 저장된 고객지원금. 입력=마진(공급가액 기준), 고객지원금=(공급가액−마진)*1.1.
-      // 미설정 행은 마진0 → 고객지원금=공급가액*1.1(표시만, 저장은 입력 시).
+      // _spData = 저장된 고객지원금. 입력=마진(공급가액 기준), 고객지원금=공급가액−마진.
+      // 미설정 행은 마진0 → 고객지원금=공급가액(표시만, 저장은 입력 시).
       const hasVal = Object.prototype.hasOwnProperty.call(_spData, key);
       let support, margin;
-      if (hasVal && supply != null){ support = Number(_spData[key]) || 0; margin = Math.max(0, supply - Math.round(support / 1.1)); }
-      else { margin = 0; support = (supply != null) ? Math.round(supply * 1.1) : null; }
+      if (hasVal && supply != null){ support = Number(_spData[key]) || 0; margin = Math.max(0, supply - support); }
+      else { margin = 0; support = (supply != null) ? supply : null; }
       return `<tr class="mg-row">
         <td>${escape(r.품목 || '')}</td>
         <td class="mg-left">${escape(d.name)}</td>
@@ -1370,8 +1370,8 @@
       const inp = e.target.closest('.sp-amt-input'); if (!inp) return;
       const margin = Number(inp.value) || 0;   // 공급가액 기준 마진
       const supply = inp.dataset.spSupplyVal !== '' ? Number(inp.dataset.spSupplyVal) : null;
-      // 입력=마진(공급가액 기준), 저장/표시값=고객지원금=(공급가액−마진)*1.1
-      _spData[inp.dataset.spKey] = (supply != null) ? Math.max(0, Math.round((supply - margin) * 1.1)) : 0;
+      // 입력=마진(공급가액 기준), 저장/표시값=고객지원금=공급가액−마진
+      _spData[inp.dataset.spKey] = (supply != null) ? Math.max(0, supply - margin) : 0;
       recalcSupportRow(inp.closest('tr'), supply, margin);
     });
     const bulkBtn = document.getElementById('sp-bulk-apply');
@@ -1383,7 +1383,7 @@
         const up = _comMarginMap ? (Number(_comMarginMap[key]) || 0) : 0;
         const fee = (rawFee != null) ? Math.max(0, rawFee - up) : null;
         const supply = (fee != null) ? Math.round(fee / 1.1) : null;
-        if (supply != null) _spData[key] = Math.max(0, Math.round((supply - v) * 1.1));
+        if (supply != null) _spData[key] = Math.max(0, supply - v);
       });
       renderSupportTable();
     });
