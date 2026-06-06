@@ -315,6 +315,9 @@ const App = (() => {
           price_sale:    r.price_sale    || base.price_sale    || null,
           price_compete: r.price_compete || base.price_compete || null,
           price_card:    r.price_card    || base.price_card    || null,
+          // 카드 표시 기준(약정·관리유형) — 매장별 독립값(상위 상속 X, 본부 base 에서 안 받음)
+          display_term:  r.display_term ?? null,
+          display_care:  r.display_care ?? null,
         });
       }
     } catch (e) {
