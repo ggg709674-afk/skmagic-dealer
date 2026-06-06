@@ -90,6 +90,9 @@
           card:    r.price_card    || '',
         };
       }
+      // 표시 기준(카드 대표 노출 약정/관리유형)
+      if (r.display_term != null) ed.dispTerm = r.display_term;
+      if (r.display_care)         ed.dispCare = r.display_care;
       if (Object.keys(ed).length) ov.edits[gid] = ed;
       // order_index → 카테고리별 분배 (product에서 primary cat 알아내야 함)
       if (r.order_index != null){
@@ -134,12 +137,15 @@
       price_sale:    ed.price?.sale    || null,
       price_compete: ed.price?.compete || null,
       price_card:    ed.price?.card    || null,
+      display_term:  ed.dispTerm != null ? ed.dispTerm : null,
+      display_care:  ed.dispCare || null,
     };
   }
   function rowIsEmpty(r){
     return !r.hidden && !r.featured && r.order_index == null
       && !r.name_override && (!r.benefits_override || r.benefits_override.length === 0) && !r.tag_override
-      && !r.price_regular && !r.price_sale && !r.price_compete && !r.price_card;
+      && !r.price_regular && !r.price_sale && !r.price_compete && !r.price_card
+      && r.display_term == null && !r.display_care;
   }
 
   /* ─── 즉시 클라우드 동기화 (auto-save) ──────────── */
@@ -280,28 +286,45 @@
   }
 
   /* 상품 가격 기준 정책 행 — 공개사이트 app.js cardPolicyPrice 와 동일 로직.
-     모델코드 base10 매칭 → 셀프형 우선(없으면 방문형) → 5년(의무60) 행. */
-  function comPolicyRow(mc){
+     모델코드 base10 매칭 → 관리유형(기본 셀프형) → 약정(기본 60=5년) 행.
+     term/care 인자로 매장이 고른 표시 기준 반영(없으면 셀프·5년). */
+  function comPolicyRow(mc, term, care){
     const db = comDB();
     const rows = (db && db.rows) || [];
     const base = (mc || '').slice(0, 10);
     if (!base) return null;
     const mine = rows.filter(r => (r.코드 || '').slice(0, 10) === base);
     if (!mine.length) return null;
-    let pool = mine.filter(r => r.형태 === '셀프형');
+    const wantCare = (care === '방문형' || care === '셀프형') ? care : '셀프형';
+    let pool = mine.filter(r => r.형태 === wantCare);
+    if (!pool.length) pool = mine.filter(r => r.형태 === '셀프형');
     if (!pool.length) pool = mine.filter(r => r.형태 === '방문형');
     if (!pool.length) pool = mine;
-    let row = pool.find(r => r.의무 === 60);
-    if (!row) row = pool.slice().sort((a, b) => Math.abs((a.의무 || 0) - 60) - Math.abs((b.의무 || 0) - 60))[0];
+    const wantTerm = Number(term) > 0 ? Number(term) : 60;
+    let row = pool.find(r => r.의무 === wantTerm);
+    if (!row) row = pool.slice().sort((a, b) => Math.abs((a.의무 || 0) - wantTerm) - Math.abs((b.의무 || 0) - wantTerm))[0];
     return row || null;
   }
+  /* 모델의 정책표에 존재하는 약정(의무)·관리유형 목록 — 표시기준 드롭다운 옵션용 */
+  function comModelBasisOptions(mc){
+    const db = comDB();
+    const rows = (db && db.rows) || [];
+    const base = (mc || '').slice(0, 10);
+    const mine = base ? rows.filter(r => (r.코드 || '').slice(0, 10) === base) : [];
+    const terms = [...new Set(mine.map(r => r.의무).filter(v => v != null))].sort((a, b) => a - b);
+    const cares = ['셀프형', '방문형'].filter(c => mine.some(r => r.형태 === c));
+    return { terms, cares };
+  }
+  // 의무개월 → 라벨 ("60"→"5년", 나누어떨어지지 않으면 "N개월")
+  function termLabel(m){ const n = Number(m); return (n && n % 12 === 0) ? (n / 12) + '년' : (n ? n + '개월' : '-'); }
 
   /* 가격 4종 — 원본 + edits 를 합쳐 표시용으로 반환
      반환: { regular, sale, compete, card }   (모두 숫자 문자열, 단위 ₩ 없이 "13,200" 형태)
      우선순위: 매장 수동 override > 정책테이블(5년+셀프/방문) > 본사 크롤(fallback). */
   function effectivePrices(p){
-    const ed = state.overrides.edits[p.goodsId]?.price || {};
-    const pol = comPolicyRow(modelCode(p));
+    const e = state.overrides.edits[p.goodsId] || {};
+    const ed = e.price || {};
+    const pol = comPolicyRow(modelCode(p), e.dispTerm, e.dispCare);
     const polReg  = (pol && pol.기준가   != null) ? String(pol.기준가)   : '';
     const polSale = (pol && pol.기본요금 != null) ? String(pol.기본요금) : '';
     const polComp = (pol && typeof pol.타사보상 === 'number' && pol.타사보상 > 0) ? String(pol.타사보상) : '';
@@ -661,6 +684,19 @@
     if (!gid) return;
     openEditModal(gid);
   }
+  // 표시기준(약정·관리유형) 선택에 따른 정책가 미리보기 힌트
+  function renderEditBasisHint(){
+    if (!_editingGid) return;
+    const orig = findProduct(_editingGid); if (!orig) return;
+    const term = Number(document.getElementById('edit-term').value) || 60;
+    const care = document.getElementById('edit-care').value || '셀프형';
+    const pol = comPolicyRow(modelCode(orig), term, care);
+    const fmt = n => (n == null ? '—' : Number(n).toLocaleString('ko-KR'));
+    const el = document.getElementById('edit-price-orig'); if (!el) return;
+    el.innerHTML = pol
+      ? `이 기준 정책가: <code>정상가 ${fmt(pol.기준가)} / 월 ${fmt(pol.기본요금)}${(typeof pol.타사보상 === 'number' && pol.타사보상 > 0) ? ' / 타사보상 ' + fmt(pol.타사보상) : ''}</code> · 가격은 정책표에서 자동`
+      : `정책표에 이 모델이 없어 본사 크롤 가격으로 표시됩니다.`;
+  }
   function openEditModal(gid){
     const p = findProduct(gid);
     if (!p){ console.warn('product not found', gid); return; }
@@ -678,24 +714,29 @@
     document.getElementById('edit-siblings').textContent = sibs.length > 1 ? `${sibs.length}색` : '단일';
 
     // 우측 폼 — 현재 적용값으로 채움 (effective)
-    const pr = effectivePrices(orig);
-    document.getElementById('edit-name').value          = cur.name || '';
-    document.getElementById('edit-price-regular').value = pr.regular || '';
-    document.getElementById('edit-price-sale').value    = pr.sale || '';
-    document.getElementById('edit-price-compete').value = pr.compete || '';
-    document.getElementById('edit-price-card').value    = pr.card || '';
-    document.getElementById('edit-benefits').value      = (cur.benefits || []).join(', ');
-    document.getElementById('edit-tag').value           = cur.tag || '';
+    document.getElementById('edit-name').value     = cur.name || '';
+    document.getElementById('edit-benefits').value = (cur.benefits || []).join(', ');
+    document.getElementById('edit-tag').value      = cur.tag || '';
 
-    // 원본값 힌트 (정상가/할인가만 — 본사 데이터 기준)
-    const op = priceOf(orig) || {};
-    const stripUnit = (s) => String(s || '').replace(/^[^\d]*월?\s*/,'').replace(/\s*원\s*$/,'').trim();
+    // 표시 기준(약정·관리유형) 드롭다운 — 정책표에 있는 값으로 채우고 현재 선택 반영(기본 5년·셀프)
+    const e = state.overrides.edits[gid] || {};
+    const basis = comModelBasisOptions(modelCode(orig));
+    const termSel = document.getElementById('edit-term');
+    const careSel = document.getElementById('edit-care');
+    const curTerm = (e.dispTerm != null) ? Number(e.dispTerm) : 60;
+    const curCare = e.dispCare || '셀프형';
+    termSel.innerHTML = basis.terms.length
+      ? basis.terms.map(t => `<option value="${t}">${termLabel(t)}</option>`).join('')
+      : '<option value="60">5년</option>';
+    termSel.value = basis.terms.includes(curTerm) ? String(curTerm) : (termSel.options[0]?.value || '60');
+    careSel.innerHTML = basis.cares.length
+      ? basis.cares.map(c => `<option value="${c}">${c === '셀프형' ? '셀프관리' : '방문관리'}</option>`).join('')
+      : '<option value="셀프형">셀프관리</option>';
+    careSel.value = basis.cares.includes(curCare) ? curCare : (careSel.options[0]?.value || '셀프형');
+    termSel.onchange = careSel.onchange = renderEditBasisHint;
+    renderEditBasisHint();
+
     document.getElementById('edit-name-orig').innerHTML     = `원본: <code>${escape(orig.name || '—')}</code>`;
-    const polH = comPolicyRow(modelCode(orig));
-    const fmtH = n => (n == null ? '' : Number(n).toLocaleString('ko-KR'));
-    document.getElementById('edit-price-orig').innerHTML    = (polH && (polH.기준가 != null || polH.기본요금 != null))
-      ? `정책 기준(5년·셀프/방문): <code>정상가 ${escape(fmtH(polH.기준가) || '—')} / 월 ${escape(fmtH(polH.기본요금) || '—')}</code> · 비우면 정책가 자동 적용`
-      : `본사 원본: <code>정상가 ${escape(stripUnit(op.del) || '—')} / 할인가 ${escape(stripUnit(op.num) || '—')}</code>`;
     document.getElementById('edit-benefits-orig').innerHTML = `원본: <code>${escape((orig.benefits || []).join(', ') || '—')}</code>`;
     document.getElementById('edit-tag-orig').innerHTML      = `원본: <code>${escape(orig.tag || '—')}</code>`;
 
@@ -712,20 +753,10 @@
     if (!orig) return;
 
     const name  = document.getElementById('edit-name').value.trim();
-    const preg  = document.getElementById('edit-price-regular').value.trim();
-    const psal  = document.getElementById('edit-price-sale').value.trim();
-    const pcom  = document.getElementById('edit-price-compete').value.trim();
-    const pcrd  = document.getElementById('edit-price-card').value.trim();
     const bRaw  = document.getElementById('edit-benefits').value.trim();
     const tag   = document.getElementById('edit-tag').value.trim();
-
-    // 정책가(5년+셀프/방문)와 비교 → 같으면 override에 안 담음(정책 그대로 추종)
-    const pol = comPolicyRow(modelCode(orig));
-    const op = priceOf(orig) || {};
-    const stripUnit = (s) => String(s || '').replace(/^[^\d]*월?\s*/,'').replace(/\s*원\s*$/,'').trim();
-    const baseRegular = (pol && pol.기준가   != null) ? String(pol.기준가)   : stripUnit(op.del);
-    const baseSale    = (pol && pol.기본요금 != null) ? String(pol.기본요금) : stripUnit(op.num);
-    const baseComp    = (pol && typeof pol.타사보상 === 'number' && pol.타사보상 > 0) ? String(pol.타사보상) : '';
+    const term  = Number(document.getElementById('edit-term').value) || 60;
+    const care  = document.getElementById('edit-care').value || '셀프형';
 
     const ed = {};
     if (name && name !== (orig.name || '')) ed.name = name;
@@ -735,13 +766,11 @@
     const origBenefits = (orig.benefits || []).slice();
     if (benefits.join('|') !== origBenefits.join('|')) ed.benefits = benefits;
 
-    // 입력값이 비었거나 정책 기준과 같으면 override 안 담음 → 정책 그대로 따름
-    const price = {};
-    if (preg && preg !== baseRegular) price.regular = preg;
-    if (psal && psal !== baseSale)    price.sale    = psal;
-    if (pcom && pcom !== baseComp)    price.compete = pcom;
-    if (pcrd) price.card    = pcrd;
-    if (Object.keys(price).length) ed.price = price;
+    // 표시 기준 — 기본(5년·셀프)과 다를 때만 override 저장(미설정=정책 기본 추종)
+    if (term !== 60) ed.dispTerm = term;
+    if (care !== '셀프형') ed.dispCare = care;
+    // 기존 레거시 가격 override 가 있었다면 표시기준 방식으로 전환하며 제거
+    // (price 는 더 이상 입력 UI 없음 — 정책가만 사용)
 
     if (Object.keys(ed).length === 0){
       delete state.overrides.edits[_editingGid];

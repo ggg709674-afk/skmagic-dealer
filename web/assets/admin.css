@@ -558,6 +558,7 @@ body.admin-body{
   min-width:0;
 }
 .adm-edit-grid-4{grid-template-columns: repeat(4, minmax(0, 1fr))}
+.adm-edit-grid-2{grid-template-columns: repeat(2, minmax(0, 1fr))}
 .adm-edit-grid .adm-input{min-width:0}
 .adm-edit-field{display:flex; flex-direction:column; gap:4px}
 .adm-edit-field span{font-size:11px; color:var(--ink-4); font-weight:500}
