@@ -754,17 +754,21 @@ const App = (() => {
   // 페이지 내 상태 — 현재 선택된 care_type idx, contract idx. detail 페이지마다 reset.
   const _optState = { careIdx: 0, contractIdx: 0, sizeKey: null, lastOpts: null, lastP: null, lastMeta: null, priceMode: 'new' };
 
-  // 기본 선택: 셀프관리(없으면 방문관리) + 5년(의무 60개월). 없으면 60에 가장 가까운 약정.
-  function pickDefaultSelection(opts) {
+  // 기본 선택: 매장 표시기준(관리유형·약정) 우선 → 없으면 셀프관리 + 5년(의무 60개월).
+  //   wantCare='셀프형'|'방문형', wantTerm=의무개월(60/72/84…). 둘 다 admin_overrides.display_*.
+  function pickDefaultSelection(opts, wantCare, wantTerm) {
     const cts = (opts && opts.care_types) || [];
     if (!cts.length) return { careIdx: 0, contractIdx: 0 };
-    let careIdx = cts.findIndex(ct => /셀프/.test(ct.contract_type || ct.name || ''));
-    if (careIdx < 0) careIdx = 0;  // 셀프 없으면 첫 그룹(방문)
+    const careRe = (wantCare === '방문형') ? /방문/ : /셀프/;
+    let careIdx = cts.findIndex(ct => careRe.test(ct.contract_type || ct.name || ''));
+    if (careIdx < 0) careIdx = cts.findIndex(ct => /셀프/.test(ct.contract_type || ct.name || ''));
+    if (careIdx < 0) careIdx = 0;  // 그래도 없으면 첫 그룹
     const contracts = cts[careIdx].contracts || [];
-    let contractIdx = contracts.findIndex(c => c.duty_use_months === 60);
+    const target = Number(wantTerm) > 0 ? Number(wantTerm) : 60;
+    let contractIdx = contracts.findIndex(c => c.duty_use_months === target);
     if (contractIdx < 0 && contracts.length) {
       let best = 0, bestDiff = Infinity;
-      contracts.forEach((c, i) => { const d = Math.abs((c.duty_use_months || 0) - 60); if (d < bestDiff) { bestDiff = d; best = i; } });
+      contracts.forEach((c, i) => { const d = Math.abs((c.duty_use_months || 0) - target); if (d < bestDiff) { bestDiff = d; best = i; } });
       contractIdx = best;
     }
     return { careIdx, contractIdx: contractIdx < 0 ? 0 : contractIdx };
@@ -802,7 +806,7 @@ const App = (() => {
       const sized = optionsForSize(_optState.sizeKey);
       if (sized) _optState.lastOpts = sized;
     }
-    const def = pickDefaultSelection(_optState.lastOpts);
+    const def = pickDefaultSelection(_optState.lastOpts, p && p._dispCare, p && p._dispTerm);
     _optState.careIdx = def.careIdx;
     _optState.contractIdx = def.contractIdx;
     _optState.priceMode = 'new';   // 기본 = 신규 렌탈
