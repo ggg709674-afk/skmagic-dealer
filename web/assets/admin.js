@@ -1284,7 +1284,13 @@
     if (state.store?.slug && window.skmFetchStore){
       try { const full = await window.skmFetchStore(state.store.slug); if (full) state.store.customer_support = full.customer_support || {}; } catch(_){}
     }
-    _spData = Object.assign({}, (state.store && state.store.customer_support) || {});
+    // _spData[key] = { m: 입력마진, s: 고객지원금 }. 레거시(숫자)면 s만.
+    _spData = {};
+    const saved = (state.store && state.store.customer_support) || {};
+    Object.keys(saved).forEach(k => {
+      const v = saved[k];
+      _spData[k] = (v && typeof v === 'object') ? { m: Number(v.m) || 0, s: Number(v.s) || 0 } : { m: null, s: Number(v) || 0 };
+    });
     // 마진설정과 동일 — 상위(본부) 마진 차감 맵 준비 (수수료합계 기준 계산용)
     _comReady = false; await computeComMargins(); _comReady = true;
     spState.cat = 'all'; spState.form = 'all'; spState.q = '';
@@ -1318,11 +1324,13 @@
     wrap.innerHTML = forms.map(([v,l]) => comChipHTML(v,l,null,spState.form===v,'spform')).join('');
     wrap.querySelectorAll('.adm-chip').forEach(el => el.addEventListener('click', () => { spState.form = el.dataset.spform; renderSpFormChips(); renderSupportTable(); }));
   }
-  // 고객지원금 = (공급가액 − 마진) 을 만원 단위로 내림. 자투리는 마진에 흡수.
+  // 고객지원금 = (공급가액 − 마진) 을 만원 단위로 내림. 만원 미만 자투리는 별도 '자투리마진'으로 표기.
   const spFloorManwon = n => Math.floor(Math.max(0, n) / 10000) * 10000;
   function recalcSupportRow(tr, supply, margin){
-    const support = (supply != null) ? spFloorManwon(supply - margin) : null;
-    const s = tr.querySelector('[data-sp-support]'); if (s) s.textContent = support != null ? comFmt(support) : '—';
+    const support  = (supply != null) ? spFloorManwon(supply - margin) : null;
+    const leftover = (supply != null) ? Math.max(0, (supply - margin) - support) : null;
+    const s = tr.querySelector('[data-sp-support]');  if (s) s.textContent = support  != null ? comFmt(support)  : '—';
+    const l = tr.querySelector('[data-sp-leftover]'); if (l) l.textContent = leftover != null ? comFmt(leftover) : '—';
   }
   function renderSupportTable(){
     const wrap = document.getElementById('sp-wrap'); if (!wrap) return;
@@ -1339,12 +1347,15 @@
       const up = _comMarginMap ? (Number(_comMarginMap[key]) || 0) : 0;
       const fee = (rawFee != null) ? Math.max(0, rawFee - up) : null;
       const supply = (fee != null) ? Math.round(fee / 1.1) : null;
-      // _spData = 저장된 고객지원금(만원 단위로 내림). 입력=마진, 고객지원금=floor((공급가액−마진)/10000)*10000.
-      // 자투리(만원 미만)는 자동으로 마진에 합산됨. 미설정 행은 마진0 → 고객지원금=공급가액(표시만).
-      const hasVal = Object.prototype.hasOwnProperty.call(_spData, key);
-      let support, margin;
-      if (hasVal && supply != null){ support = Number(_spData[key]) || 0; margin = Math.max(0, supply - support); }
-      else { margin = 0; support = (supply != null) ? supply : null; }
+      // _spData[key]={m:입력마진,s:고객지원금}. 입력=마진, 고객지원금=floor((공급가액−마진)/만원), 자투리=나머지.
+      const stored = _spData[key];
+      let margin, support, leftover;
+      if (supply == null){ margin = 0; support = null; leftover = null; }
+      else if (stored){
+        support = Number(stored.s) || 0;
+        margin = (stored.m != null) ? Number(stored.m) : Math.max(0, supply - support);
+        leftover = Math.max(0, (supply - margin) - support);
+      } else { margin = 0; support = spFloorManwon(supply); leftover = Math.max(0, supply - support); }
       return `<tr class="mg-row">
         <td>${escape(r.품목 || '')}</td>
         <td class="mg-left">${escape(d.name)}</td>
@@ -1354,11 +1365,12 @@
         <td>${escape(r.관리주기 || '—')}</td>
         <td>${supply != null ? comFmt(supply) : '—'}</td>
         <td><input type="number" class="mg-margin-input sp-amt-input" data-sp-key="${escape(key)}" data-sp-supply-val="${supply != null ? supply : ''}" value="${margin || ''}" placeholder="0" min="0" step="1000"></td>
+        <td class="mg-fee-col" data-sp-leftover="${escape(key)}">${leftover != null ? comFmt(leftover) : '—'}</td>
         <td class="mg-shop" data-sp-support="${escape(key)}">${support != null ? comFmt(support) : '—'}</td>
       </tr>`;
     }).join('');
     wrap.innerHTML = `<div class="adm-table-wrap"><table class="adm-table adm-mg-table">
-      <thead><tr><th>품목</th><th>모델</th><th>제품코드</th><th>형태</th><th>의무기간</th><th>관리주기</th><th>공급가액</th><th>마진입력 (공급가액 기준)</th><th>고객지원금</th></tr></thead>
+      <thead><tr><th>품목</th><th>모델</th><th>제품코드</th><th>형태</th><th>의무기간</th><th>관리주기</th><th>공급가액</th><th>마진입력 (공급가액 기준)</th><th>자투리마진</th><th>고객지원금</th></tr></thead>
       <tbody>${body}</tbody></table></div>`;
   }
   function bindSupportUI(){
@@ -1368,10 +1380,10 @@
     const wrap = document.getElementById('sp-wrap');
     if (wrap) wrap.addEventListener('input', (e) => {
       const inp = e.target.closest('.sp-amt-input'); if (!inp) return;
-      const margin = Number(inp.value) || 0;   // 공급가액 기준 마진
+      const margin = Number(inp.value) || 0;   // 공급가액 기준 마진(타이핑 값 그대로 유지)
       const supply = inp.dataset.spSupplyVal !== '' ? Number(inp.dataset.spSupplyVal) : null;
-      // 입력=마진(공급가액 기준), 저장/표시값=고객지원금=floor((공급가액−마진)/만원)
-      _spData[inp.dataset.spKey] = (supply != null) ? spFloorManwon(supply - margin) : 0;
+      // 저장: {m:입력마진, s:고객지원금=floor((공급가액−마진)/만원)}. 자투리는 별도 표기.
+      _spData[inp.dataset.spKey] = { m: margin, s: (supply != null) ? spFloorManwon(supply - margin) : 0 };
       recalcSupportRow(inp.closest('tr'), supply, margin);
     });
     const bulkBtn = document.getElementById('sp-bulk-apply');
@@ -1383,7 +1395,7 @@
         const up = _comMarginMap ? (Number(_comMarginMap[key]) || 0) : 0;
         const fee = (rawFee != null) ? Math.max(0, rawFee - up) : null;
         const supply = (fee != null) ? Math.round(fee / 1.1) : null;
-        if (supply != null) _spData[key] = spFloorManwon(supply - v);
+        if (supply != null) _spData[key] = { m: v, s: spFloorManwon(supply - v) };
       });
       renderSupportTable();
     });
@@ -1391,7 +1403,7 @@
     if (saveBtn) saveBtn.addEventListener('click', async () => {
       if (!state.store?.id || !window.skmSaveCustomerSupport){ alert('매장 정보를 불러오지 못했어요.'); return; }
       const payload = {};
-      Object.keys(_spData).forEach(k => { if (Number(_spData[k]) > 0) payload[k] = Number(_spData[k]); });
+      Object.keys(_spData).forEach(k => { const o = _spData[k]; if (o && Number(o.s) > 0) payload[k] = { m: Number(o.m) || 0, s: Number(o.s) || 0 }; });
       saveBtn.disabled = true;
       const { error } = await window.skmSaveCustomerSupport(state.store.id, payload);
       saveBtn.disabled = false;
