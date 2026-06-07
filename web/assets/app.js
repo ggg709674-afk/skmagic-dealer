@@ -578,7 +578,8 @@ const App = (() => {
     const supKey = (spEnabled && pol) ? (pol.코드 + '|' + pol.형태 + '|' + pol.의무) : null;
     const supRaw = supKey ? _custSupport[supKey] : null;
     const custSup = (supRaw && typeof supRaw === 'object') ? (Number(supRaw.s) || 0) : (Number(supRaw) || 0);
-    const custSupBand = custSup > 0 ? `<div class="cust-support">고객지원금 <strong>${Number(custSup).toLocaleString('ko-KR')}</strong>원</div>` : '';
+    // 만원 단위 표기 — "지원금 30만원" (이미지 박스 하단 오버레이, 이미지 안 밀어올림)
+    const custSupBand = custSup > 0 ? `<div class="cust-support">지원금 <strong>${Math.round(custSup / 10000)}만원</strong></div>` : '';
     return `
       <a class="product-card${isMattress ? ' has-brand' : ''}" href="./detail.html?id=${encodeURIComponent(p.goodsId)}">
         ${brandBadge}
