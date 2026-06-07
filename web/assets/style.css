@@ -448,12 +448,11 @@ ul,ol{margin:0;padding:0;list-style:none}
 }
 .product-card:hover .thumb img{transform:scale(1.04)}
 /* 고객지원금 — 이미지 박스 하단 밴드(빈 공간에 표시). 0이면 마크업 자체가 없음 */
-/* 이미지 박스 우측 하단 — 스타버스트 씰 배지(지원금 위 / 금액 아래). 이미지 안 밀어올림 */
+/* 이미지 박스 우측 하단 — 스타버스트 씰 배지(모서리 둥근 톱니별, SVG). 이미지 안 밀어올림 */
 .product-card .thumb .cust-support{
   position:absolute;right:8px;bottom:8px;z-index:2;
   width:66px;height:66px;
-  clip-path:polygon(50.0% 0.0%, 60.1% 12.3%, 75.0% 6.7%, 77.6% 22.4%, 93.3% 25.0%, 87.7% 39.9%, 100.0% 50.0%, 87.7% 60.1%, 93.3% 75.0%, 77.6% 77.6%, 75.0% 93.3%, 60.1% 87.7%, 50.0% 100.0%, 39.9% 87.7%, 25.0% 93.3%, 22.4% 77.6%, 6.7% 75.0%, 12.3% 60.1%, 0.0% 50.0%, 12.3% 39.9%, 6.7% 25.0%, 22.4% 22.4%, 25.0% 6.7%, 39.9% 12.3%);
-  background:var(--primary);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50.0,6.0 58.8,17.2 72.0,11.9 74.0,26.0 88.1,28.0 82.8,41.2 94.0,50.0 82.8,58.8 88.1,72.0 74.0,74.0 72.0,88.1 58.8,82.8 50.0,94.0 41.2,82.8 28.0,88.1 26.0,74.0 11.9,72.0 17.2,58.8 6.0,50.0 17.2,41.2 11.9,28.0 26.0,26.0 28.0,11.9 41.2,17.2' fill='%23DE4F41' stroke='%23DE4F41' stroke-width='8' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center/contain;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   color:#fff;line-height:1.05;text-align:center;
 }
