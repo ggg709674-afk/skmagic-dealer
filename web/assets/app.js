@@ -579,7 +579,7 @@ const App = (() => {
     const supRaw = supKey ? _custSupport[supKey] : null;
     const custSup = (supRaw && typeof supRaw === 'object') ? (Number(supRaw.s) || 0) : (Number(supRaw) || 0);
     // 만원 단위 표기 — "지원금 30만원" (이미지 박스 하단 오버레이, 이미지 안 밀어올림)
-    const custSupBand = custSup > 0 ? `<div class="cust-support">지원금 <strong>${Math.round(custSup / 10000)}만원</strong></div>` : '';
+    const custSupBand = custSup > 0 ? `<div class="cust-support"><span class="cs-l">지원금</span><strong>${Math.round(custSup / 10000)}만원</strong></div>` : '';
     return `
       <a class="product-card${isMattress ? ' has-brand' : ''}" href="./detail.html?id=${encodeURIComponent(p.goodsId)}">
         ${brandBadge}
