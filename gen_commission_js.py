@@ -6,7 +6,8 @@ admin.js parseCommissionWorkbook 과 동일한 파싱 규칙:
   H=7 관리주기, I=8 기준가, J=9 운영가/기본할인, K=10 전사할인, L=11 타사보상
 - 13행(idx 12)부터 데이터, 병합 셀은 좌상단 값 전파
 - 기본요금 = 전사할인(>0) 우선, 없으면 운영가
-- 홈페이지 등록 모델만(products.json, 코드 base 9자리), 색상 변형은 base 10자리로 1행
+- 전체 행 저장(등록 여부 무관 — 노출은 admin.js comHomeRows/app.js 코드 매칭이 거름),
+  색상 변형은 base 10자리로 1행
 - ★ 수수료합계는 보안상 정적 파일에 절대 넣지 않음 (admin.js 상단 주석 참조)
 
 사용: python gen_commission_js.py "<수수료표.xlsx>" "<source 표기>"
@@ -15,10 +16,8 @@ import json, pathlib, re, sys, datetime
 import openpyxl
 
 ROOT = pathlib.Path(__file__).parent
-PJ = ROOT / "data" / "products.json"
 DST = ROOT / "web" / "assets" / "commission.js"
 
-MAIN = {"100000005", "100000010", "100000024", "100000245", "1000000245"}
 MAT_SIZE = {"S": "SS", "Q": "Q", "K": "K"}
 
 def com_base_code(code):
@@ -94,16 +93,8 @@ def main():
             "타사보상": int(num(l)) if num(l) is not None else None,
         })
 
-    # 홈페이지 등록 모델만
-    db = json.loads(PJ.read_text(encoding="utf-8"))
-    home_base = set()
-    for p in db["products"]:
-        if not p.get("model"): continue
-        if not any(cat in MAIN for cat in (p.get("categories") or [])): continue
-        home_base.add(com_base_code(p["model"].split("\n")[0].strip())[:9])
-    rows = [x for x in rows if com_base_code(x["코드"])[:9] in home_base]
-
     # 색상 묶음 dedupe — 품목|코드base10|형태|의무|사이즈
+    # (홈페이지 등록 필터는 표시 시점에서 — admin.js comHomeRows 와 동일 원칙)
     seen, out = set(), []
     for x in rows:
         key = f"{x['품목']}|{com_base_code(x['코드'])[:10]}|{x['형태']}|{x['의무']}|{x['사이즈']}"

@@ -1150,7 +1150,7 @@
   function mgFiltered(){
     const db = (typeof comDB === 'function') ? comDB() : null; if (!db) return [];
     const q = mgState.q.toLowerCase();
-    return db.rows.filter(r => {
+    return comHomeRows().filter(r => {
       if (mgState.cat !== 'all' && r.품목 !== mgState.cat) return false;
       if (mgState.form !== 'all' && r.형태 !== mgState.form) return false;
       if (q){ const d = comDisplay(r); if (!(`${d.name} ${d.code} ${r.모델} ${r.코드||''}`.toLowerCase().includes(q))) return false; }
@@ -1159,8 +1159,9 @@
   }
   function renderMgCatChips(){
     const wrap = document.getElementById('mg-cat-chips'); const db = (typeof comDB==='function')?comDB():null; if (!wrap || !db) return;
-    const counts = {}; db.rows.forEach(r => { counts[r.품목] = (counts[r.품목]||0)+1; });
-    const chips = [comChipHTML('all','전체',db.rows.length,mgState.cat==='all','mgcat')];
+    const mgHomeRows = comHomeRows();
+    const counts = {}; mgHomeRows.forEach(r => { counts[r.품목] = (counts[r.품목]||0)+1; });
+    const chips = [comChipHTML('all','전체',mgHomeRows.length,mgState.cat==='all','mgcat')];
     db.품목순.filter(c=>counts[c]).forEach(c => chips.push(comChipHTML(c,c,counts[c],mgState.cat===c,'mgcat')));
     wrap.innerHTML = chips.join('');
     wrap.querySelectorAll('.adm-chip').forEach(el => el.addEventListener('click', () => { mgState.cat = el.dataset.mgcat; renderMgCatChips(); renderMarginTable(); }));
@@ -1309,7 +1310,7 @@
   function spFiltered(){
     const db = (typeof comDB === 'function') ? comDB() : null; if (!db) return [];
     const q = spState.q.toLowerCase();
-    return db.rows.filter(r => {
+    return comHomeRows().filter(r => {
       if (spState.cat !== 'all' && r.품목 !== spState.cat) return false;
       if (spState.form !== 'all' && r.형태 !== spState.form) return false;
       if (q){ const d = comDisplay(r); if (!(`${d.name} ${d.code} ${r.모델} ${r.코드||''}`.toLowerCase().includes(q))) return false; }
@@ -1318,8 +1319,9 @@
   }
   function renderSpCatChips(){
     const wrap = document.getElementById('sp-cat-chips'); const db = (typeof comDB==='function')?comDB():null; if (!wrap || !db) return;
-    const counts = {}; db.rows.forEach(r => { counts[r.품목] = (counts[r.품목]||0)+1; });
-    const chips = [comChipHTML('all','전체',db.rows.length,spState.cat==='all','spcat')];
+    const spHomeRows = comHomeRows();
+    const counts = {}; spHomeRows.forEach(r => { counts[r.품목] = (counts[r.품목]||0)+1; });
+    const chips = [comChipHTML('all','전체',spHomeRows.length,spState.cat==='all','spcat')];
     db.품목순.filter(c=>counts[c]).forEach(c => chips.push(comChipHTML(c,c,counts[c],spState.cat===c,'spcat')));
     wrap.innerHTML = chips.join('');
     wrap.querySelectorAll('.adm-chip').forEach(el => el.addEventListener('click', () => { spState.cat = el.dataset.spcat; renderSpCatChips(); renderSupportTable(); }));
@@ -1830,6 +1832,12 @@
   // 산하(비-super)는 정적 commission.js(원본) 로 fallback 금지 — 서버 스코프(comData)만 사용.
   // RPC 미배포/오류 시 산하는 데이터 없음으로 보일지언정 원본은 절대 노출 안 함. 본부만 정적 fallback 허용.
   function comDB(){ return comData || (_isSuper ? (window.COMMISSION_DB || null) : null); }
+  // 홈페이지 등록 모델 행만 — 업로드는 전체 행을 저장하고, 노출만 여기서 거른다.
+  // (제품 등록이 정책표 업로드보다 늦어도 재업로드 없이 자동 반영)
+  function comHomeRows(){
+    const db = comDB();
+    return db ? db.rows.filter(r => comHomeMatch(r.코드)) : [];
+  }
 
   /* ─── 정책테이블 수수료에 적용할 마진 계산 (산하 매장 admin 전용) ───
      - 본부(super)            : null → 원본 수수료 그대로 (차감 없음)
@@ -2461,7 +2469,7 @@
     const hint = document.getElementById('com-source-hint');
     const db = comDB();
     if (!hint || !db) return;
-    const models = new Set(db.rows.map(r=>r.모델)).size;
+    const models = new Set(comHomeRows().map(r=>r.모델)).size;
     // 갱신: 저장 시각(updated_at)을 KST 날짜+시·분으로. 없으면 built_at(날짜) fallback.
     let when = '';
     const d = comUpdatedAt ? new Date(comUpdatedAt) : null;
@@ -2522,9 +2530,9 @@
       if (typeof XLSX === 'undefined') throw new Error('엑셀 파서(XLSX)가 로드되지 않았어요. 새로고침 후 다시 시도해 줘.');
       const buf = await file.arrayBuffer();
       const payload = parseCommissionWorkbook(buf, file.name);
-      if (!payload.rows.length) throw new Error('홈페이지 등록 모델과 매칭되는 행이 없어요. 수수료표 양식을 확인해 줘.');
-      const models = new Set(payload.rows.map(r=>r.모델)).size;
-      setComUploadStatus(`분석 완료 — ${payload.rows.length}행 / ${models}종. 저장 중…`, '');
+      if (!payload.rows.length) throw new Error('수수료표에서 행을 읽지 못했어요. 양식을 확인해 줘.');
+      const homeCnt = payload.rows.filter(r => comHomeMatch(r.코드)).length;
+      setComUploadStatus(`분석 완료 — 전체 ${payload.rows.length}행 (등록 모델 ${homeCnt}행). 저장 중…`, '');
       if (window.skmSaveCommission){
         const { error } = await window.skmSaveCommission(payload);
         if (error){
@@ -2537,7 +2545,7 @@
       renderComCatChips();
       renderComFormChips();
       renderComTable();
-      setComUploadStatus(`완료 — ${payload.rows.length}행 / ${models}종 갱신됐어요.`, 'ok');
+      setComUploadStatus(`완료 — 전체 ${payload.rows.length}행 저장 (등록 모델 ${homeCnt}행 표시). 미등록 모델도 저장되어, 제품을 나중에 등록하면 자동 반영돼요.`, 'ok');
     } catch(err){
       setComUploadStatus('실패: ' + (err.message || err), 'err');
     }
@@ -2668,13 +2676,9 @@
       });
     }
 
-    // 홈페이지 등록 모델만 (제품코드 앞 9자리 기준)
-    const MAIN = ['100000005','100000010','100000024','100000245','1000000245'];
-    const products = (window.PRODUCTS_DB && window.PRODUCTS_DB.products) || [];
-    const homeBase = new Set(products
-      .filter(p => p.model && p.categories && p.categories.some(cat => MAIN.includes(cat)))
-      .map(p => comBaseCode(p.model).slice(0, 9)));
-    const onHome = (code) => code && homeBase.has(comBaseCode(code).slice(0, 9));
+    // ※ 홈페이지 등록 모델 필터는 업로드 시점이 아니라 표시 시점(comHomeRows)에서 한다.
+    //   업로드 때 걸러 버리면, 정책표에 먼저 있고 제품을 나중에 등록한 모델이 누락돼
+    //   같은 파일을 재업로드해야 했음. 전체 행을 저장해두면 등록 순서와 무관.
 
     // 색상 묶음: 품목|코드base(끝 색상자리 제외)|형태|의무(+매트리스는 사이즈) 1행만.
     //  ※ 모델명 기준으로 묶으면, 모델명이 같고 코드만 다른 변형(예: 풀스텐스파 화이트
@@ -2682,7 +2686,6 @@
     //    진짜 색상 변형(BIDF17DR43WH ↔ …BK)은 앞 10자리가 같아 그대로 1행으로 묶인다.
     const seen = {}, out = [];
     for (const x of rows){
-      if (!onHome(x.코드)) continue;
       const key = x.품목 + '|' + comBaseCode(x.코드).slice(0, 10) + '|' + x.형태 + '|' + x.의무 + '|' + (x.사이즈 || '');
       if (seen[key]) continue;
       seen[key] = 1;
@@ -2704,8 +2707,9 @@
     const wrap = document.getElementById('com-cat-chips');
     const db = comDB(); if (!wrap || !db) return;
     const counts = {};
-    db.rows.forEach(r => { counts[r.품목] = (counts[r.품목]||0)+1; });
-    const chips = [comChipHTML('all','전체',db.rows.length,comState.cat==='all','cat')];
+    const homeRows = comHomeRows();
+    homeRows.forEach(r => { counts[r.품목] = (counts[r.품목]||0)+1; });
+    const chips = [comChipHTML('all','전체',homeRows.length,comState.cat==='all','cat')];
     db.품목순.filter(c=>counts[c]).forEach(c => chips.push(comChipHTML(c,c,counts[c],comState.cat===c,'cat')));
     wrap.innerHTML = chips.join('');
     wrap.querySelectorAll('.adm-chip').forEach(el => el.addEventListener('click', () => {
@@ -2724,7 +2728,7 @@
   function comFiltered(){
     const db = comDB(); if (!db) return [];
     const q = comState.q.toLowerCase();
-    return db.rows.filter(r => {
+    return comHomeRows().filter(r => {
       if (comState.cat !== 'all' && r.품목 !== comState.cat) return false;
       if (comState.form !== 'all' && r.형태 !== comState.form) return false;
       if (q){
@@ -2739,7 +2743,7 @@
     const cntEl = document.getElementById('com-count');
     const db = comDB(); if (!tbody || !db) return;
     const list = comFiltered();
-    if (cntEl) cntEl.innerHTML = `<strong>${list.length}</strong>행 표시 / 전체 ${db.rows.length}행`;
+    if (cntEl) cntEl.innerHTML = `<strong>${list.length}</strong>행 표시 / 전체 ${comHomeRows().length}행`;
     if (!list.length){
       tbody.innerHTML = `<tr><td colspan="12" class="adm-empty">조건에 맞는 항목이 없어요.</td></tr>`;
       return;
