@@ -1505,7 +1505,11 @@ const App = (() => {
           const fn = u.split('/').pop();
           const local = `../products/${id}/images/detail_${String(i).padStart(2,'0')}_${fn}`;
           // 상세 컷 전부 우리 서버(repo/vercel)에 저장 — 본사 핫링크 안 함.
-          // 본사가 .gif 로 주는 애니메이션 컷은 용량(개당 3MB, 최대 34MB) 때문에 mp4 로 변환해 둠.
+          // 26.5월부터 본사가 애니메이션 컷을 <video src=*.mp4> 로 직접 제공 — 그대로 video 렌더.
+          if (/\.mp4(\?|$)/i.test(fn)) {
+            return `<video src="${escape(local)}" autoplay loop muted playsinline preload="metadata" onerror="this.style.display='none'"></video>`;
+          }
+          // 본사가 .gif 로 주는 애니메이션 컷(구형)은 용량(개당 3MB, 최대 34MB) 때문에 mp4 로 변환해 둠.
           // → gif 참조는 같은 경로의 .mp4 를 <video> 자동재생·루프로 렌더. 깨지면 숨김.
           if (/\.gif(\?|$)/i.test(fn)) {
             const mp4 = local.replace(/\.gif(\?|$)/i, '.mp4');

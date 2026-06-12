@@ -75,12 +75,18 @@ def extract_detail(page, goodsId):
                 return (ma ? parseInt(ma[1], 10) : 9999) - (mb ? parseInt(mb[1], 10) : 9999);
             });
 
-            // 상세 인포그래픽: id="goodsDetailInfo" 안의 img들 or tab-content 안
+            // 상세 인포그래픽: id="goodsDetailInfo" 안의 img + video (문서 순서 유지)
+            // 26.5월부터 본사가 애니메이션 컷을 gif <img> 대신 <video src=*.mp4> 로 제공 —
+            // img만 수집하면 동영상 컷이 통째로 빠진다 (mini 등록 때 발견)
             const detail_imgs = [];
             const seen_d = new Set();
             const detail_root = document.querySelector('#goodsDetailInfo') || document.querySelector('.detailInfo') || document.body;
-            detail_root.querySelectorAll('img').forEach(im => {
-                const s = im.getAttribute('src') || '';
+            detail_root.querySelectorAll('img, video').forEach(el => {
+                let s = el.getAttribute('src') || '';
+                if (!s && el.tagName === 'VIDEO') {
+                    const so = el.querySelector('source');
+                    s = so ? (so.getAttribute('src') || '') : '';
+                }
                 if (!s) return;
                 if (!s.includes('skmagic')) return;
                 // 메인이미지/아이콘 제외
@@ -166,6 +172,20 @@ def process_one(page, prod, force=False):
     meta = extract_detail(page, gid)
     meta["source_url"] = url
     meta["fetched_at"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+
+    # 재크롤(force) 시 별도 크롤러가 채운 필드 보존 — crawl_options(options),
+    # crawl_specs(specs), crawl_mattress_sizes(specs_by_size). 안 하면 force 재크롤마다 날아감.
+    if os.path.exists(meta_path):
+        try:
+            with open(meta_path, encoding="utf-8") as f:
+                old = json.load(f)
+            for k in ("options", "specs_by_size"):
+                if k in old and k not in meta:
+                    meta[k] = old[k]
+            if not meta.get("specs") and old.get("specs"):
+                meta["specs"] = old["specs"]
+        except Exception:
+            pass
 
     # 이미지 다운로드
     img_dir = os.path.join(out_dir, "images")
