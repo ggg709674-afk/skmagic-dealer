@@ -93,12 +93,191 @@
       "num": "9,950"
     }
   ],
-  "specs": [],
+  "specs": [
+    {
+      "label": "무게",
+      "value": "14.4kg"
+    },
+    {
+      "label": "크기(mm)",
+      "value": "195(W) X 435(D) X 435(H) mm"
+    },
+    {
+      "label": "색상",
+      "value": "오트밀 베이지"
+    },
+    {
+      "label": "출시년월",
+      "value": "2026.6.1"
+    },
+    {
+      "label": "모델명",
+      "value": "WPUIAC606SOB"
+    },
+    {
+      "label": "상품명",
+      "value": "MEGA ICE 얼음정수기 mini"
+    },
+    {
+      "label": "기본 구성",
+      "value": "본체"
+    },
+    {
+      "label": "설치 / 배송 정보",
+      "value": "SK매직 본사 설치기사 직접 배송/설치"
+    },
+    {
+      "label": "UV코크자동살균",
+      "value": "O"
+    },
+    {
+      "label": "스테인리스직수관",
+      "value": "O"
+    },
+    {
+      "label": "아이스",
+      "value": "O"
+    },
+    {
+      "label": "온수",
+      "value": "O"
+    },
+    {
+      "label": "냉수",
+      "value": "O"
+    },
+    {
+      "label": "직수",
+      "value": "O"
+    },
+    {
+      "label": "UV안심케어",
+      "value": "O"
+    },
+    {
+      "label": "조리수 설치가능여부",
+      "value": "X"
+    },
+    {
+      "label": "에너지소비효율 1등급",
+      "value": "O"
+    },
+    {
+      "label": "다중이용시설용",
+      "value": "X"
+    },
+    {
+      "label": "IOT케어",
+      "value": "X"
+    },
+    {
+      "label": "어린이전용버튼",
+      "value": "X"
+    },
+    {
+      "label": "무빙코크",
+      "value": "X"
+    },
+    {
+      "label": "정격전압",
+      "value": "220V/60Hz"
+    },
+    {
+      "label": "품질보증기준",
+      "value": "제품하자시 1년 무상A/S"
+    },
+    {
+      "label": "A/S 책임자와 전화번호",
+      "value": "SK인텔릭스 1600-1661"
+    },
+    {
+      "label": "제조자(수입품의 경우 수입자를 함께 표기)",
+      "value": "SK인텔릭스"
+    },
+    {
+      "label": "에너지 효율등급",
+      "value": "최저소비효율등급 만족"
+    },
+    {
+      "label": "소비전력",
+      "value": "온수 2,900W / 냉수 0.7A / 제빙 0.75A / 탈빙 0.75A"
+    },
+    {
+      "label": "제조국",
+      "value": "대한민국"
+    },
+    {
+      "label": "전기안전인증",
+      "value": "JH07734-26003 인증정보 확인"
+    },
+    {
+      "label": "전파인증",
+      "value": "R-R-T8R-WPU-IAC606 인증정보 확인"
+    }
+  ],
   "pageTitle": "MEGA ICE 얼음정수기 mini | 구독 | 방문관리, 냉온정얼음, 오트밀 베이지 | WPUIAC606SOB | SK매직몰",
   "source_url": "https://www.skmagic.com/goods/indexGoodsDetail?goodsId=G000069933",
   "fetched_at": "2026-06-12T13:31:18",
   "downloaded": {
     "main": 7,
     "detail": 53
+  },
+  "options": {
+    "care_types": [
+      {
+        "id": "",
+        "name": "기본",
+        "contracts": [
+          {
+            "label": "3년",
+            "years": 3,
+            "duty_use_months": 36,
+            "own_get_months": 60,
+            "contract_type": "방문형",
+            "filter_period": "4개월",
+            "visit_period": "4개월",
+            "index": 0,
+            "value": "",
+            "id": "rentalInfo0"
+          },
+          {
+            "label": "5년",
+            "years": 5,
+            "duty_use_months": 60,
+            "own_get_months": 60,
+            "contract_type": "방문형",
+            "filter_period": "4개월",
+            "visit_period": "4개월",
+            "index": 1,
+            "value": "",
+            "id": "rentalInfo1"
+          },
+          {
+            "label": "6년",
+            "years": 6,
+            "duty_use_months": 72,
+            "own_get_months": 72,
+            "contract_type": "방문형",
+            "filter_period": "4개월",
+            "visit_period": "4개월",
+            "index": 2,
+            "value": "",
+            "id": "rentalInfo2"
+          },
+          {
+            "label": "7년",
+            "years": 7,
+            "duty_use_months": 84,
+            "own_get_months": 84,
+            "contract_type": "방문형",
+            "filter_period": "4개월",
+            "visit_period": "4개월",
+            "index": 3,
+            "value": "",
+            "id": "rentalInfo3"
+          }
+        ]
+      }
+    ]
   }
 }
