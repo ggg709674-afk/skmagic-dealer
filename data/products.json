@@ -7,7 +7,7 @@
       "menuNo": "1001",
       "goodsFilterList": null,
       "url": "https://www.skmagic.com/goods/indexGoodsList?dispClsfNo=100000005&mstDispClsfNo=100000003&dispLvl=2&menuNo=1001",
-      "count": 26
+      "count": 28
     },
     {
       "name": "필터정기배송 정수기",
@@ -1821,7 +1821,8 @@
         "100000005"
       ],
       "_colorGroup": "cg_0005",
-      "_colorName": "소프트 핑크"
+      "_colorName": "소프트 핑크",
+      "thumb_ext": ".png"
     },
     {
       "goodsId": "G000068407",
@@ -1863,7 +1864,8 @@
         "100000005"
       ],
       "_colorGroup": "cg_0005",
-      "_colorName": "파스텔 세이지 그린"
+      "_colorName": "파스텔 세이지 그린",
+      "thumb_ext": ".png"
     },
     {
       "goodsId": "G000068403",
@@ -1905,7 +1907,8 @@
         "100000005"
       ],
       "_colorGroup": "cg_0005",
-      "_colorName": "파스텔 블루"
+      "_colorName": "파스텔 블루",
+      "thumb_ext": ".png"
     },
     {
       "goodsId": "G000069531",
@@ -1944,7 +1947,8 @@
       ],
       "_colorGroup": "cg_0002",
       "_colorStyle": "#EEDAD1",
-      "_colorName": "핑크"
+      "_colorName": "핑크",
+      "thumb_ext": ".png"
     },
     {
       "goodsId": "G000069848",
@@ -1979,7 +1983,8 @@
       ],
       "_colorGroup": "cg_0001",
       "_colorStyle": "#8A8A8A",
-      "_colorName": "뉴트럴 실버"
+      "_colorName": "뉴트럴 실버",
+      "thumb_ext": ".png"
     },
     {
       "goodsId": "G000069382",
@@ -2005,7 +2010,8 @@
       ],
       "_colorGroup": "cg_0003",
       "_colorStyle": "url('https://web-image.useinsider.com/skmagiccom/defaultImageLibrary/PSG%E1%84%8E%E1%85%A9%E1%84%89%E1%85%A9%E1%84%92%E1%85%A7%E1%86%BC%E1%84%91%E1%85%B3%E1%86%AF%E1%84%85%E1%85%A5%E1%84%89%E1%85%B3_%E1%84%82%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%87%E1%85%B5_PC-1750985772.png')",
-      "_colorName": "다크 네이비"
+      "_colorName": "다크 네이비",
+      "thumb_ext": ".png"
     },
     {
       "goodsId": "G000067187",
@@ -2044,7 +2050,8 @@
       ],
       "_colorGroup": "cg_0006",
       "_colorStyle": "#173C25",
-      "_colorName": "다크 그린"
+      "_colorName": "다크 그린",
+      "thumb_ext": ".png"
     },
     {
       "goodsId": "G000062320",
@@ -2196,7 +2203,8 @@
       "colors": [],
       "categories": [
         "1000000245"
-      ]
+      ],
+      "thumb_ext": ".png"
     },
     {
       "goodsId": "G000069406",
@@ -2216,7 +2224,8 @@
       "colors": [],
       "categories": [
         "1000000245"
-      ]
+      ],
+      "thumb_ext": ".png"
     },
     {
       "goodsId": "G000069429",
@@ -2236,7 +2245,8 @@
       "colors": [],
       "categories": [
         "1000000245"
-      ]
+      ],
+      "thumb_ext": ".png"
     },
     {
       "goodsId": "G000069422",
@@ -2256,7 +2266,8 @@
       "colors": [],
       "categories": [
         "1000000245"
-      ]
+      ],
+      "thumb_ext": ".png"
     },
     {
       "goodsId": "G000069421",
@@ -2276,8 +2287,83 @@
       "colors": [],
       "categories": [
         "1000000245"
-      ]
+      ],
+      "thumb_ext": ".png"
+    },
+    {
+      "goodsId": "G000069931",
+      "name": "MEGA ICE 얼음정수기 mini",
+      "model": "WPUIAC606SNW",
+      "alt": "MEGA ICE 얼음정수기 mini",
+      "thumb": "https://static.skmagic.com/image/goods/G000069931/G000069931_2_480x480.png",
+      "benefits": [
+        "냉온정얼음",
+        "셀프관리/방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 66,900",
+          "num": "24,950"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        },
+        {
+          "color": "color07",
+          "style": "background: #CCB89E;"
+        }
+      ],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0009",
+      "_colorStyle": "rgb(251,251,251)",
+      "_colorName": "내추럴 화이트",
+      "_addedByColorExpand": true
+    },
+    {
+      "goodsId": "G000069933",
+      "name": "MEGA ICE 얼음정수기 mini",
+      "model": "WPUIAC606SOB",
+      "alt": "MEGA ICE 얼음정수기 mini",
+      "thumb": "https://static.skmagic.com/image/goods/G000069933/G000069933_2_480x480.png",
+      "benefits": [
+        "냉온정얼음",
+        "셀프관리/방문관리"
+      ],
+      "tag": "",
+      "prices": [
+        {
+          "title": "구독",
+          "del": "월 66,900",
+          "num": "24,950"
+        }
+      ],
+      "colors": [
+        {
+          "color": "color01",
+          "style": "background: rgb(251,251,251);"
+        },
+        {
+          "color": "color07",
+          "style": "background: #CCB89E;"
+        }
+      ],
+      "categories": [
+        "100000005"
+      ],
+      "thumb_ext": ".png",
+      "_colorGroup": "cg_0009",
+      "_colorStyle": "#CCB89E",
+      "_colorName": "오트밀 베이지",
+      "_addedByColorExpand": true
     }
   ],
-  "total": 81
+  "total": 83
 }
