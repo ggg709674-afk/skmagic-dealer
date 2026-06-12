@@ -29,32 +29,6 @@ const App = (() => {
     '100000024',   // 비데
     '1000000245',  // 매트리스
   ];
-  const MALL_CATEGORIES = [
-    {
-      key: 'rental',
-      label: '렌탈',
-      desc: '정수기·공기청정기·비데·매트리스',
-      href: './index.html?view=category',
-      icon: 'rental',
-      count: '생활가전 렌탈'
-    },
-    {
-      key: 'mobile',
-      label: '휴대폰',
-      desc: '신규가입·기기변경·번호이동 상담',
-      href: '#mobile-section',
-      icon: 'mobile',
-      count: '통신 상품 상담'
-    },
-    {
-      key: 'internet',
-      label: '인터넷',
-      desc: '인터넷·TV·결합 할인 상담',
-      href: '#internet-section',
-      icon: 'internet',
-      count: '가정 통신 결합'
-    },
-  ];
   const isVisibleCat = (cls) => VISIBLE_CATEGORIES.includes(cls);
   /* VISIBLE_CATEGORIES 순서대로 정렬 (안 보이는 건 제거) */
   function orderedVisibleCats(cats) {
@@ -668,16 +642,6 @@ const App = (() => {
     const key = (CATEGORY_META[dispClsfNo] || { icon: 'box' }).icon;
     return 'cat-color-' + key;
   }
-  function mallCategoryIcon(key) {
-    const stroke = 'currentColor';
-    if (key === 'mobile') {
-      return `<svg viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.8" width="10" height="18.4" rx="2.2"/><path d="M10.5 18h3"/></svg>`;
-    }
-    if (key === 'internet') {
-      return `<svg viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5a12 12 0 0 1 16 0"/><path d="M7 13a7.5 7.5 0 0 1 10 0"/><path d="M10 16.5a3 3 0 0 1 4 0"/><path d="M12 20h.01"/></svg>`;
-    }
-    return (window.ICONS && ICONS.box) ? ICONS.box() : `<svg viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 18v3"/></svg>`;
-  }
 
   /* ================== Home ================== */
   async function renderHome() {
@@ -695,16 +659,15 @@ const App = (() => {
       `;
     }
 
-    // category grid — 종합몰 상위 3개 입구
+    // category grid — VISIBLE_CATEGORIES 순서대로 4개만
     const grid = document.getElementById('cat-grid');
     if (grid) {
-      grid.innerHTML = MALL_CATEGORIES.map(c => `
-        <a class="cat-card mall-card mall-card-${c.key}" href="${c.href}">
-          <div class="ic mall-ic mall-ic-${c.key}">${mallCategoryIcon(c.icon)}</div>
+      grid.innerHTML = visibleCats.map(c => `
+        <a class="cat-card" href="./index.html?cls=${c.dispClsfNo}">
+          <div class="ic ${categoryColorClass(c.dispClsfNo)}">${categoryIcon(c.dispClsfNo)}</div>
           <div class="cat-text">
-            <div class="nm">${escape(c.label)}</div>
-            <div class="cnt">${escape(c.count)}</div>
-            <div class="mall-desc">${escape(c.desc)}</div>
+            <div class="nm">${escape(CATEGORY_META[c.dispClsfNo]?.label || c.name || '기타')}</div>
+            <div class="cnt">${c.count}개 상품</div>
           </div>
         </a>
       `).join('');
@@ -730,7 +693,7 @@ const App = (() => {
     // 카테고리별 섹션 — VISIBLE만, 각 4개씩 미리보기 + 전체보기 링크
     const sections = document.getElementById('cat-sections');
     if (sections) {
-      const rentalSections = visibleCats.map(c => {
+      sections.innerHTML = visibleCats.map(c => {
         const all = data.products.filter(p => (p.categories || []).includes(c.dispClsfNo));
         if (!all.length) return '';
         const preview = all.slice(0, HOME_PREVIEW_LIMIT);
@@ -753,42 +716,6 @@ const App = (() => {
           </section>
         `;
       }).join('');
-      sections.innerHTML = rentalSections + `
-        <section class="cat-section mall-service-section" id="mobile-section">
-          <div class="section-head">
-            <div style="display:flex;align-items:center;gap:14px">
-              <div class="sec-ic mall-ic-mobile">${mallCategoryIcon('mobile')}</div>
-              <div>
-                <h2>휴대폰</h2>
-                <p class="sub">신규가입·기기변경·번호이동 상담형 상품</p>
-              </div>
-            </div>
-            <a class="more" href="#consult">상담신청 ${ICONS.arrow()}</a>
-          </div>
-          <div class="mall-service-grid">
-            <a class="mall-service-card" href="#consult"><strong>신규가입</strong><span>새 번호 개통과 요금제 추천</span></a>
-            <a class="mall-service-card" href="#consult"><strong>기기변경</strong><span>사용 중인 번호 그대로 단말 교체</span></a>
-            <a class="mall-service-card" href="#consult"><strong>번호이동</strong><span>통신사 변경 혜택 비교 상담</span></a>
-          </div>
-        </section>
-        <section class="cat-section mall-service-section" id="internet-section">
-          <div class="section-head">
-            <div style="display:flex;align-items:center;gap:14px">
-              <div class="sec-ic mall-ic-internet">${mallCategoryIcon('internet')}</div>
-              <div>
-                <h2>인터넷</h2>
-                <p class="sub">인터넷·TV·휴대폰 결합 할인 상담</p>
-              </div>
-            </div>
-            <a class="more" href="#consult">상담신청 ${ICONS.arrow()}</a>
-          </div>
-          <div class="mall-service-grid">
-            <a class="mall-service-card" href="#consult"><strong>인터넷 단독</strong><span>가정·사무실 인터넷 설치 상담</span></a>
-            <a class="mall-service-card" href="#consult"><strong>인터넷 + TV</strong><span>채널 구성과 월 요금 비교</span></a>
-            <a class="mall-service-card" href="#consult"><strong>결합 할인</strong><span>휴대폰과 묶어 할인 조건 확인</span></a>
-          </div>
-        </section>
-      `;
     }
   }
 

@@ -391,7 +391,7 @@ ul,ol{margin:0;padding:0;list-style:none}
 /* ---------- 페이지 흔들림(CLS) 방지: JS가 채우기 전 빈 컨테이너에 자리 선점 ----------
    :empty는 JS innerHTML로 채워지는 순간 자동 해제 — 빈 동안만 적용.
    값은 실측 자연 높이 기준 + 약간 여유. 빈 상태 페이지 길이 ≈ 채워진 상태로 만들어 점프 최소화. */
-.cat-grid:empty{min-height:150px}                 /* 종합몰 상위 카테고리 1행 (데스크탑) */
+.cat-grid:empty{min-height:150px}                 /* 6열 카테고리 1행 (데스크탑) */
 .product-grid:empty{min-height:500px}             /* 4열 product 카드 1행 */
 #cat-sections:empty{min-height:2700px}            /* 4 카테고리 섹션 (데스크탑 실측 2660) */
 #filter-bar:empty{min-height:58px}                /* 필터칩 1줄 */
@@ -401,8 +401,8 @@ ul,ol{margin:0;padding:0;list-style:none}
 
 /* ---------- Category grid (simplified, compact center) ---------- */
 .cat-grid{
-  display:grid;grid-template-columns:repeat(3,minmax(220px,280px));
-  gap:18px;justify-content:center;
+  display:grid;grid-template-columns:repeat(4,auto);
+  gap:40px;justify-content:center;
 }
 .cat-card{
   background:transparent;border:0;border-radius:14px;
@@ -410,24 +410,10 @@ ul,ol{margin:0;padding:0;list-style:none}
   min-height:0;
   display:flex;align-items:center;gap:12px;
 }
-.cat-card.mall-card{
-  min-height:96px;
-  padding:18px 20px;
-  border:1px solid var(--line);
-  border-radius:16px;
-  background:#fff;
-  box-shadow:0 8px 24px rgba(34,34,34,.04);
-}
 .cat-text{display:flex;flex-direction:column;min-width:0}
 .cat-card:hover{
   /* 박스·그림자·이동 효과 모두 제거 — 아이콘 색 변화만으로 호버 표현 */
   background:transparent;border-color:transparent;box-shadow:none;
-}
-.cat-card.mall-card:hover{
-  background:#fff;
-  border-color:var(--line-strong);
-  box-shadow:var(--shadow-card);
-  transform:translateY(-2px);
 }
 .cat-card .ic{
   width:46px;height:46px;border-radius:50%;margin:0;flex-shrink:0;
@@ -437,30 +423,8 @@ ul,ol{margin:0;padding:0;list-style:none}
 }
 .cat-card .ic svg{width:28px;height:28px}
 .cat-card:hover .ic{background:#f0f0f0;color:#6b7280}
-.cat-card.mall-card:hover .ic{background:#f8f8f8}
 .cat-card .nm{font-weight:700;font-size:14px;color:var(--ink-1)}
 .cat-card .cnt{font-size:11px;color:var(--ink-4);margin-top:1px}
-.cat-card.mall-card .nm{font-size:18px;font-weight:800}
-.cat-card.mall-card .cnt{font-size:12px;font-weight:700;color:var(--primary-dark);margin-top:4px}
-.mall-desc{font-size:12px;color:var(--ink-3);line-height:1.45;margin-top:5px;word-break:keep-all}
-.mall-ic-rental{color:var(--primary)}
-.mall-ic-mobile{color:#2563eb}
-.mall-ic-internet{color:#0f766e}
-.mall-card-mobile:hover{border-color:#bfdbfe}
-.mall-card-internet:hover{border-color:#99f6e4}
-.mall-service-section{scroll-margin-top:90px}
-.mall-service-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:18px;
-}
-.mall-service-card{
-  display:flex;flex-direction:column;gap:8px;
-  min-height:118px;padding:22px;
-  background:#fff;border:1px solid var(--line);border-radius:16px;
-  transition:.18s;
-}
-.mall-service-card:hover{border-color:var(--primary);box-shadow:var(--shadow-card);transform:translateY(-2px)}
-.mall-service-card strong{font-size:18px;color:var(--ink-1)}
-.mall-service-card span{font-size:14px;color:var(--ink-3);line-height:1.55}
 
 /* ---------- Product card ---------- */
 .product-grid{
@@ -937,16 +901,13 @@ ul,ol{margin:0;padding:0;list-style:none}
 @media (max-width: 960px){
   .hero .container{grid-template-columns:1fr;gap:24px;padding-top:36px;padding-bottom:36px}
   .hero h1{font-size:34px}
-  .cat-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .cat-grid{grid-template-columns:repeat(4,1fr);gap:6px}
   .cat-card{padding:10px 4px;flex-direction:column;gap:6px;text-align:center;align-items:center}
-  .cat-card.mall-card{min-height:138px;padding:14px 8px}
   .cat-card .ic{width:42px;height:42px;border-radius:50%;margin:0}
   .cat-card .ic svg{width:22px;height:22px}
   .cat-text{align-items:center}
   .cat-card .nm{font-size:12.5px}
   .cat-card .cnt{font-size:10px}
-  .mall-desc{font-size:11px;line-height:1.35}
-  .mall-service-grid{grid-template-columns:1fr;gap:10px}
   .product-grid{grid-template-columns:repeat(2,1fr)}
   /* 2열로 좁아지면 데스크탑용 고정 높이(430px)가 과해 카드가 세로로 늘어남 → 내용 높이에 맞춤 */
   .product-card{min-height:0}
@@ -972,9 +933,7 @@ ul,ol{margin:0;padding:0;list-style:none}
   .hv-card-tl .hvc-sub{font-size:10px}
 }
 @media (max-width: 560px){
-  .cat-grid{grid-template-columns:1fr;gap:8px}
-  .cat-card.mall-card{min-height:92px;flex-direction:row;text-align:left;align-items:center;padding:14px 16px}
-  .cat-card.mall-card .cat-text{align-items:flex-start}
+  .cat-grid{grid-template-columns:repeat(4,1fr);gap:4px}  /* 좁은 모바일도 4열 한 줄 유지 */
   .product-grid{grid-template-columns:repeat(2,1fr)}
 
   /* 필터 칩: 줄바꿈 막고 한 줄 유지 + 가로 스크롤 */
